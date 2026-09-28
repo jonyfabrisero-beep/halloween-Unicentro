@@ -1,0 +1,261 @@
+@import "tailwindcss";
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+@keyframes ghostFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+@keyframes treeSway {
+  0%, 100% {
+    transform: rotate(-1.5deg);
+  }
+  50% {
+    transform: rotate(1.5deg);
+  }
+}
+
+@keyframes batFlap {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.4);
+  }
+}
+
+@keyframes driftLeaf {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(110vw, 40px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-60px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes scaleUp {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-ghostFloat {
+  animation: ghostFloat 3.2s ease-in-out infinite;
+}
+
+.animate-treeSway {
+  transform-origin: bottom center;
+  animation: treeSway 4s ease-in-out infinite;
+}
+
+.animate-batFlap {
+  transform-origin: center;
+  animation: batFlap 0.28s ease-in-out infinite;
+}
+
+.animate-driftLeaf {
+  animation: driftLeaf 9s linear infinite;
+}
+
+.animate-wiggle {
+  animation: wiggle 0.15s ease-in-out infinite;
+}
+
+.animate-fall {
+  animation: fall linear infinite;
+}
+
+.animate-scaleUp {
+  animation: scaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes groundedWobble {
+  0% {
+    transform: scale(1, 1) rotate(0deg);
+  }
+  15% {
+    transform: scale(1.18, 0.85) rotate(-1deg);
+  }
+  35% {
+    transform: scale(0.9, 1.15) rotate(2deg);
+  }
+  55% {
+    transform: scale(1.08, 0.94) rotate(-1.5deg);
+  }
+  75% {
+    transform: scale(0.97, 1.04) rotate(1deg);
+  }
+  90% {
+    transform: scale(1.02, 0.99) rotate(-0.5deg);
+  }
+  100% {
+    transform: scale(1, 1) rotate(0deg);
+  }
+}
+
+.animate-groundedWobble {
+  transform-origin: bottom center !important;
+  animation: groundedWobble 0.7s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+@keyframes fogDriftSlow {
+  0% {
+    transform: translate3d(0%, 0, 0) scaleY(1);
+  }
+  33% {
+    transform: translate3d(14%, -10px, 0) scaleY(1.05);
+  }
+  66% {
+    transform: translate3d(28%, 6px, 0) scaleY(0.96);
+  }
+  100% {
+    transform: translate3d(42%, -4px, 0) scaleY(1.02);
+  }
+}
+
+@keyframes fogDriftFast {
+  0% {
+    transform: translate3d(0%, 0, 0) scaleY(1);
+  }
+  40% {
+    transform: translate3d(-18%, 8px, 0) scaleY(0.95);
+  }
+  80% {
+    transform: translate3d(-32%, -6px, 0) scaleY(1.06);
+  }
+  100% {
+    transform: translate3d(-40%, 4px, 0) scaleY(1);
+  }
+}
+
+.animate-fogDriftSlow {
+  will-change: transform;
+  animation: fogDriftSlow 42s ease-in-out infinite alternate;
+}
+
+.animate-fogDriftFast {
+  will-change: transform;
+  animation: fogDriftFast 32s ease-in-out infinite alternate;
+}
+
+@keyframes treeBreeze {
+  0%, 100% {
+    transform: rotate(0deg) skewX(0deg);
+  }
+  30% {
+    transform: rotate(1.5deg) skewX(0.8deg);
+  }
+  70% {
+    transform: rotate(-1.2deg) skewX(-0.6deg);
+  }
+}
+
+@keyframes treeRustle {
+  0% {
+    transform: scale(1, 1) rotate(0deg);
+  }
+  20% {
+    transform: scale(0.96, 1.05) rotate(-3.5deg);
+  }
+  40% {
+    transform: scale(1.04, 0.96) rotate(3deg);
+  }
+  60% {
+    transform: scale(0.98, 1.02) rotate(-1.8deg);
+  }
+  80% {
+    transform: scale(1.01, 0.99) rotate(0.8deg);
+  }
+  100% {
+    transform: scale(1, 1) rotate(0deg);
+  }
+}
+
+.animate-treeBreeze {
+  transform-origin: bottom center !important;
+  animation: treeBreeze 5.5s ease-in-out infinite;
+}
+
+.animate-treeRustle {
+  transform-origin: bottom center !important;
+  animation: treeRustle 0.65s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+@keyframes bubblePop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -2px) scale(1.08);
+  }
+  80% {
+    transform: translate(-50%, 1px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.animate-bubblePop {
+  animation: bubblePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+
+

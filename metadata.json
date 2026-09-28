@@ -1,0 +1,6 @@
+{
+  "name": "Dulce o Truco - Unicentro Maracay",
+  "description": "Juego interactivo de Halloween para centro comercial. Escanea los códigos QR de las tiendas, desbloquea las casas embrujadas y abre el candado del castillo para reclamar tus dulces.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
