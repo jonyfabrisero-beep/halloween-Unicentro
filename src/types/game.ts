@@ -7,6 +7,8 @@ export interface PlayerData {
   gender: Gender;
   createdAt: string;
   completedAt?: string;
+  prizeDelivered?: boolean;
+  prizeDeliveredAt?: string;
   unlockedStores: string[]; // Store IDs that are completed (3 stars)
   storeStars: Record<string, number>; // Store ID -> star count (0 to 3)
   scanHistory: {

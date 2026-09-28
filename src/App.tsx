@@ -15,7 +15,6 @@ import { RegistrationScreen } from './components/RegistrationScreen';
 import { InteractiveMap } from './components/InteractiveMap';
 import { TopHud } from './components/TopHud';
 import { AdminModal } from './components/AdminModal';
-import { QrVaultModal } from './components/QrVaultModal';
 
 export default function App() {
   const [currentPlayer, setCurrentPlayer] = useState<PlayerData | null>(() =>
@@ -29,8 +28,8 @@ export default function App() {
 
   const [isMuted, setIsMuted] = useState<boolean>(() => soundEffects.getIsMuted());
   const [volume, setVolume] = useState<number>(() => soundEffects.getMusicVolume());
+  const [adminInitialTab, setAdminInitialTab] = useState<'participants' | 'qr_vault'>('participants');
   const [showAdminModal, setShowAdminModal] = useState(false);
-  const [showVaultModal, setShowVaultModal] = useState(false);
   const [selectedStoreFromHud, setSelectedStoreFromHud] = useState<StoreInfo | null>(null);
 
   // Auto-open admin modal if user navigates to /csv or #csv
@@ -40,6 +39,10 @@ export default function App() {
       const hash = window.location.hash.toLowerCase();
       const search = window.location.search.toLowerCase();
       if (path.includes('csv') || hash.includes('csv') || search.includes('admin')) {
+        setAdminInitialTab('participants');
+        setShowAdminModal(true);
+      } else if (path.includes('qr') || hash.includes('qr')) {
+        setAdminInitialTab('qr_vault');
         setShowAdminModal(true);
       }
     };
@@ -108,39 +111,6 @@ export default function App() {
     setCurrentScreen('REGISTRATION');
   };
 
-  const handleSimulateScanFromVault = (store: StoreInfo) => {
-    if (!currentPlayer) return;
-
-    const updatedUnlocked = Array.from(new Set([...(currentPlayer.unlockedStores || []), store.id]));
-    const updatedStars = {
-      ...(currentPlayer.storeStars || {}),
-      [store.id]: 3,
-    };
-    const updatedHistory = [
-      ...(currentPlayer.scanHistory || []),
-      {
-        storeId: store.id,
-        storeName: store.name,
-        timestamp: new Date().toISOString(),
-        code: store.code,
-      },
-    ];
-
-    const allNowComplete = updatedUnlocked.length >= 10;
-
-    const updated: PlayerData = {
-      ...currentPlayer,
-      unlockedStores: updatedUnlocked,
-      storeStars: updatedStars,
-      scanHistory: updatedHistory,
-      completedAt: allNowComplete ? new Date().toISOString() : currentPlayer.completedAt,
-    };
-
-    storageService.saveCurrentPlayer(updated);
-    setCurrentPlayer(updated);
-    soundEffects.playUnlock();
-  };
-
   return (
     <div className="relative w-full h-full min-h-screen bg-slate-950 font-['Fredoka'] text-white select-none overflow-x-hidden">
       {/* Mobile Landscape Orientation Advisory */}
@@ -169,8 +139,14 @@ export default function App() {
             onVolumeChange={handleVolumeChange}
             onToggleMute={handleToggleMute}
             onSelectStore={(store) => setSelectedStoreFromHud(store)}
-            onOpenVault={() => setShowVaultModal(true)}
-            onOpenAdmin={() => setShowAdminModal(true)}
+            onOpenVault={() => {
+              setAdminInitialTab('qr_vault');
+              setShowAdminModal(true);
+            }}
+            onOpenAdmin={() => {
+              setAdminInitialTab('participants');
+              setShowAdminModal(true);
+            }}
           />
 
           {/* 16:9 Interactive Landscape Map */}
@@ -187,20 +163,12 @@ export default function App() {
       {/* Supervisor & Luma CSV Sync Admin Modal */}
       {showAdminModal && (
         <AdminModal
+          initialTab={adminInitialTab}
           onClose={() => setShowAdminModal(false)}
           onRefreshCurrentPlayer={() => {
             setCurrentPlayer(null);
             setCurrentScreen('REGISTRATION');
           }}
-        />
-      )}
-
-      {/* Backup Store QR Cards Vault Modal */}
-      {showVaultModal && (
-        <QrVaultModal
-          stores={STORES_DATA}
-          onSimulateScan={handleSimulateScanFromVault}
-          onClose={() => setShowVaultModal(false)}
         />
       )}
     </div>

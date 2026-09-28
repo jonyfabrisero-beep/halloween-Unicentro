@@ -150,59 +150,59 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
       ))}
 
       {/* Main Modal Box (Page 7 green frame) */}
-      <div className="relative w-full max-w-sm sm:max-w-md bg-gradient-to-b from-[#18082e] via-[#0f0422] to-[#080214] border-4 border-emerald-400 rounded-3xl p-5 shadow-[0_0_50px_rgba(52,211,153,0.5)] text-center text-white">
+      <div className="relative w-full max-w-sm sm:max-w-md bg-gradient-to-b from-[#18082e] via-[#0f0422] to-[#080214] border-3 sm:border-4 border-emerald-400 rounded-3xl p-4 sm:p-5 shadow-[0_0_50px_rgba(52,211,153,0.5)] text-center text-white max-h-[95vh] overflow-y-auto my-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-900/80 border border-slate-700 text-slate-400 hover:text-white hover:bg-red-950 hover:border-red-500 transition-colors flex items-center justify-center"
+          className="absolute top-3 right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900/80 border border-slate-700 text-slate-400 hover:text-white hover:bg-red-950 hover:border-red-500 transition-colors flex items-center justify-center cursor-pointer"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
 
         {/* Store Title & Badge */}
-        <div className="mb-4">
+        <div className="mb-3 sm:mb-4">
           <div
-            className="inline-block px-3 py-1 rounded-full text-xs font-bold text-white mb-1 shadow-sm font-['Fredoka']"
+            className="inline-block px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold text-white mb-1 shadow-sm font-['Fredoka']"
             style={{ backgroundColor: store.color }}
           >
             {store.category} · {store.location}
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-amber-300 font-['Lilita_One'] tracking-wide">
+          <h2 className="text-xl sm:text-3xl font-black text-amber-300 font-['Lilita_One'] tracking-wide">
             {store.name}
           </h2>
-          <p className="text-xs text-purple-200/80 font-['Fredoka'] mt-0.5">
+          <p className="text-[11px] sm:text-xs text-purple-200/80 font-['Fredoka'] mt-0.5">
             {store.description}
           </p>
         </div>
 
         {/* Success State */}
         {scanStatus === 'SUCCESS' ? (
-          <div className="py-6 flex flex-col items-center justify-center animate-scaleUp">
-            <div className="w-20 h-20 rounded-full bg-emerald-500/20 border-4 border-emerald-400 flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(52,211,153,0.8)] animate-bounce">
-              <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+          <div className="py-4 sm:py-6 flex flex-col items-center justify-center animate-scaleUp">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-500/20 border-3 sm:border-4 border-emerald-400 flex items-center justify-center mb-2 sm:mb-3 shadow-[0_0_30px_rgba(52,211,153,0.8)] animate-bounce">
+              <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-400" />
             </div>
-            <h3 className="text-2xl font-black text-emerald-300 font-['Lilita_One']">
+            <h3 className="text-xl sm:text-2xl font-black text-emerald-300 font-['Lilita_One']">
               ¡QR CORRECTO!
             </h3>
-            <p className="text-sm text-purple-200 font-['Fredoka'] mt-1">
+            <p className="text-xs sm:text-sm text-purple-200 font-['Fredoka'] mt-1">
               ¡Completaste esta casa! Se están rellenando tus estrellas... ⭐⭐⭐
             </p>
           </div>
         ) : isAlreadyUnlocked ? (
           /* Already completed */
-          <div className="py-4 flex flex-col items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center mb-2">
-              <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+          <div className="py-3 sm:py-4 flex flex-col items-center justify-center">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center mb-2">
+              <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-400" />
             </div>
-            <h3 className="text-lg font-black text-emerald-300 font-['Lilita_One']">
+            <h3 className="text-base sm:text-lg font-black text-emerald-300 font-['Lilita_One']">
               ¡Esta casa ya fue liberada!
             </h3>
-            <p className="text-xs text-slate-300 font-['Fredoka'] max-w-xs mt-1">
+            <p className="text-[11px] sm:text-xs text-slate-300 font-['Fredoka'] max-w-xs mt-1">
               Ya tienes las 3 estrellas de <span className="text-amber-300 font-bold">{store.name}</span>. Visita las demás tiendas para abrir el castillo central.
             </p>
             <button
               onClick={onClose}
-              className="mt-4 px-6 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
+              className="mt-3 sm:mt-4 px-5 py-1.5 sm:px-6 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs cursor-pointer"
             >
               Regresar al mapa
             </button>
@@ -211,29 +211,29 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
           /* Active Scan Options */
           <div>
             {/* Header prompt (Page 7: "Escanea el Qr") */}
-            <div className="mb-3">
-              <span className="text-sm font-bold text-emerald-400 uppercase tracking-wider font-['Lilita_One']">
+            <div className="mb-2 sm:mb-3">
+              <span className="text-xs sm:text-sm font-bold text-emerald-400 uppercase tracking-wider font-['Lilita_One']">
                 Escanea el QR de la tienda
               </span>
             </div>
 
             {/* Camera Viewfinder container */}
-            <div className="relative w-56 h-56 mx-auto rounded-2xl bg-black border-2 border-emerald-400/80 overflow-hidden shadow-inner flex flex-col items-center justify-center">
+            <div className="relative w-44 h-44 sm:w-52 sm:h-52 mx-auto rounded-2xl bg-black border-2 border-emerald-400/80 overflow-hidden shadow-inner flex flex-col items-center justify-center">
               <div id={readerElementId} className="w-full h-full" />
 
               {!scannerActive && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center bg-slate-950/90">
-                  <div className="w-16 h-16 rounded-2xl bg-emerald-950/80 border border-emerald-400/50 flex items-center justify-center mb-2 shadow-md">
-                    <QrCode className="w-10 h-10 text-emerald-400" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-2.5 text-center bg-slate-950/90">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-emerald-950/80 border border-emerald-400/50 flex items-center justify-center mb-1.5 sm:mb-2 shadow-md">
+                    <QrCode className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-400" />
                   </div>
                   <button
                     onClick={startCameraScanner}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-slate-950 font-black text-xs font-['Lilita_One'] tracking-wide shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-slate-950 font-black text-xs font-['Lilita_One'] tracking-wide shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Camera className="w-4 h-4" />
+                    <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span>Abrir Cámara</span>
                   </button>
-                  <p className="text-[10px] text-slate-400 mt-2 font-['Fredoka']">
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 mt-1.5 sm:mt-2 font-['Fredoka']">
                     Apunta al código QR físico ubicado en el mostrador
                   </p>
                 </div>
@@ -242,7 +242,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
 
             {/* Error banner */}
             {cameraError && (
-              <div className="mt-3 p-2 rounded-lg bg-red-950/80 border border-red-500/50 text-red-200 text-xs flex items-center gap-2 justify-center font-['Fredoka']">
+              <div className="mt-2.5 p-2 rounded-lg bg-red-950/80 border border-red-500/50 text-red-200 text-xs flex items-center gap-2 justify-center font-['Fredoka']">
                 <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
                 <span>{cameraError}</span>
               </div>
@@ -250,7 +250,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
 
             {/* Manual Code Input Form or Toggle */}
             {showManualInput ? (
-              <form onSubmit={handleManualSubmit} className="mt-3 flex gap-2">
+              <form onSubmit={handleManualSubmit} className="mt-2.5 flex gap-2">
                 <input
                   type="text"
                   value={manualCode}
@@ -260,7 +260,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                 />
                 <button
                   type="submit"
-                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs"
+                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer"
                 >
                   Validar
                 </button>
@@ -268,10 +268,10 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
             ) : null}
 
             {/* Action buttons (Demo scan & Manual input toggle) */}
-            <div className="mt-4 pt-3 border-t border-purple-900/40 flex flex-wrap items-center justify-center gap-2 text-xs">
+            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-purple-900/40 flex flex-wrap items-center justify-center gap-2 text-xs">
               <button
                 onClick={triggerVictory}
-                className="px-3 py-1.5 rounded-lg bg-purple-900/60 border border-purple-500/40 text-purple-200 hover:bg-purple-800 hover:text-white font-['Fredoka'] font-medium transition-colors"
+                className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-purple-900/60 border border-purple-500/40 text-purple-200 hover:bg-purple-800 hover:text-white font-['Fredoka'] font-medium transition-colors cursor-pointer text-[11px] sm:text-xs"
                 title="Simular escaneo de esta tienda"
               >
                 ⚡ Simular Escaneo
@@ -279,7 +279,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
 
               <button
                 onClick={() => setShowManualInput(!showManualInput)}
-                className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-amber-300 font-['Fredoka'] transition-colors flex items-center gap-1"
+                className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-amber-300 font-['Fredoka'] transition-colors flex items-center gap-1 cursor-pointer text-[11px] sm:text-xs"
               >
                 <KeyRound className="w-3.5 h-3.5 text-amber-400" />
                 <span>{showManualInput ? 'Ocultar código' : 'Ingresar código manual'}</span>

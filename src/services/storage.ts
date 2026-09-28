@@ -51,6 +51,40 @@ export const storageService = {
     }
   },
 
+  togglePrizeDelivered(playerId: string): PlayerData | null {
+    try {
+      const all = this.getAllPlayers();
+      const index = all.findIndex((p) => p.id === playerId);
+      if (index === -1) return null;
+
+      const currentPrize = !!all[index].prizeDelivered;
+      const newStatus = !currentPrize;
+      all[index] = {
+        ...all[index],
+        prizeDelivered: newStatus,
+        prizeDeliveredAt: newStatus ? new Date().toISOString() : undefined,
+      };
+
+      localStorage.setItem(ALL_PLAYERS_KEY, JSON.stringify(all));
+
+      // Synchronize active player if currently playing
+      const current = this.getCurrentPlayer();
+      if (current && current.id === playerId) {
+        const updatedCurrent = {
+          ...current,
+          prizeDelivered: newStatus,
+          prizeDeliveredAt: all[index].prizeDeliveredAt,
+        };
+        localStorage.setItem(CURRENT_PLAYER_KEY, JSON.stringify(updatedCurrent));
+      }
+
+      return all[index];
+    } catch (e) {
+      console.error('Error toggling prize delivered', e);
+      return null;
+    }
+  },
+
   clearCurrentPlayer(): void {
     localStorage.removeItem(CURRENT_PLAYER_KEY);
   },
@@ -78,6 +112,8 @@ export const storageService = {
       'Total Estrellas Obtenidas',
       'Mapa Completado (Castillo)',
       'Hora Finalización',
+      'Premio Entregado',
+      'Fecha y Hora Entrega Premio',
       'Historial de Tiendas Escaneadas',
     ];
 
@@ -85,6 +121,8 @@ export const storageService = {
       const storesDone = p.unlockedStores?.length || 0;
       const totalStars = Object.values(p.storeStars || {}).reduce((acc, v) => acc + v, 0);
       const isCompleted = storesDone >= 10 ? 'SÍ' : 'NO';
+      const prizeStatus = p.prizeDelivered ? 'SÍ' : 'NO';
+      const prizeTime = p.prizeDeliveredAt ? p.prizeDeliveredAt : 'Pendiente';
       const historyStr = (p.scanHistory || [])
         .map((h) => `${h.storeName} (${h.timestamp.slice(11, 19)})`)
         .join(' | ');
@@ -99,6 +137,8 @@ export const storageService = {
         totalStars,
         `"${isCompleted}"`,
         `"${p.completedAt || 'En Progreso'}"`,
+        `"${prizeStatus}"`,
+        `"${prizeTime}"`,
         `"${historyStr.replace(/"/g, '""')}"`,
       ].join(',');
     });

@@ -62,8 +62,7 @@ interface PumpkinState {
   wobbling: boolean;
   imageSrc: string;
   isBuried?: boolean;
-  sizeClass: string;
-  shadowWidth: string;
+  widthPercent: string;
 }
 
 interface InteractiveGhostsAndPumpkinsProps {
@@ -178,7 +177,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
     return () => clearInterval(bubbleInterval);
   }, []);
 
-  // 10 authentic pumpkins matching PROTOTIPO JUEGO HALLOWEEN.png
+  // 10 authentic pumpkins matching PROTOTIPO JUEGO HALLOWEEN.png with proportional map widths
   const [pumpkins, setPumpkins] = useState<PumpkinState[]>([
     {
       id: 'p1',
@@ -186,8 +185,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
       y: 89.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_rostro.png',
-      sizeClass: 'w-7 h-7 sm:w-8 sm:h-8',
-      shadowWidth: 'w-7 sm:w-8',
+      widthPercent: '3.4%',
     }, // maze
     {
       id: 'p2',
@@ -195,8 +193,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
       y: 65.5,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_sin_rostro.png',
-      sizeClass: 'w-7 h-7 sm:w-8 sm:h-8',
-      shadowWidth: 'w-7 sm:w-8',
+      widthPercent: '3.4%',
     }, // left path
     {
       id: 'p3',
@@ -204,8 +201,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
       y: 32.5,
       wobbling: false,
       imageSrc: '/pumpkins/trio_calabazas.png',
-      sizeClass: 'w-11 h-7 sm:w-13 sm:h-8',
-      shadowWidth: 'w-11 sm:w-13',
+      widthPercent: '4.8%',
     }, // upper left
     {
       id: 'p4',
@@ -213,8 +209,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
       y: 42.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabazas_duo.png',
-      sizeClass: 'w-8 h-8 sm:w-9 sm:h-9',
-      shadowWidth: 'w-8 sm:w-9',
+      widthPercent: '4.0%',
     }, // next to opticolor
     {
       id: 'p5',
@@ -222,8 +217,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
       y: 79.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_rostro.png',
-      sizeClass: 'w-7 h-7 sm:w-8 sm:h-8',
-      shadowWidth: 'w-7 sm:w-8',
+      widthPercent: '3.4%',
     }, // south-west path near AG Decoraciones
     {
       id: 'p6',
@@ -231,8 +225,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
       y: 33.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_rostro.png',
-      sizeClass: 'w-7 h-7 sm:w-8 sm:h-8',
-      shadowWidth: 'w-7 sm:w-8',
+      widthPercent: '3.4%',
     }, // north-east curve between Clarks and Movilmat
     {
       id: 'p7',
@@ -240,8 +233,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
       y: 27.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_sin_rostro.png',
-      sizeClass: 'w-7 h-7 sm:w-8 sm:h-8',
-      shadowWidth: 'w-7 sm:w-8',
+      widthPercent: '3.4%',
     }, // upper road
     {
       id: 'p8',
@@ -249,8 +241,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
       y: 73.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabazas_duo.png',
-      sizeClass: 'w-8 h-8 sm:w-9 sm:h-9',
-      shadowWidth: 'w-8 sm:w-9',
+      widthPercent: '4.0%',
     }, // right road
     {
       id: 'p9',
@@ -259,17 +250,15 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
       wobbling: false,
       imageSrc: '/pumpkins/trio_calabazas_enterradas.png',
       isBuried: true,
-      sizeClass: 'w-14 h-8 sm:w-18 sm:h-10',
-      shadowWidth: 'w-14 sm:w-18',
-    }, // bottom dirt patch - SEMI-ENTERRADAS (sin animación de movimiento, con partículas de tierra)
+      widthPercent: '5.2%',
+    }, // bottom dirt patch - SEMI-ENTERRADAS
     {
       id: 'p10',
       x: 67.5,
       y: 94.5,
       wobbling: false,
       imageSrc: '/pumpkins/trio_calabazas.png',
-      sizeClass: 'w-10 h-6 sm:w-12 sm:h-7',
-      shadowWidth: 'w-10 sm:w-12',
+      widthPercent: '4.8%',
     }, // bottom right grass
   ]);
 
@@ -362,26 +351,33 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
 
   return (
     <>
-      {/* Realistic Vector Autumn Leaves Drifting in 3D wind (No emojis!) */}
+      {/* Realistic Vector Autumn Leaves Drifting in 3D wind with high randomness & varied trajectories */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-25">
         {[
-          { id: 1, top: 12, dur: 11, delay: 0.5, color1: '#F97316', color2: '#DC2626' },
-          { id: 2, top: 28, dur: 9, delay: 2.2, color1: '#EA580C', color2: '#B45309' },
-          { id: 3, top: 45, dur: 12, delay: 4.0, color1: '#FBBF24', color2: '#D97706' },
-          { id: 4, top: 62, dur: 10, delay: 1.5, color1: '#C2410C', color2: '#991B1B' },
-          { id: 5, top: 78, dur: 13, delay: 3.5, color1: '#F59E0B', color2: '#EA580C' },
+          { id: 1, left: -6, top: 8, dur: 9.5, delay: 0.2, anim: 'animate-leafDiagonal', size: 'w-4 h-4 sm:w-5 sm:h-5', color1: '#F97316', color2: '#DC2626' },
+          { id: 2, left: 15, top: -8, dur: 8.0, delay: 1.8, anim: 'animate-leafSwirl', size: 'w-3.5 h-3.5 sm:w-4.5 sm:h-4.5', color1: '#EA580C', color2: '#B45309' },
+          { id: 3, left: -5, top: 38, dur: 11.2, delay: 3.5, anim: 'animate-leafTumble', size: 'w-4.5 h-4.5 sm:w-5.5 sm:h-5.5', color1: '#FBBF24', color2: '#D97706' },
+          { id: 4, left: 42, top: -10, dur: 13.0, delay: 0.8, anim: 'animate-leafFloatDown', size: 'w-4 h-4 sm:w-5 sm:h-5', color1: '#C2410C', color2: '#991B1B' },
+          { id: 5, left: -4, top: 62, dur: 10.5, delay: 2.6, anim: 'animate-leafDiagonal', size: 'w-3.5 h-3.5 sm:w-4 sm:h-4', color1: '#F59E0B', color2: '#EA580C' },
+          { id: 6, left: 68, top: -8, dur: 9.0, delay: 4.2, anim: 'animate-leafSwirl', size: 'w-4 h-4 sm:w-5 sm:h-5', color1: '#EF4444', color2: '#991B1B' },
+          { id: 7, left: -5, top: 22, dur: 12.5, delay: 1.1, anim: 'animate-leafTumble', size: 'w-5 h-5 sm:w-6 sm:h-6', color1: '#F97316', color2: '#7C2D12' },
+          { id: 8, left: 85, top: -10, dur: 14.0, delay: 3.0, anim: 'animate-leafFloatDown', size: 'w-3.5 h-3.5 sm:w-4 sm:h-4', color1: '#D97706', color2: '#78350F' },
+          { id: 9, left: -6, top: 50, dur: 8.8, delay: 5.0, anim: 'animate-leafDiagonal', size: 'w-4 h-4 sm:w-5 sm:h-5', color1: '#FB923C', color2: '#C2410C' },
+          { id: 10, left: 30, top: -6, dur: 10.2, delay: 6.2, anim: 'animate-leafSwirl', size: 'w-3 h-3 sm:w-4 sm:h-4', color1: '#E11D48', color2: '#881337' },
+          { id: 11, left: -5, top: 75, dur: 11.8, delay: 2.0, anim: 'animate-leafTumble', size: 'w-4.5 h-4.5 sm:w-5 sm:h-5', color1: '#FBBF24', color2: '#B45309' },
+          { id: 12, left: 55, top: -8, dur: 12.0, delay: 4.8, anim: 'animate-leafFloatDown', size: 'w-4 h-4 sm:w-5 sm:h-5', color1: '#F97316', color2: '#9A3412' },
         ].map((leaf) => (
           <div
             key={leaf.id}
-            className="absolute animate-driftLeaf select-none"
+            className={`absolute ${leaf.anim} select-none`}
             style={{
               top: `${leaf.top}%`,
-              left: '-4%',
+              left: `${leaf.left}%`,
               animationDuration: `${leaf.dur}s`,
               animationDelay: `${leaf.delay}s`,
             }}
           >
-            <svg viewBox="0 0 24 24" className="w-5 h-5 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+            <svg viewBox="0 0 24 24" className={`${leaf.size} filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]`}>
               <path
                 d="M12 2 C8 6, 4 9, 3 14 C2 17, 5 20, 9 20 C10 20, 11 21, 11 23 L13 23 C13 21, 14 20, 15 20 C19 20, 22 17, 21 14 C20 9, 16 6, 12 2 Z"
                 fill={leaf.color1}
@@ -407,6 +403,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
             style={{
               left: `${ghost.x}%`,
               top: `${ghost.y}%`,
+              width: '3.2%',
               opacity: ghost.isPoofed ? 0 : ghost.opacity,
               transform: `translate(-50%, -50%) scale(${ghost.scale})`,
             }}
@@ -420,22 +417,21 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
             {/* Ground shadow beneath floating ghost with synchronized fade */}
             <div
               style={{ opacity: (ghost.isPoofed ? 0 : ghost.opacity) * 0.45 }}
-              className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-8 h-3 rounded-full bg-black blur-xs pointer-events-none transition-opacity duration-1000"
+              className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-2 rounded-full bg-black blur-xs pointer-events-none transition-opacity duration-1000"
             />
 
-            {/* Mini Ghost Speech Bubble */}
-            {ghost.bubbleText && !ghost.isPoofed && ghost.opacity > 0.5 && (
-              <div className="absolute -top-7 sm:-top-8 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-bubblePop whitespace-nowrap">
-                <div className="relative px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-950/95 border border-purple-400/80 shadow-[0_2px_12px_rgba(0,0,0,0.85)] backdrop-blur-xs text-[10px] sm:text-[11px] font-bold text-amber-300 font-['Fredoka'] tracking-wide flex items-center justify-center">
-                  <span>{ghost.bubbleText}</span>
-                  {/* Bubble pointer tail */}
-                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-purple-400/80" />
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-t-[4px] border-t-slate-950" />
+            <div className="relative w-full aspect-[100/115] filter drop-shadow-[0_0_8px_rgba(167,243,208,0.5)] animate-ghostFloat">
+              {/* Mini Ghost Speech Bubble Anchored directly over the ghost's head */}
+              {ghost.bubbleText && !ghost.isPoofed && ghost.opacity > 0.5 && (
+                <div className="absolute -top-6 sm:-top-7 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-bubblePop whitespace-nowrap scale-75 sm:scale-90 md:scale-100 origin-bottom">
+                  <div className="relative px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-950/95 border border-purple-400/80 shadow-[0_2px_10px_rgba(0,0,0,0.85)] text-[10px] sm:text-[11px] font-bold text-amber-300 font-['Fredoka'] tracking-wide flex items-center justify-center">
+                    <span>{ghost.bubbleText}</span>
+                    {/* Bubble pointer tail */}
+                    <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-purple-400/80" />
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-t-[4px] border-t-slate-950" />
+                  </div>
                 </div>
-              </div>
-            )}
-
-            <div className="relative w-9 h-11 sm:w-11 sm:h-13 filter drop-shadow-[0_0_10px_rgba(167,243,208,0.5)] animate-ghostFloat">
+              )}
               {ghost.type === 'green' && (
                 <svg viewBox="0 0 100 115" className="w-full h-full">
                   <defs>
@@ -546,7 +542,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
           <div
             key={p.id}
             onClick={(e) => handlePumpkinTap(p, e)}
-            style={{ left: `${p.x}%`, top: `${p.y}%` }}
+            style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.widthPercent }}
             className={`absolute -translate-x-1/2 -translate-y-1/2 z-15 cursor-pointer select-none transition-transform duration-200 ${
               p.isBuried
                 ? 'hover:brightness-110 active:brightness-95' // No jumping or wobbling for semi-buried
@@ -560,14 +556,12 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
                 : '¡Tócame para ver saltar dulces!'
             }
           >
-            {/* Authentic Hand-Illustrated Pumpkin Container without artificial shadows */}
-            <div
-              className={`relative ${p.sizeClass} flex items-center justify-center`}
-            >
+            {/* Authentic Hand-Illustrated Pumpkin Container */}
+            <div className="relative w-full flex items-center justify-center">
               <img
                 src={p.imageSrc}
                 alt="Calabaza de Halloween"
-                className="w-full h-full object-contain pointer-events-none select-none"
+                className="w-full h-auto object-contain pointer-events-none select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
                 loading="eager"
               />
             </div>

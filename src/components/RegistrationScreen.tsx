@@ -76,37 +76,37 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
       </div>
 
       {/* Main Registration Card matching PDF Page 6 */}
-      <div className="relative z-10 w-full max-w-lg bg-slate-950/80 border-2 border-purple-500/40 rounded-3xl p-5 sm:p-7 shadow-[0_0_40px_rgba(147,51,234,0.25)] backdrop-blur-md my-auto">
+      <div className="relative z-10 w-full max-w-lg bg-slate-950/85 border-2 border-purple-500/40 rounded-3xl p-4 sm:p-7 shadow-[0_0_40px_rgba(147,51,234,0.25)] backdrop-blur-md my-auto max-h-[96vh] overflow-y-auto">
         {/* Header */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-3">
           <div className="flex justify-center mb-1">
             <img
               src="/LOGO03B.png"
               alt="Unicentro Maracay"
-              className="w-24 h-24 sm:w-32 sm:h-32 object-contain filter drop-shadow-[0_4px_16px_rgba(245,158,11,0.4)] select-none pointer-events-none"
+              className="w-20 h-20 sm:w-28 sm:h-28 object-contain filter drop-shadow-[0_4px_16px_rgba(245,158,11,0.4)] select-none pointer-events-none"
               loading="eager"
             />
           </div>
-          <div className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-purple-900/60 border border-purple-400/30 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center justify-center gap-1.5 px-3 py-0.5 rounded-full bg-purple-900/60 border border-purple-400/30 text-amber-300 text-[11px] font-semibold uppercase tracking-wider mb-1.5">
             <span>🎃</span>
             <span>Registro de Jugador</span>
             <span>🎃</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white font-['Lilita_One'] tracking-wide">
+          <h2 className="text-xl sm:text-3xl font-black text-white font-['Lilita_One'] tracking-wide">
             ¡Prepárate para la Aventura!
           </h2>
-          <p className="text-xs sm:text-sm text-purple-200/80 font-['Fredoka'] mt-1">
+          <p className="text-xs sm:text-sm text-purple-200/80 font-['Fredoka'] mt-0.5">
             Ingresa tus datos para registrar tus tiendas y reclamar tus dulces
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           {/* Avatar / Gender Selector matching PDF Page 6 */}
           <div>
-            <label className="block text-xs font-bold text-amber-300 uppercase tracking-wider mb-2 text-center font-['Fredoka']">
+            <label className="block text-[11px] sm:text-xs font-bold text-amber-300 uppercase tracking-wider mb-1.5 text-center font-['Fredoka']">
               Elige tu Avatar:
             </label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div onClick={() => handleGenderSelect('girl')}>
                 <GirlAvatar isSelected={selectedGender === 'girl'} />
               </div>
@@ -128,9 +128,9 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
                 placeholder="Ej. Sofía / Daniel"
-                className="w-full px-4 py-2.5 rounded-xl bg-purple-950/50 border-2 border-purple-400/50 text-white placeholder-purple-400/50 focus:outline-none focus:border-amber-400 focus:shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all font-['Fredoka'] font-medium text-sm sm:text-base"
+                className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl bg-purple-950/50 border-2 border-purple-400/50 text-white placeholder-purple-400/50 focus:outline-none focus:border-amber-400 focus:shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all font-['Fredoka'] font-medium text-xs sm:text-sm"
               />
-              <Ghost className="w-5 h-5 text-purple-400 absolute right-3 top-3 pointer-events-none" />
+              <Ghost className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400 absolute right-3 top-2.5 sm:top-3 pointer-events-none" />
             </div>
           </div>
 
@@ -146,24 +146,24 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
                 value={parentName}
                 onChange={(e) => setParentName(e.target.value)}
                 placeholder="Ej. María Pérez"
-                className="w-full px-4 py-2.5 rounded-xl bg-purple-950/50 border-2 border-purple-400/50 text-white placeholder-purple-400/50 focus:outline-none focus:border-amber-400 focus:shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all font-['Fredoka'] font-medium text-sm sm:text-base"
+                className="w-full px-3.5 py-2 sm:py-2.5 rounded-xl bg-purple-950/50 border-2 border-purple-400/50 text-white placeholder-purple-400/50 focus:outline-none focus:border-amber-400 focus:shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all font-['Fredoka'] font-medium text-xs sm:text-sm"
               />
-              <User className="w-5 h-5 text-purple-400 absolute right-3 top-3 pointer-events-none" />
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400 absolute right-3 top-2.5 sm:top-3 pointer-events-none" />
             </div>
           </div>
 
           {/* Error Message */}
           {errorMsg && (
-            <div className="p-2.5 rounded-lg bg-red-950/70 border border-red-500/50 text-red-200 text-xs text-center font-['Fredoka'] animate-shake">
+            <div className="p-2 rounded-lg bg-red-950/70 border border-red-500/50 text-red-200 text-xs text-center font-['Fredoka'] animate-shake">
               ⚠️ {errorMsg}
             </div>
           )}
 
           {/* Big Green PLAY Button matching PDF Page 4 & 6 */}
-          <div className="pt-2">
+          <div className="pt-1">
             <button
               type="submit"
-              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-black text-2xl font-['Lilita_One'] tracking-wider shadow-[0_0_25px_rgba(52,211,153,0.6)] hover:scale-102 active:scale-98 transition-all duration-200 border-2 border-emerald-200 flex items-center justify-center gap-3 cursor-pointer"
+              className="w-full py-3 sm:py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-black text-xl sm:text-2xl font-['Lilita_One'] tracking-wider shadow-[0_0_25px_rgba(52,211,153,0.6)] hover:scale-102 active:scale-98 transition-all duration-200 border-2 border-emerald-200 flex items-center justify-center gap-3 cursor-pointer"
             >
               <span>PLAY</span>
               <span className="text-xl">▶</span>
@@ -171,7 +171,7 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
           </div>
 
           {/* Note on data sync */}
-          <div className="flex items-center justify-center gap-1.5 text-[11px] text-purple-300/70 font-['Fredoka'] text-center pt-1">
+          <div className="flex items-center justify-center gap-1.5 text-[10px] sm:text-[11px] text-purple-300/70 font-['Fredoka'] text-center pt-0.5">
             <HelpCircle className="w-3.5 h-3.5 text-purple-400" />
             <span>Tus escaneos se guardarán automáticamente para retirar tus dulces</span>
           </div>

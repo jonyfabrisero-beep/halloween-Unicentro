@@ -35,6 +35,7 @@ export const CentralCastle: React.FC<CentralCastleProps> = ({
   return (
     <div
       onClick={handleClick}
+      style={{ width: '13.5%' }}
       className={`absolute left-[53%] top-[58.5%] -translate-x-1/2 -translate-y-[75%] z-25 cursor-pointer select-none origin-bottom transition-transform duration-200 ${
         isBouncing
           ? 'animate-groundedWobble'
@@ -43,63 +44,69 @@ export const CentralCastle: React.FC<CentralCastleProps> = ({
     >
       {/* Tooltip if locked */}
       {showTooltip && (
-        <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-xl bg-purple-950/95 border-2 border-amber-400 text-amber-200 text-xs font-bold font-['Fredoka'] whitespace-nowrap shadow-xl z-40 animate-bounce">
+        <div className="absolute -top-12 sm:-top-16 left-1/2 -translate-x-1/2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-purple-950/95 border-2 border-amber-400 text-amber-200 text-[10px] sm:text-xs font-bold font-['Fredoka'] whitespace-nowrap shadow-xl z-40 animate-bounce">
           🔒 ¡Te faltan {totalStores - completedCount} casas por escanear!
         </div>
       )}
 
       {/* Castle Illustration Container matching PROTOTIPO JUEGO HALLOWEEN.png */}
-      <div className="relative w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 flex items-center justify-center">
+      <div className="relative w-full aspect-square flex items-center justify-center">
         {/* Ambient glow if unlocked */}
         {isUnlocked && (
-          <div className="absolute inset-0 rounded-full bg-amber-400/35 blur-3xl animate-pulse pointer-events-none" />
+          <div className="absolute inset-0 rounded-full bg-amber-400/35 blur-2xl animate-pulse pointer-events-none" />
         )}
 
         <img
           src="/houses/castillo_central.png"
           alt="Castillo Embrujado Central"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.7)]"
           loading="eager"
         />
 
-        {/* Central Padlock ("candado central" - Page 2 & 4) */}
-        <div className="absolute top-[52%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
-          {isUnlocked ? (
-            // Giant Unlocked Shackle & Glowing Golden Emblem
-            <div className="relative flex flex-col items-center animate-bounce" style={{ animationDuration: '2s' }}>
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-200 to-amber-500 p-1 shadow-[0_0_30px_rgba(251,191,36,0.95)] border-2 border-white flex items-center justify-center">
-                <svg viewBox="0 0 100 100" className="w-10 h-10 filter drop-shadow-md">
-                  <ellipse cx="50" cy="54" rx="40" ry="34" fill="#F97316" stroke="#9A3412" strokeWidth="3" />
-                  <ellipse cx="50" cy="54" rx="20" ry="34" fill="#FB923C" stroke="#9A3412" strokeWidth="2" />
-                  <polygon points="36,40 44,48 30,48" fill="#451A03" />
-                  <polygon points="64,40 70,48 56,48" fill="#451A03" />
-                  <path d="M30 64 L36 72 L42 64 L50 72 L58 64 L64 72 L70 64 Z" fill="#451A03" />
-                </svg>
-              </div>
-              <span className="mt-1 px-3 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] sm:text-xs font-black font-['Lilita_One'] uppercase tracking-wider shadow-lg animate-pulse">
+        {/* Central Padlock ("candado central" using authentic parte superior & inferior) */}
+        <div className="absolute top-[52%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center select-none">
+          <div className="relative flex flex-col items-center">
+            {/* Shackle: parte superior candado.png (Animates lifting up & rotating open when unlocked) */}
+            <div
+              className={`relative transition-all duration-700 ease-out z-10 ${
+                isUnlocked
+                  ? '-translate-y-3 sm:-translate-y-4 -rotate-[24deg] origin-bottom-right drop-shadow-[0_0_12px_rgba(251,191,36,0.9)]'
+                  : 'translate-y-0 rotate-0 drop-shadow-md'
+              }`}
+            >
+              <img
+                src="/castle/parte_superior_candado.png"
+                alt="Grillete del Candado"
+                className="w-6 sm:w-8 md:w-10 h-auto object-contain -mb-2 sm:-mb-2.5 pointer-events-none"
+                loading="eager"
+              />
+            </div>
+
+            {/* Lock Body: parte inferior candado.png */}
+            <div className="relative z-20">
+              <img
+                src="/castle/parte_inferior_candado.png"
+                alt="Cuerpo del Candado"
+                className={`w-8 sm:w-10 md:w-12 h-auto object-contain pointer-events-none transition-all duration-500 ${
+                  isUnlocked
+                    ? 'filter drop-shadow-[0_0_16px_rgba(251,191,36,0.9)] animate-pulse'
+                    : 'filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.85)]'
+                }`}
+                loading="eager"
+              />
+            </div>
+
+            {/* Badge Indicator: ¡ABIERTO! or Progress Count */}
+            {isUnlocked ? (
+              <span className="mt-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-green-400 text-slate-950 text-[8px] sm:text-[9px] md:text-[10px] font-black font-['Lilita_One'] uppercase tracking-wider shadow-[0_0_12px_rgba(52,211,153,0.8)] animate-bounce border border-white">
                 ¡ABIERTO!
               </span>
-            </div>
-          ) : (
-            // Giant Locked Central Padlock
-            <div className="relative flex flex-col items-center group">
-              {/* Golden Shackle (parte superior candado.png) */}
-              <div className="w-9 h-9 sm:w-11 sm:h-11 border-4 sm:border-6 border-amber-400 rounded-t-full bg-transparent -mb-2 shadow-lg" />
-
-              {/* Purple/Ruby Lock Body (parte inferior candado.png) */}
-              <div className="w-13 h-11 sm:w-15 sm:h-13 rounded-2xl bg-gradient-to-b from-purple-600 via-purple-800 to-indigo-950 border-2 sm:border-3 border-amber-400 flex flex-col items-center justify-center shadow-[0_6px_20px_rgba(0,0,0,0.9)]">
-                {/* Keyhole */}
-                <div className="w-3.5 h-4.5 bg-amber-300 rounded-full flex flex-col items-center justify-end p-0.5 shadow-inner">
-                  <div className="w-1 h-2 bg-slate-950" />
-                </div>
-              </div>
-
-              {/* Lock Progress Indicator */}
-              <span className="mt-1 px-2.5 py-0.5 rounded-full bg-slate-950/95 border border-amber-400/80 text-amber-300 text-[10px] sm:text-[11px] font-bold font-mono shadow-md">
+            ) : (
+              <span className="mt-0.5 px-1.5 py-0.5 rounded-full bg-slate-950/95 border border-amber-400/80 text-amber-300 text-[8px] sm:text-[9px] font-bold font-mono shadow-sm">
                 {completedCount}/10
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

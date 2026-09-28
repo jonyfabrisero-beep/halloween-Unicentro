@@ -6,7 +6,7 @@ export const StarsBadge: React.FC<{
   isAnimating?: boolean;
 }> = ({ stars, isAnimating = false }) => {
   return (
-    <div className={`relative flex items-center justify-center gap-1.5 transition-all duration-300 pointer-events-none select-none ${isAnimating ? 'scale-125' : 'scale-100'}`}>
+    <div className={`relative flex items-center justify-center gap-0.5 sm:gap-1 transition-all duration-300 pointer-events-none select-none ${isAnimating ? 'scale-125' : 'scale-100'}`}>
       {[1, 2, 3].map((starIdx) => {
         const isFilled = stars >= starIdx;
         return (
@@ -14,12 +14,12 @@ export const StarsBadge: React.FC<{
             key={starIdx}
             className={`relative transition-all duration-500 transform ${
               isFilled
-                ? 'scale-110 drop-shadow-[0_0_12px_rgba(250,204,21,1)]'
-                : 'scale-95 drop-shadow-[0_0_8px_rgba(56,189,248,0.85)]'
+                ? 'scale-105 drop-shadow-[0_0_5px_rgba(250,204,21,0.9)]'
+                : 'scale-90 drop-shadow-[0_0_3px_rgba(56,189,248,0.7)]'
             } ${isAnimating && stars === starIdx ? 'animate-bounce' : ''}`}
           >
             <svg
-              className="w-5 h-5 sm:w-6 sm:h-6"
+              className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4"
               viewBox="0 0 24 24"
               fill={isFilled ? 'url(#starGradFilled)' : 'url(#starGradCyanEmpty)'}
               stroke={isFilled ? '#CA8A04' : '#0284C7'}
@@ -46,7 +46,7 @@ export const StarsBadge: React.FC<{
   );
 };
 
-// Padlock for HUD matching PROTOTIPO JUEGO HALLOWEEN.png: beveled bronze square frame with rivets
+// Padlock for HUD matching user's authentic illustrations: qr acertado.png & qr por acertar.png
 export const HudPadlock: React.FC<{
   unlocked: boolean;
   storeName: string;
@@ -56,34 +56,19 @@ export const HudPadlock: React.FC<{
   return (
     <button
       onClick={onClick}
-      title={`${storeName} (${unlocked ? 'Completado' : 'Pendiente'})`}
-      className={`relative w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-all duration-300 transform active:scale-90 border-2 ${
+      title={`${storeName} (${unlocked ? 'Completado ✓' : 'Pendiente 🔒'})`}
+      className={`relative w-5 h-5 xs:w-6 xs:h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg sm:rounded-xl flex items-center justify-center transition-transform duration-200 transform active:scale-90 shrink-0 cursor-pointer ${
         unlocked
-          ? 'bg-gradient-to-b from-emerald-600 via-emerald-800 to-slate-950 border-emerald-300 shadow-[0_0_12px_rgba(52,211,153,0.9)] hover:scale-110'
-          : 'bg-gradient-to-b from-[#8C5320] via-[#5C3210] to-[#2E1605] border-[#F59E0B] shadow-[0_3px_8px_rgba(0,0,0,0.8),inset_0_1px_2px_rgba(255,255,255,0.4)] opacity-90 hover:opacity-100 hover:scale-105'
+          ? 'hover:scale-110 drop-shadow-[0_0_6px_rgba(52,211,153,0.8)]'
+          : 'hover:scale-105 opacity-90 hover:opacity-100 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]'
       }`}
     >
-      {/* Corner rivets */}
-      <span className="absolute top-0.5 left-0.5 w-1 h-1 rounded-full bg-amber-200/80" />
-      <span className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full bg-amber-200/80" />
-      <span className="absolute bottom-0.5 left-0.5 w-1 h-1 rounded-full bg-amber-200/80" />
-      <span className="absolute bottom-0.5 right-0.5 w-1 h-1 rounded-full bg-amber-200/80" />
-
-      {unlocked ? (
-        // Green skull icon matching PROTOTIPO JUEGO HALLOWEEN.png
-        <div className="relative flex items-center justify-center animate-scaleUp">
-          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-200 drop-shadow-[0_0_6px_#34d399]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2a7.5 7.5 0 0 0-7.5 7.5c0 2.5 1.2 4.7 3.1 6.1v2.4a1 1 0 0 0 1 1h6.8a1 1 0 0 0 1-1V15.6c1.9-1.4 3.1-3.6 3.1-6.1A7.5 7.5 0 0 0 12 2zm-2.8 8.2a1.4 1.4 0 1 1 0-2.8 1.4 1.4 0 0 1 0 2.8zm5.6 0a1.4 1.4 0 1 1 0-2.8 1.4 1.4 0 0 1 0 2.8zm-2.8 6.8c-.8 0-1.4-.4-1.8-1h3.6c-.4.6-1 1-1.8 1z" />
-          </svg>
-        </div>
-      ) : (
-        // Bronze closed padlock with shackle and keyhole
-        <div className="relative flex flex-col items-center">
-          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
-          </svg>
-        </div>
-      )}
+      <img
+        src={unlocked ? '/hud/qr_acertado.png' : '/hud/qr_por_acertar.png'}
+        alt={unlocked ? 'QR Acertado' : 'QR Pendiente'}
+        className="w-full h-full object-contain pointer-events-none select-none filter"
+        loading="eager"
+      />
     </button>
   );
 };

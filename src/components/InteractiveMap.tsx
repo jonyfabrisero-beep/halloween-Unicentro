@@ -118,20 +118,20 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-slate-950 flex items-center justify-center overflow-hidden pt-12 select-none">
+    <div className="relative w-full h-full min-h-screen bg-slate-950 flex items-center justify-center overflow-hidden pt-12 sm:pt-14 px-1 sm:px-3 pb-2 select-none">
       {/* Subtle Full-Screen Ambient Mist drifting across the background */}
       <DriftingMist fullScreen />
 
       {/* 16:9 Landscape Game Canvas Container matching PDF Layout */}
       <div
         ref={mapContainerRef}
-        className="relative w-full max-w-[1440px] aspect-[16/9] max-h-[calc(100vh-3.2rem)] shadow-2xl overflow-hidden bg-slate-900 border-x border-purple-900/40"
+        className="relative w-full max-w-[1440px] aspect-[16/9] max-h-[calc(100dvh-3.6rem)] shadow-2xl overflow-hidden bg-slate-900 border border-purple-900/40 rounded-xl sm:rounded-2xl mx-auto"
       >
         {/* Themed Isometric Map Background matching the user's authentic mapa de fondo.png */}
         <img
           src="/mapa_de_fondo.png"
           alt="Mapa de Fondo Unicentro Maracay"
-          className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none"
+          className="absolute inset-0 w-full h-full object-fill object-center pointer-events-none select-none"
           loading="eager"
         />
 

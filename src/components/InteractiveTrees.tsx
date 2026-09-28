@@ -236,6 +236,7 @@ export const InteractiveTrees: React.FC<InteractiveTreesProps> = ({
               left: `${tree.x}%`,
               top: `${tree.y}%`,
               zIndex: tree.zIndex,
+              width: '5.4%',
             }}
             className="absolute -translate-x-1/2 -translate-y-[92%] select-none cursor-pointer origin-bottom group"
             title="¡Toca el árbol para hacer caer pequeñas hojas de otoño!"
@@ -253,7 +254,7 @@ export const InteractiveTrees: React.FC<InteractiveTreesProps> = ({
               <img
                 src={tree.imageSrc}
                 alt="Árbol de otoño"
-                className={`${tree.sizeClass} h-auto object-contain pointer-events-none select-none`}
+                className="w-full h-auto object-contain pointer-events-none select-none filter drop-shadow-[0_3px_6px_rgba(0,0,0,0.4)]"
                 loading="eager"
               />
             </div>

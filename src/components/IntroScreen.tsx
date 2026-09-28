@@ -121,44 +121,44 @@ export const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
       </div>
 
       {/* Center Brand Lockup matching PDF Page 6 */}
-      <div className="z-10 flex flex-col items-center justify-center text-center my-auto px-4 max-w-2xl">
+      <div className="z-10 flex flex-col items-center justify-center text-center my-auto px-2 sm:px-4 max-w-2xl max-h-[85vh] overflow-y-auto">
         {/* Official Mall Logo matching LOGO03B.png - Static */}
         <div className="flex items-center justify-center mb-1">
           <img
             src="/LOGO03B.png"
             alt="Unicentro Maracay"
-            className="w-56 h-56 sm:w-72 sm:h-72 md:w-84 md:h-84 lg:w-96 lg:h-96 max-h-[35vh] object-contain filter drop-shadow-[0_6px_24px_rgba(245,158,11,0.5)] select-none pointer-events-none"
+            className="w-36 h-36 xs:w-48 xs:h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 max-h-[30vh] object-contain filter drop-shadow-[0_6px_24px_rgba(245,158,11,0.5)] select-none pointer-events-none"
             loading="eager"
           />
         </div>
 
         {/* Game Title with Playful Bounce Animation */}
-        <div className="relative mt-2 mb-3 animate-bounce" style={{ animationDuration: '3s' }}>
-          <h2 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-normal text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-amber-200 font-['Lilita_One'] drop-shadow-[0_4px_12px_rgba(249,115,22,0.6)]">
+        <div className="relative mt-1 sm:mt-2 mb-2 sm:mb-3 animate-bounce" style={{ animationDuration: '3s' }}>
+          <h2 className="text-3xl xs:text-4xl sm:text-6xl md:text-7xl font-black tracking-normal text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-amber-200 font-['Lilita_One'] drop-shadow-[0_4px_12px_rgba(249,115,22,0.6)]">
             Dulce o Truco
           </h2>
-          <p className="text-sm sm:text-base text-purple-200 font-['Fredoka'] font-medium mt-1">
+          <p className="text-xs sm:text-base text-purple-200 font-['Fredoka'] font-medium mt-0.5 sm:mt-1">
             ¡El Gran Recorrido de Halloween por las Tiendas!
           </p>
         </div>
 
         {/* Big Play CTA Button */}
-        <div className="mt-6">
+        <div className="mt-3 sm:mt-6">
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleStart();
             }}
-            className="group relative px-10 py-3.5 rounded-full bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-600 text-slate-950 font-black text-xl sm:text-2xl font-['Lilita_One'] tracking-wide shadow-[0_0_25px_rgba(52,211,153,0.7)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-emerald-200"
+            className="group relative px-8 sm:px-10 py-2.5 sm:py-3.5 rounded-full bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-600 text-slate-950 font-black text-lg sm:text-2xl font-['Lilita_One'] tracking-wide shadow-[0_0_25px_rgba(52,211,153,0.7)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-emerald-200 cursor-pointer"
           >
             <span className="flex items-center gap-2">
               <span>¡TOCAR PARA JUGAR!</span>
-              <span className="text-2xl group-hover:translate-x-1 transition-transform">🎃</span>
+              <span className="text-xl sm:text-2xl group-hover:translate-x-1 transition-transform">🎃</span>
             </span>
           </button>
         </div>
 
-        <p className="text-xs text-purple-300/80 mt-4 font-['Fredoka']">
+        <p className="text-[11px] sm:text-xs text-purple-300/80 mt-2.5 sm:mt-4 font-['Fredoka']">
           Toca en cualquier parte de la pantalla para comenzar
         </p>
       </div>

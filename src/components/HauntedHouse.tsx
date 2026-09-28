@@ -41,6 +41,7 @@ export const HauntedHouse: React.FC<HauntedHouseProps> = ({
       style={{
         left: `${store.x}%`,
         top: `${store.y}%`,
+        width: '7.8%',
       }}
       className={`absolute -translate-x-1/2 -translate-y-[85%] cursor-pointer z-15 select-none origin-bottom transition-transform duration-200 ${
         isBouncing || isAnimating
@@ -51,28 +52,23 @@ export const HauntedHouse: React.FC<HauntedHouseProps> = ({
       }`}
     >
       {/* 3-Stars Badge floating right above the roof (Page 1 & 2) */}
-      <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap">
+      <div className="absolute -top-4 sm:-top-5 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap origin-bottom">
         <StarsBadge stars={stars} isAnimating={isAnimating} />
       </div>
 
       {/* Authentic Isometric Haunted Building Container matching PROTOTIPO JUEGO HALLOWEEN.png */}
-      <div className="relative w-24 h-24 sm:w-30 sm:h-30 md:w-34 md:h-34 flex items-center justify-center">
-        {/* Glow halo if completed */}
-        {isUnlocked && (
-          <div className="absolute inset-0 rounded-2xl bg-emerald-400/25 blur-lg animate-pulse pointer-events-none" />
-        )}
-
+      <div className="relative w-full aspect-square flex items-center justify-center">
         {/* User's authentic house illustration */}
         <img
           src={store.imagePath}
           alt={`Casa de ${store.name}`}
-          className="w-full h-full object-contain pointer-events-none"
+          className="w-full h-full object-contain pointer-events-none filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]"
           loading="eager"
         />
 
-        {/* Unlocked green badge if done */}
+        {/* Unlocked check badge if done */}
         {isUnlocked && (
-          <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-white text-xs font-black shadow-md animate-bounce">
+          <div className="absolute -top-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 rounded-full bg-amber-400 border border-slate-950 flex items-center justify-center text-slate-950 text-[8px] sm:text-[10px] font-black shadow-md animate-bounce">
             ✓
           </div>
         )}
