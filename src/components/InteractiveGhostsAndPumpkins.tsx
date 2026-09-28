@@ -423,12 +423,12 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
             <div className="relative w-full aspect-[100/115] filter drop-shadow-[0_0_8px_rgba(167,243,208,0.5)] animate-ghostFloat">
               {/* Mini Ghost Speech Bubble Anchored directly over the ghost's head */}
               {ghost.bubbleText && !ghost.isPoofed && ghost.opacity > 0.5 && (
-                <div className="absolute -top-6 sm:-top-7 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-bubblePop whitespace-nowrap scale-75 sm:scale-90 md:scale-100 origin-bottom">
-                  <div className="relative px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-slate-950/95 border border-purple-400/80 shadow-[0_2px_10px_rgba(0,0,0,0.85)] text-[10px] sm:text-[11px] font-bold text-amber-300 font-['Fredoka'] tracking-wide flex items-center justify-center">
+                <div className="absolute -top-4 sm:-top-5 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-bubblePop whitespace-nowrap scale-[0.55] xs:scale-[0.65] sm:scale-[0.75] md:scale-[0.85] origin-bottom">
+                  <div className="relative px-1.5 py-0.5 rounded-full bg-slate-950/95 border border-purple-400/70 shadow-[0_2px_8px_rgba(0,0,0,0.85)] text-[8px] sm:text-[9px] font-bold text-amber-300 font-['Fredoka'] tracking-tight flex items-center justify-center">
                     <span>{ghost.bubbleText}</span>
                     {/* Bubble pointer tail */}
-                    <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[5px] border-t-purple-400/80" />
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[3.5px] border-l-transparent border-r-[3.5px] border-r-transparent border-t-[4px] border-t-slate-950" />
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[3px] border-l-transparent border-r-[3px] border-r-transparent border-t-[4px] border-t-purple-400/70" />
+                    <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[2.5px] border-l-transparent border-r-[2.5px] border-r-transparent border-t-[3px] border-t-slate-950" />
                   </div>
                 </div>
               )}
