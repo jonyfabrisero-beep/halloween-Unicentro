@@ -118,14 +118,19 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-slate-950 flex items-center justify-center overflow-hidden pt-12 sm:pt-14 px-1 sm:px-3 pb-2 select-none">
+    <div className="relative w-full h-[100dvh] min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center overflow-auto pt-9 sm:pt-12 px-1 sm:px-2 pb-1 select-none">
       {/* Subtle Full-Screen Ambient Mist drifting across the background */}
       <DriftingMist fullScreen />
 
-      {/* 16:9 Landscape Game Canvas Container matching PDF Layout */}
+      {/* 16:9 Landscape Game Canvas Container matching PDF Layout - Dynamically constrained by both width & height */}
       <div
         ref={mapContainerRef}
-        className="relative w-full max-w-[1440px] aspect-[16/9] max-h-[calc(100dvh-3.6rem)] shadow-2xl overflow-hidden bg-slate-900 border border-purple-900/40 rounded-xl sm:rounded-2xl mx-auto"
+        style={{
+          width: 'min(calc(100vw - 8px), calc((100dvh - 44px) * (16 / 9)))',
+          height: 'min(calc((100vw - 8px) * (9 / 16)), calc(100dvh - 44px))',
+          maxWidth: '1440px',
+        }}
+        className="relative aspect-[16/9] shadow-2xl overflow-hidden bg-slate-900 border border-purple-900/50 rounded-xl sm:rounded-2xl mx-auto shrink-0 transition-all duration-300"
       >
         {/* Themed Isometric Map Background matching the user's authentic mapa de fondo.png */}
         <img

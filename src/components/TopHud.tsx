@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PlayerData, StoreInfo } from '../types/game';
 import { HudPadlock } from './GameIcons';
 import { soundEffects } from '../services/soundEffects';
-import { Volume2, Volume1, VolumeX, FolderKey, ShieldAlert, Sparkles } from 'lucide-react';
+import { Volume2, Volume1, VolumeX, FolderKey, ShieldAlert, Sparkles, Maximize2, Minimize2 } from 'lucide-react';
 
 interface TopHudProps {
   player: PlayerData;
@@ -27,12 +27,31 @@ export const TopHud: React.FC<TopHudProps> = ({
   onOpenVault,
   onOpenAdmin,
 }) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    soundEffects.playBounce();
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
   const completedCount = player.unlockedStores?.length || 0;
   const isAllComplete = completedCount >= 10;
   const displayPercent = isMuted ? 0 : Math.round(volume * 100);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 px-1.5 py-1 sm:px-4 sm:py-1.5 flex items-center justify-between gap-1 sm:gap-2 pointer-events-none select-none">
+    <header className="fixed top-0 left-0 right-0 z-30 px-1.5 py-0.5 sm:px-4 sm:py-1.5 flex items-center justify-between gap-1 sm:gap-2 pointer-events-none select-none">
       {/* Left: Player Profile & Progress */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 pointer-events-auto bg-slate-950/85 backdrop-blur-md px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-xl sm:rounded-2xl border border-purple-500/30 shadow-lg">
         <div className="relative">
@@ -78,7 +97,7 @@ export const TopHud: React.FC<TopHudProps> = ({
         })}
       </div>
 
-      {/* Right Actions: Sound & Volume Control, QR Vault, Admin */}
+      {/* Right Actions: Sound & Volume Control, Fullscreen, QR Vault, Admin */}
       <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 pointer-events-auto bg-slate-950/85 backdrop-blur-md px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-xl sm:rounded-2xl border border-purple-500/30 shadow-lg">
         {/* Interactive Volume Controller - Always Visible */}
         <div className="flex items-center gap-1 sm:gap-1.5 bg-slate-900/95 rounded-lg sm:rounded-xl px-1.5 py-0.5 border border-purple-500/30 shadow-inner">
@@ -109,14 +128,27 @@ export const TopHud: React.FC<TopHudProps> = ({
               step="1"
               value={displayPercent}
               onChange={(e) => onVolumeChange(Number(e.target.value) / 100)}
-              className="w-10 sm:w-14 md:w-18 h-1.5 accent-amber-400 bg-slate-800 rounded-lg cursor-pointer"
+              className="w-8 sm:w-14 md:w-18 h-1.5 accent-amber-400 bg-slate-800 rounded-lg cursor-pointer"
               title={`Volumen de música: ${displayPercent}%`}
             />
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-amber-300 w-6 text-right select-none">
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold text-amber-300 w-5 sm:w-6 text-right select-none">
               {displayPercent}%
             </span>
           </div>
         </div>
+
+        {/* Fullscreen toggle button to maximize game viewport on phones */}
+        <button
+          onClick={toggleFullscreen}
+          className="p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-slate-900/80 border border-slate-700/60 text-slate-300 hover:text-amber-300 hover:border-amber-400/50 transition-colors cursor-pointer"
+          title={isFullscreen ? 'Salir de Pantalla Completa' : 'Ver en Pantalla Completa (Ocultar barra del navegador)'}
+        >
+          {isFullscreen ? (
+            <Minimize2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
+          ) : (
+            <Maximize2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
+          )}
+        </button>
 
         {/* QR Vault backup for offline or print */}
         <button
