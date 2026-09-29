@@ -1,6 +1,6 @@
 import { StoreInfo } from '../types/game';
 
-// 10 stores placed at the exact coordinates from PROTOTIPO JUEGO HALLOWEEN.png
+// 10 stores placed at the adjusted coordinates for 2400x1080 island map
 export const STORES_DATA: StoreInfo[] = [
   {
     id: 'store-1',
@@ -12,7 +12,7 @@ export const STORES_DATA: StoreInfo[] = [
     description: 'Pizzas artesanales al horno de leña y delicias italianas.',
     color: '#DC2626', // Red
     accentColor: '#EF4444',
-    x: 5.5,
+    x: 14.4,
     y: 51.5,
     houseType: 3,
     imagePath: '/houses/casa_03.png',
@@ -27,7 +27,7 @@ export const STORES_DATA: StoreInfo[] = [
     description: 'Ropa juvenil con estilo urbano y accesorios de temporada.',
     color: '#6B21A8', // Purple
     accentColor: '#A855F7',
-    x: 20.5,
+    x: 26.4,
     y: 36.5,
     houseType: 5,
     imagePath: '/houses/casa_05.png',
@@ -42,7 +42,7 @@ export const STORES_DATA: StoreInfo[] = [
     description: 'Lentes y accesorios terroríficamente geniales para tus disfraces.',
     color: '#EA580C', // Orange
     accentColor: '#F97316',
-    x: 30.0,
+    x: 34.0,
     y: 47.0,
     houseType: 4,
     imagePath: '/houses/casa_04.png',
@@ -57,7 +57,7 @@ export const STORES_DATA: StoreInfo[] = [
     description: 'Los mejores accesorios y detalles mágicos para tu look espeluznante.',
     color: '#D97706', // Amber/Orange
     accentColor: '#F59E0B',
-    x: 31.0,
+    x: 34.8,
     y: 77.0,
     houseType: 2,
     imagePath: '/houses/casa_02.png',
@@ -72,7 +72,7 @@ export const STORES_DATA: StoreInfo[] = [
     description: 'Encuentra las prendas más divertidas y coloridas para Halloween.',
     color: '#EC4899', // Pink
     accentColor: '#F472B6',
-    x: 45.0,
+    x: 46.0,
     y: 84.0,
     houseType: 1,
     imagePath: '/houses/casa_01.png',
@@ -87,7 +87,7 @@ export const STORES_DATA: StoreInfo[] = [
     description: 'Cupcakes embrujados, tortas temáticas y golosinas artesanales.',
     color: '#0284C7', // Sky Blue
     accentColor: '#38BDF8',
-    x: 42.5,
+    x: 44.0,
     y: 26.5,
     houseType: 6,
     imagePath: '/houses/casa_06.png',
@@ -102,7 +102,7 @@ export const STORES_DATA: StoreInfo[] = [
     description: 'Zapatos cómodos para recorrer todo el centro comercial pidiendo dulces.',
     color: '#EA580C', // Orange
     accentColor: '#F97316',
-    x: 66.5,
+    x: 63.2,
     y: 22.5,
     houseType: 7,
     imagePath: '/houses/casa_07.png',
@@ -117,7 +117,7 @@ export const STORES_DATA: StoreInfo[] = [
     description: 'Accesorios para teléfonos, gadgets inteligentes y novedades.',
     color: '#DB2777', // Magenta/Rose
     accentColor: '#F472B6',
-    x: 77.0,
+    x: 71.6,
     y: 43.5,
     houseType: 9,
     imagePath: '/houses/casa_09.png',
@@ -132,7 +132,7 @@ export const STORES_DATA: StoreInfo[] = [
     description: 'Juguetes, disfraces y dulces coleccionables de Halloween.',
     color: '#CA8A04', // Gold/Yellow
     accentColor: '#EAB308',
-    x: 90.0,
+    x: 82.0,
     y: 51.5,
     houseType: 10,
     imagePath: '/houses/casa_10.png',
@@ -147,9 +147,10 @@ export const STORES_DATA: StoreInfo[] = [
     description: 'Los mejores gadgets electrónicos, audio y accesorios futuristas.',
     color: '#1E293B', // Dark Slate
     accentColor: '#64748B',
-    x: 72.0,
-    y: 74.0,
+    x: 75.2,
+    y: 66.5,
     houseType: 8,
     imagePath: '/houses/casa_08.png',
+    scaleFactor: 1.28,
   },
 ];

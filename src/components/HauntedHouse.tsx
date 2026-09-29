@@ -41,7 +41,7 @@ export const HauntedHouse: React.FC<HauntedHouseProps> = ({
       style={{
         left: `${store.x}%`,
         top: `${store.y}%`,
-        width: '7.8%',
+        width: store.customWidthPercent || `${6.2 * (store.scaleFactor || 1.0)}%`,
       }}
       className={`absolute -translate-x-1/2 -translate-y-[85%] cursor-pointer z-15 select-none origin-bottom transition-transform duration-200 ${
         isBouncing || isAnimating
@@ -62,7 +62,7 @@ export const HauntedHouse: React.FC<HauntedHouseProps> = ({
         <img
           src={store.imagePath}
           alt={`Casa de ${store.name}`}
-          className="w-full h-full object-contain pointer-events-none filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]"
+          className="w-full h-full object-contain pointer-events-none"
           loading="eager"
         />
 

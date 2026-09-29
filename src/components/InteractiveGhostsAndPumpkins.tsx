@@ -31,28 +31,28 @@ const GHOST_PHRASES = [
 ];
 
 // Curated authentic positions along stone pathways, cemetery, riverbank, and grass
-// All positions are carefully spaced and clear of mall stores and the central castle
+// Adjusted for 2400x1080 island map (all positions kept safely inside the island)
 const GHOST_SPAWN_SPOTS: { x: number; y: number }[] = [
-  { x: 11.0, y: 59.5 }, // Cemetery gate
-  { x: 7.5, y: 72.0 },  // Far left grass
-  { x: 14.5, y: 38.0 }, // Left forest path
-  { x: 23.5, y: 45.0 }, // Near path intersection
-  { x: 33.5, y: 92.5 }, // Bottom left meadow
-  { x: 26.0, y: 64.0 }, // Between west houses
-  { x: 38.0, y: 19.0 }, // North-west tree line
-  { x: 51.5, y: 25.0 }, // North bridge
-  { x: 60.5, y: 83.0 }, // South riverbank path
-  { x: 69.5, y: 44.5 }, // East plaza path
-  { x: 72.5, y: 26.0 }, // North-east trail
-  { x: 82.0, y: 66.0 }, // East curved trail
-  { x: 91.5, y: 38.0 }, // Far east trail
-  { x: 96.5, y: 56.5 }, // Far right edge by Galler
-  { x: 86.0, y: 84.0 }, // South-east bridge approach
-  { x: 48.0, y: 92.0 }, // Bottom center grass
-  { x: 63.0, y: 36.0 }, // North trail curve
-  { x: 18.0, y: 82.0 }, // Lower west grass
-  { x: 79.0, y: 48.0 }, // Mid-east crossroads
-  { x: 40.0, y: 76.0 }, // South-west river trail
+  { x: 18.8, y: 59.5 }, // Cemetery gate
+  { x: 16.0, y: 72.0 }, // Far left grass
+  { x: 21.6, y: 38.0 }, // Left forest path
+  { x: 28.8, y: 45.0 }, // Near path intersection
+  { x: 36.8, y: 92.5 }, // Bottom left meadow
+  { x: 30.8, y: 64.0 }, // Between west houses
+  { x: 40.4, y: 19.0 }, // North-west tree line
+  { x: 51.2, y: 25.0 }, // North bridge
+  { x: 58.4, y: 83.0 }, // South riverbank path
+  { x: 65.6, y: 44.5 }, // East plaza path
+  { x: 68.0, y: 26.0 }, // North-east trail
+  { x: 75.6, y: 66.0 }, // East curved trail
+  { x: 83.2, y: 38.0 }, // Far east trail
+  { x: 87.2, y: 56.5 }, // Far right edge by Galler
+  { x: 78.8, y: 84.0 }, // South-east bridge approach
+  { x: 48.4, y: 92.0 }, // Bottom center grass
+  { x: 60.4, y: 36.0 }, // North trail curve
+  { x: 24.4, y: 82.0 }, // Lower west grass
+  { x: 73.2, y: 48.0 }, // Mid-east crossroads
+  { x: 42.0, y: 76.0 }, // South-west river trail
 ];
 
 interface PumpkinState {
@@ -74,15 +74,15 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
   particleTriggerRef,
   containerRef,
 }) => {
-  // 7 interactive ghosts on the map matching PROTOTIPO JUEGO HALLOWEEN.png
+  // 7 interactive ghosts on the map matching PROTOTIPO JUEGO HALLOWEEN.png (adjusted for 2400x1080)
   const [ghosts, setGhosts] = useState<GhostState[]>([
-    { id: 'g1', x: 11.0, y: 59.5, type: 'pumpkin', isPoofed: false, opacity: 1, scale: 1, isFading: false },
-    { id: 'g2', x: 33.5, y: 92.5, type: 'green', isPoofed: false, opacity: 1, scale: 1, isFading: false },
-    { id: 'g3', x: 51.5, y: 25.0, type: 'side', isPoofed: false, opacity: 1, scale: 1, isFading: false },
-    { id: 'g4', x: 60.5, y: 83.0, type: 'flame', isPoofed: false, opacity: 1, scale: 1, isFading: false },
-    { id: 'g5', x: 69.5, y: 44.5, type: 'green', isPoofed: false, opacity: 1, scale: 1, isFading: false },
-    { id: 'g6', x: 82.0, y: 66.0, type: 'book', isPoofed: false, opacity: 1, scale: 1, isFading: false },
-    { id: 'g7', x: 96.5, y: 56.5, type: 'side', isPoofed: false, opacity: 1, scale: 1, isFading: false },
+    { id: 'g1', x: 18.8, y: 59.5, type: 'pumpkin', isPoofed: false, opacity: 1, scale: 1, isFading: false },
+    { id: 'g2', x: 36.8, y: 92.5, type: 'green', isPoofed: false, opacity: 1, scale: 1, isFading: false },
+    { id: 'g3', x: 51.2, y: 25.0, type: 'side', isPoofed: false, opacity: 1, scale: 1, isFading: false },
+    { id: 'g4', x: 58.4, y: 83.0, type: 'flame', isPoofed: false, opacity: 1, scale: 1, isFading: false },
+    { id: 'g5', x: 65.6, y: 44.5, type: 'green', isPoofed: false, opacity: 1, scale: 1, isFading: false },
+    { id: 'g6', x: 75.6, y: 66.0, type: 'book', isPoofed: false, opacity: 1, scale: 1, isFading: false },
+    { id: 'g7', x: 87.2, y: 56.5, type: 'side', isPoofed: false, opacity: 1, scale: 1, isFading: false },
   ]);
 
   // Keep a reference to current ghosts state for timeout callbacks
@@ -177,88 +177,88 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
     return () => clearInterval(bubbleInterval);
   }, []);
 
-  // 10 authentic pumpkins matching PROTOTIPO JUEGO HALLOWEEN.png with proportional map widths
+  // 10 authentic pumpkins matching PROTOTIPO JUEGO HALLOWEEN.png adjusted for 2400x1080 island map
   const [pumpkins, setPumpkins] = useState<PumpkinState[]>([
     {
       id: 'p1',
-      x: 4.8,
+      x: 13.8,
       y: 89.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_rostro.png',
-      widthPercent: '3.4%',
+      widthPercent: '2.7%',
     }, // maze
     {
       id: 'p2',
-      x: 17.5,
+      x: 24.0,
       y: 65.5,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_sin_rostro.png',
-      widthPercent: '3.4%',
+      widthPercent: '2.7%',
     }, // left path
     {
       id: 'p3',
-      x: 31.5,
+      x: 35.2,
       y: 32.5,
       wobbling: false,
       imageSrc: '/pumpkins/trio_calabazas.png',
-      widthPercent: '4.8%',
+      widthPercent: '3.8%',
     }, // upper left
     {
       id: 'p4',
-      x: 38.5,
+      x: 40.8,
       y: 42.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabazas_duo.png',
-      widthPercent: '4.0%',
+      widthPercent: '3.2%',
     }, // next to opticolor
     {
       id: 'p5',
-      x: 23.5,
+      x: 28.8,
       y: 79.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_rostro.png',
-      widthPercent: '3.4%',
+      widthPercent: '2.7%',
     }, // south-west path near AG Decoraciones
     {
       id: 'p6',
-      x: 73.0,
+      x: 68.4,
       y: 33.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_rostro.png',
-      widthPercent: '3.4%',
+      widthPercent: '2.7%',
     }, // north-east curve between Clarks and Movilmat
     {
       id: 'p7',
-      x: 56.0,
+      x: 54.8,
       y: 27.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_sin_rostro.png',
-      widthPercent: '3.4%',
+      widthPercent: '2.7%',
     }, // upper road
     {
       id: 'p8',
-      x: 87.0,
+      x: 79.6,
       y: 73.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabazas_duo.png',
-      widthPercent: '4.0%',
+      widthPercent: '3.2%',
     }, // right road
     {
       id: 'p9',
-      x: 61.5,
+      x: 59.2,
       y: 93.5,
       wobbling: false,
       imageSrc: '/pumpkins/trio_calabazas_enterradas.png',
       isBuried: true,
-      widthPercent: '5.2%',
+      widthPercent: '4.2%',
     }, // bottom dirt patch - SEMI-ENTERRADAS
     {
       id: 'p10',
-      x: 67.5,
+      x: 64.0,
       y: 94.5,
       wobbling: false,
       imageSrc: '/pumpkins/trio_calabazas.png',
-      widthPercent: '4.8%',
+      widthPercent: '3.8%',
     }, // bottom right grass
   ]);
 
@@ -403,7 +403,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
             style={{
               left: `${ghost.x}%`,
               top: `${ghost.y}%`,
-              width: '3.2%',
+              width: '2.6%',
               opacity: ghost.isPoofed ? 0 : ghost.opacity,
               transform: `translate(-50%, -50%) scale(${ghost.scale})`,
             }}

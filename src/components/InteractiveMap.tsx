@@ -374,7 +374,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       {/* Subtle Full-Screen Ambient Mist drifting across the background */}
       <DriftingMist fullScreen />
 
-      {/* 16:9 Landscape Game Canvas Viewport Container */}
+      {/* 2400x1080 (20:9) Landscape Game Canvas Viewport Container */}
       <div
         ref={mapContainerRef}
         onWheel={handleWheel}
@@ -383,12 +383,12 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         style={{
-          width: 'min(calc(100vw - 8px), calc((100dvh - 44px) * (16 / 9)))',
-          height: 'min(calc((100vw - 8px) * (9 / 16)), calc(100dvh - 44px))',
-          maxWidth: '1440px',
+          width: 'min(calc(100vw - 8px), calc((100dvh - 44px) * (2400 / 1080)))',
+          height: 'min(calc((100vw - 8px) * (1080 / 2400)), calc(100dvh - 44px))',
+          maxWidth: '1920px',
           touchAction: 'none',
         }}
-        className={`relative aspect-[16/9] shadow-2xl overflow-hidden bg-slate-900 border border-purple-900/50 rounded-xl sm:rounded-2xl mx-auto shrink-0 ${
+        className={`relative aspect-[20/9] shadow-2xl overflow-hidden bg-slate-900 border border-purple-900/50 rounded-xl sm:rounded-2xl mx-auto shrink-0 ${
           scale > 1.0 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
         }`}
       >
@@ -402,12 +402,16 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           }}
           className="relative w-full h-full will-change-transform select-none"
         >
-          {/* Themed Isometric Map Background matching the user's authentic mapa de fondo.png */}
+          {/* Animated 2400x1080 Map Background matching fondo animado juego.gif */}
           <img
-            src="/mapa_de_fondo.png"
-            alt="Mapa de Fondo Unicentro Maracay"
+            src="/fondo_animado_juego.gif"
+            alt="Fondo Animado del Juego Unicentro Maracay"
             className="absolute inset-0 w-full h-full object-fill object-center pointer-events-none select-none"
             loading="eager"
+            onError={(e) => {
+              // Fallback to static png if needed
+              (e.target as HTMLImageElement).src = '/mapa_de_fondo.png';
+            }}
           />
 
           {/* Ambient Spooky Overlay & Mist */}

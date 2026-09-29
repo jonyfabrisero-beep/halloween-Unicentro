@@ -35,8 +35,8 @@ export const CentralCastle: React.FC<CentralCastleProps> = ({
   return (
     <div
       onClick={handleClick}
-      style={{ width: '13.5%' }}
-      className={`absolute left-[53%] top-[58.5%] -translate-x-1/2 -translate-y-[75%] z-25 cursor-pointer select-none origin-bottom transition-transform duration-200 ${
+      style={{ width: '12.4%' }}
+      className={`absolute left-[50.5%] top-[51.5%] -translate-x-1/2 -translate-y-[75%] z-25 cursor-pointer select-none origin-bottom transition-transform duration-200 ${
         isBouncing
           ? 'animate-groundedWobble'
           : 'hover:scale-y-[1.05] hover:scale-x-[0.98]'
@@ -59,7 +59,7 @@ export const CentralCastle: React.FC<CentralCastleProps> = ({
         <img
           src="/houses/castillo_central.png"
           alt="Castillo Embrujado Central"
-          className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.7)]"
+          className="w-full h-full object-contain"
           loading="eager"
         />
 
