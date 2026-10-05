@@ -108,11 +108,21 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const prizesDeliveredCount = players.filter((p) => !!p.prizeDelivered).length;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 text-white select-none overflow-y-auto">
+    <div 
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 text-white select-none overflow-y-auto overscroll-contain"
+    >
       {/* 1. ADMIN CODE GATE (If not authenticated) */}
       {!isAuthenticated ? (
         <div 
-          className={`relative w-full max-w-md bg-gradient-to-b from-slate-950 via-[#19092B] to-slate-950 border-2 border-amber-500/60 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(245,158,11,0.35)] my-auto text-center transition-transform ${
+          role="dialog"
+          aria-modal="true"
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
+          className={`modal-container relative w-full max-w-md bg-gradient-to-b from-slate-950 via-[#19092B] to-slate-950 border-2 border-amber-500/60 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(245,158,11,0.35)] my-auto text-center transition-transform ${
             isShaking ? 'animate-wiggle' : ''
           }`}
         >
@@ -185,7 +195,15 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         </div>
       ) : (
         /* 2. AUTHENTICATED ADMIN DASHBOARD */
-        <div className="relative w-full max-w-5xl bg-gradient-to-b from-slate-950 via-[#100624] to-slate-950 border-2 border-emerald-500/60 rounded-3xl p-4 sm:p-7 shadow-[0_0_50px_rgba(16,185,129,0.3)] my-auto max-h-[92vh] flex flex-col">
+        <div 
+          role="dialog"
+          aria-modal="true"
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
+          className="modal-container relative w-full max-w-5xl bg-gradient-to-b from-slate-950 via-[#100624] to-slate-950 border-2 border-emerald-500/60 rounded-3xl p-4 sm:p-7 shadow-[0_0_50px_rgba(16,185,129,0.3)] my-auto max-h-[92vh] flex flex-col overflow-y-auto overscroll-contain"
+        >
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-900/60 pb-3 mb-3">
             <div>

@@ -42,7 +42,11 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   const ticketCode = `DULCE-${player.id.slice(-6).toUpperCase()}`;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-lg flex items-center justify-center p-3 sm:p-6 select-none overflow-y-auto animate-fadeIn">
+    <div 
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-lg flex items-center justify-center p-3 sm:p-6 select-none overflow-y-auto overscroll-contain animate-fadeIn"
+    >
       {/* Radiant rotating sunburst background rays (Page 5: resplandor.png & Page 8) */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden opacity-30">
         <div className="w-[800px] h-[800px] rounded-full border-dashed border-4 border-amber-300 animate-spin" style={{ animationDuration: '40s' }} />
@@ -50,7 +54,15 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
       </div>
 
       {/* Main Victory Card matching PDF Page 8 */}
-      <div className="relative z-10 w-full max-w-lg bg-gradient-to-b from-[#20083b] via-[#120429] to-[#070114] border-3 sm:border-4 border-amber-400 rounded-3xl p-4 sm:p-7 text-center text-white shadow-[0_0_60px_rgba(245,158,11,0.5)] my-auto max-h-[96vh] overflow-y-auto animate-scaleUp">
+      <div 
+        role="dialog"
+        aria-modal="true"
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
+        style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
+        className="modal-container relative z-10 w-full max-w-lg bg-gradient-to-b from-[#20083b] via-[#120429] to-[#070114] border-3 sm:border-4 border-amber-400 rounded-3xl p-4 sm:p-7 text-center text-white shadow-[0_0_60px_rgba(245,158,11,0.5)] my-auto max-h-[96vh] overflow-y-auto overscroll-contain animate-scaleUp"
+      >
         {/* Close Button */}
         <button
           onClick={onClose}

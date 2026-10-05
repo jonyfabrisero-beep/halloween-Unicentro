@@ -202,6 +202,17 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     if (!container) return;
 
     const onTouchStart = (e: TouchEvent) => {
+      // If a modal is open, completely bypass map touch gestures to allow smooth native modal scrolling
+      const target = e.target as HTMLElement | null;
+      if (
+        activeStoreModal ||
+        showVictoryModal ||
+        target?.closest('.modal-container') ||
+        target?.closest('[role="dialog"]')
+      ) {
+        return;
+      }
+
       // Cancel any ongoing momentum flick animation immediately on finger touch
       if (momentumAnimRef.current) {
         cancelAnimationFrame(momentumAnimRef.current);
@@ -261,6 +272,17 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     };
 
     const onTouchMove = (e: TouchEvent) => {
+      // If a modal is open, completely bypass map touch gestures to allow smooth native modal scrolling
+      const target = e.target as HTMLElement | null;
+      if (
+        activeStoreModal ||
+        showVictoryModal ||
+        target?.closest('.modal-container') ||
+        target?.closest('[role="dialog"]')
+      ) {
+        return;
+      }
+
       const touches = e.touches;
       const ts = touchStateRef.current;
 
@@ -358,7 +380,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         cancelAnimationFrame(momentumAnimRef.current);
       }
     };
-  }, [scale, pan, clampPan]);
+  }, [scale, pan, clampPan, activeStoreModal, showVictoryModal]);
 
   // Mouse wheel / trackpad zoom & mouse drag on desktop
   const handleWheel = (e: React.WheelEvent) => {

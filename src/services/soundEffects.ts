@@ -78,11 +78,7 @@ class SoundEffectsService {
       this.sfxGain.gain.cancelScheduledValues(now);
       this.sfxGain.gain.setValueAtTime(muted ? 0 : 0.4, now);
     }
-    if (muted && this.isMusicPlaying) {
-      this.stopMusic();
-    } else if (!muted && !this.isMusicPlaying) {
-      this.startMusic();
-    }
+    ambientSound.setMuted(muted);
   }
 
   public toggleMute(): boolean {
@@ -268,53 +264,13 @@ class SoundEffectsService {
     } catch {}
   }
 
-  // Spooky playful background music loop using gentle pentatonic notes
+  // Delegate background music to the high-quality musica_fondo.mp3 soundtrack
   public startMusic() {
-    if (this.isMusicPlaying || this.isMuted) return;
-    this.initContext();
-    this.isMusicPlaying = true;
-
-    // Upbeat spooky melody in C Dorian / minor
-    const notes = [
-      523.25, 0, 622.25, 587.33, 523.25, 0, 466.16, 523.25,
-      622.25, 0, 698.46, 622.25, 587.33, 0, 523.25, 392.00,
-    ];
-    let step = 0;
-
-    this.musicInterval = window.setInterval(() => {
-      if (!this.isMusicPlaying || this.isMuted || !this.ctx || !this.musicGain) return;
-      const freq = notes[step % notes.length];
-      step++;
-
-      if (freq > 0) {
-        try {
-          const osc = this.ctx.createOscillator();
-          const noteGain = this.ctx.createGain();
-          const now = this.ctx.currentTime;
-
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, now);
-
-          // Rich, full, crisp tone that responds cleanly to volume control
-          noteGain.gain.setValueAtTime(0.24, now);
-          noteGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-
-          osc.connect(noteGain);
-          noteGain.connect(this.musicGain);
-
-          osc.start(now);
-          osc.stop(now + 0.32);
-        } catch {}
-      }
-    }, 280);
+    ambientSound.start();
   }
 
   public stopMusic() {
-    this.isMusicPlaying = false;
-    if (this.musicInterval !== null) {
-      clearInterval(this.musicInterval);
-      this.musicInterval = null;
-    }
+    ambientSound.stop();
   }
 }
 

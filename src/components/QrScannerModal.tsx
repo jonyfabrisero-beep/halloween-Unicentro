@@ -132,7 +132,11 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 select-none animate-fadeIn">
+    <div 
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 select-none animate-fadeIn overflow-y-auto overscroll-contain"
+    >
       {/* Animated flapping bats around modal matching PDF Page 1 & 7 */}
       {bats.map((bat, idx) => (
         <AnimatedBat
@@ -149,31 +153,23 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
         />
       ))}
 
-      {/* Main Modal Box (Page 7 green frame) */}
-      <div className="relative w-full max-w-sm sm:max-w-md bg-gradient-to-b from-[#18082e] via-[#0f0422] to-[#080214] border-3 sm:border-4 border-emerald-400 rounded-3xl p-4 sm:p-5 shadow-[0_0_50px_rgba(52,211,153,0.5)] text-center text-white max-h-[95vh] overflow-y-auto my-auto">
+      {/* Main Modal Box (Page 7 green frame) with responsive landscape adaptation */}
+      <div 
+        role="dialog"
+        aria-modal="true"
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
+        style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
+        className="modal-container relative w-full max-w-sm sm:max-w-md landscape:max-w-xl md:landscape:max-w-2xl bg-gradient-to-b from-[#18082e] via-[#0f0422] to-[#080214] border-3 sm:border-4 border-emerald-400 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-[0_0_50px_rgba(52,211,153,0.5)] text-center text-white max-h-[92dvh] overflow-y-auto overscroll-contain my-auto"
+      >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900/80 border border-slate-700 text-slate-400 hover:text-white hover:bg-red-950 hover:border-red-500 transition-colors flex items-center justify-center cursor-pointer"
+          className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900/80 border border-slate-700 text-slate-400 hover:text-white hover:bg-red-950 hover:border-red-500 transition-colors flex items-center justify-center cursor-pointer"
         >
           <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
-
-        {/* Store Title & Badge */}
-        <div className="mb-3 sm:mb-4">
-          <div
-            className="inline-block px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold text-white mb-1 shadow-sm font-['Fredoka']"
-            style={{ backgroundColor: store.color }}
-          >
-            {store.category} · {store.location}
-          </div>
-          <h2 className="text-xl sm:text-3xl font-black text-amber-300 font-['Lilita_One'] tracking-wide">
-            {store.name}
-          </h2>
-          <p className="text-[11px] sm:text-xs text-purple-200/80 font-['Fredoka'] mt-0.5">
-            {store.description}
-          </p>
-        </div>
 
         {/* Success State */}
         {scanStatus === 'SUCCESS' ? (
@@ -208,82 +204,104 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
             </button>
           </div>
         ) : (
-          /* Active Scan Options */
-          <div>
-            {/* Header prompt (Page 7: "Escanea el Qr") */}
-            <div className="mb-2 sm:mb-3">
-              <span className="text-xs sm:text-sm font-bold text-emerald-400 uppercase tracking-wider font-['Lilita_One']">
-                Escanea el QR de la tienda
-              </span>
-            </div>
+          /* Active Scan Options: Side-by-side in landscape, stacked in portrait */
+          <div className="landscape:grid landscape:grid-cols-2 landscape:gap-4 landscape:items-center text-center landscape:text-left">
+            {/* Left Column in Landscape: Title, Description, Error, Manual Code Form, Action Buttons */}
+            <div className="flex flex-col items-center landscape:items-start">
+              {/* Store Title & Badge */}
+              <div className="mb-2 sm:mb-3">
+                <div
+                  className="inline-block px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-white mb-1 shadow-sm font-['Fredoka']"
+                  style={{ backgroundColor: store.color }}
+                >
+                  {store.category} · {store.location}
+                </div>
+                <h2 className="text-lg sm:text-2xl font-black text-amber-300 font-['Lilita_One'] tracking-wide leading-tight">
+                  {store.name}
+                </h2>
+                <p className="text-[11px] sm:text-xs text-purple-200/80 font-['Fredoka'] mt-0.5 line-clamp-2 landscape:line-clamp-none">
+                  {store.description}
+                </p>
+              </div>
 
-            {/* Camera Viewfinder container */}
-            <div className="relative w-44 h-44 sm:w-52 sm:h-52 mx-auto rounded-2xl bg-black border-2 border-emerald-400/80 overflow-hidden shadow-inner flex flex-col items-center justify-center">
-              <div id={readerElementId} className="w-full h-full" />
-
-              {!scannerActive && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-2.5 text-center bg-slate-950/90">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-emerald-950/80 border border-emerald-400/50 flex items-center justify-center mb-1.5 sm:mb-2 shadow-md">
-                    <QrCode className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-400" />
-                  </div>
-                  <button
-                    onClick={startCameraScanner}
-                    className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-slate-950 font-black text-xs font-['Lilita_One'] tracking-wide shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span>Abrir Cámara</span>
-                  </button>
-                  <p className="text-[9px] sm:text-[10px] text-slate-400 mt-1.5 sm:mt-2 font-['Fredoka']">
-                    Apunta al código QR físico ubicado en el mostrador
-                  </p>
+              {/* Error banner */}
+              {cameraError && (
+                <div className="w-full mb-2 p-1.5 sm:p-2 rounded-lg bg-red-950/80 border border-red-500/50 text-red-200 text-xs flex items-center gap-1.5 justify-center landscape:justify-start font-['Fredoka']">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                  <span className="text-[10px] sm:text-xs">{cameraError}</span>
                 </div>
               )}
+
+              {/* Manual Code Input Form */}
+              {showManualInput && (
+                <form onSubmit={handleManualSubmit} className="w-full mb-2 flex gap-1.5">
+                  <input
+                    type="text"
+                    value={manualCode}
+                    onChange={(e) => setManualCode(e.target.value)}
+                    placeholder={`Código (ej: ${store.code})`}
+                    className="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-purple-500/40 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-mono"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer active:scale-95 transition-transform"
+                  >
+                    Validar
+                  </button>
+                </form>
+              )}
+
+              {/* Action buttons (Demo scan & Manual input toggle) */}
+              <div className="w-full pt-2 border-t border-purple-900/40 flex flex-wrap items-center justify-center landscape:justify-start gap-1.5 text-xs">
+                <button
+                  onClick={triggerVictory}
+                  className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-purple-900/60 border border-purple-500/40 text-purple-200 hover:bg-purple-800 hover:text-white font-['Fredoka'] font-medium transition-colors cursor-pointer text-[11px] sm:text-xs active:scale-95"
+                  title="Simular escaneo de esta tienda"
+                >
+                  ⚡ Simular Escaneo
+                </button>
+
+                <button
+                  onClick={() => setShowManualInput(!showManualInput)}
+                  className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-amber-300 font-['Fredoka'] transition-colors flex items-center gap-1 cursor-pointer text-[11px] sm:text-xs active:scale-95"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{showManualInput ? 'Ocultar código' : 'Ingresar código manual'}</span>
+                </button>
+              </div>
             </div>
 
-            {/* Error banner */}
-            {cameraError && (
-              <div className="mt-2.5 p-2 rounded-lg bg-red-950/80 border border-red-500/50 text-red-200 text-xs flex items-center gap-2 justify-center font-['Fredoka']">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
-                <span>{cameraError}</span>
+            {/* Right Column in Landscape: Camera Viewfinder */}
+            <div className="flex flex-col items-center justify-center mt-2.5 landscape:mt-0">
+              {/* Header prompt (Page 7: "Escanea el Qr") */}
+              <div className="mb-1.5">
+                <span className="text-[11px] sm:text-xs font-bold text-emerald-400 uppercase tracking-wider font-['Lilita_One']">
+                  Escanea el QR de la tienda
+                </span>
               </div>
-            )}
 
-            {/* Manual Code Input Form or Toggle */}
-            {showManualInput ? (
-              <form onSubmit={handleManualSubmit} className="mt-2.5 flex gap-2">
-                <input
-                  type="text"
-                  value={manualCode}
-                  onChange={(e) => setManualCode(e.target.value)}
-                  placeholder={`Código (ej: ${store.code})`}
-                  className="flex-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-purple-500/40 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-mono"
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs cursor-pointer"
-                >
-                  Validar
-                </button>
-              </form>
-            ) : null}
+              {/* Camera Viewfinder container */}
+              <div className="relative w-36 h-36 sm:w-44 sm:h-44 landscape:w-36 landscape:h-36 mx-auto rounded-xl sm:rounded-2xl bg-black border-2 border-emerald-400/80 overflow-hidden shadow-inner flex flex-col items-center justify-center">
+                <div id={readerElementId} className="w-full h-full" />
 
-            {/* Action buttons (Demo scan & Manual input toggle) */}
-            <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-purple-900/40 flex flex-wrap items-center justify-center gap-2 text-xs">
-              <button
-                onClick={triggerVictory}
-                className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-purple-900/60 border border-purple-500/40 text-purple-200 hover:bg-purple-800 hover:text-white font-['Fredoka'] font-medium transition-colors cursor-pointer text-[11px] sm:text-xs"
-                title="Simular escaneo de esta tienda"
-              >
-                ⚡ Simular Escaneo
-              </button>
-
-              <button
-                onClick={() => setShowManualInput(!showManualInput)}
-                className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-amber-300 font-['Fredoka'] transition-colors flex items-center gap-1 cursor-pointer text-[11px] sm:text-xs"
-              >
-                <KeyRound className="w-3.5 h-3.5 text-amber-400" />
-                <span>{showManualInput ? 'Ocultar código' : 'Ingresar código manual'}</span>
-              </button>
+                {!scannerActive && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-2 text-center bg-slate-950/90">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-950/80 border border-emerald-400/50 flex items-center justify-center mb-1 shadow-md">
+                      <QrCode className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-400" />
+                    </div>
+                    <button
+                      onClick={startCameraScanner}
+                      className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-slate-950 font-black text-[11px] sm:text-xs font-['Lilita_One'] tracking-wide shadow-md hover:scale-105 active:scale-95 transition-transform flex items-center gap-1 cursor-pointer"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Abrir Cámara</span>
+                    </button>
+                    <p className="text-[9px] text-slate-400 mt-1 font-['Fredoka'] max-w-[140px] leading-tight">
+                      Apunta al código QR en el mostrador
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

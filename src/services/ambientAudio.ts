@@ -51,18 +51,13 @@ class AmbientSoundEngine {
 
     this.isRunning = true;
 
-    // Play background soundtrack
+    // Play background soundtrack exclusively
     if (this.bgMusic) {
-      this.bgMusic.volume = this.isMuted ? 0 : this.baseVolume * 0.65;
+      this.bgMusic.volume = this.isMuted ? 0 : this.baseVolume * 0.75;
       this.bgMusic.play().catch(() => {
         // Browser autoplay policy will resume on first user interaction
       });
     }
-
-    // Layer subtle procedural breeze & night sounds underneath
-    this.startWindLoop();
-    this.scheduleNextOwl();
-    this.scheduleNextWood();
   }
 
   public stop() {
