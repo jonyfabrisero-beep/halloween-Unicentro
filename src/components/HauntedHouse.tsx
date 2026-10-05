@@ -74,6 +74,11 @@ export const HauntedHouse: React.FC<HauntedHouseProps> = ({
           </div>
         )}
 
+        {/* Permanent Number Badge on the house to easily identify slot ordering */}
+        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-md bg-slate-950/95 border border-amber-400/90 text-amber-300 font-mono font-black text-[9px] sm:text-[11px] shadow-[0_0_8px_rgba(245,158,11,0.6)] flex items-center justify-center z-20 pointer-events-none whitespace-nowrap">
+          <span>#{store.slotNumber}</span>
+        </div>
+
         {/* Store brand label on hover */}
         {isHovered && (
           <div
