@@ -37,7 +37,8 @@ export const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
   return (
     <div
       onClick={handleStart}
-      className="relative w-full h-full min-h-screen flex flex-col items-center justify-between p-6 overflow-hidden bg-gradient-to-b from-[#2e0854] via-[#1a0536] to-[#0d021f] text-white cursor-pointer select-none"
+      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+      className="relative w-full min-h-[100dvh] flex flex-col items-center justify-between p-4 sm:p-6 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-[#2e0854] via-[#1a0536] to-[#0d021f] text-white cursor-pointer select-none touch-pan-y"
     >
       {/* Background illustration overlay */}
       <img

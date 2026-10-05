@@ -42,41 +42,59 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const [isInteracting, setIsInteracting] = useState(false);
   const [showPanHint, setShowPanHint] = useState(false);
 
+  const screenContainerRef = useRef<HTMLDivElement | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapContentRef = useRef<HTMLDivElement | null>(null);
   const particleTriggerRef = useRef<ParticleTrigger | null>(null);
+  const momentumAnimRef = useRef<number | null>(null);
 
   // Gesture tracking refs (avoid re-rendering during 60fps drag/pinch)
   const touchStateRef = useRef<{
     isDragging: boolean;
     startX: number;
     startY: number;
+    prevX: number;
+    prevY: number;
     startPanX: number;
     startPanY: number;
     initialDistance: number;
     initialScale: number;
     dragDistance: number;
     lastTapTime: number;
+    lastTime: number;
+    vx: number;
+    vy: number;
   }>({
     isDragging: false,
     startX: 0,
     startY: 0,
+    prevX: 0,
+    prevY: 0,
     startPanX: 0,
     startPanY: 0,
     initialDistance: 0,
     initialScale: 1.0,
     dragDistance: 0,
     lastTapTime: 0,
+    lastTime: 0,
+    vx: 0,
+    vy: 0,
   });
 
-  // Clamp pan coordinates strictly based on container dimensions and current zoom scale
+  // Clamp pan coordinates based on container dimensions and zoom scale
+  // Provides generous free panning range across the entire island in all directions
   const clampPan = useCallback((x: number, y: number, currentScale: number) => {
-    if (!mapContainerRef.current || currentScale <= 1.02) {
+    if (!mapContainerRef.current) {
       return { x: 0, y: 0 };
     }
     const rect = mapContainerRef.current.getBoundingClientRect();
-    const maxX = Math.max(0, ((currentScale - 1) * rect.width) / 2);
-    const maxY = Math.max(0, ((currentScale - 1) * rect.height) / 2);
+    const baseMarginX = Math.max(160, rect.width * 0.38);
+    const baseMarginY = Math.max(100, rect.height * 0.38);
+    const zoomExtraX = Math.max(0, ((currentScale - 1) * rect.width) / 2);
+    const zoomExtraY = Math.max(0, ((currentScale - 1) * rect.height) / 2);
+
+    const maxX = baseMarginX + zoomExtraX;
+    const maxY = baseMarginY + zoomExtraY;
 
     return {
       x: Math.max(-maxX, Math.min(maxX, x)),
@@ -118,12 +136,19 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     handleZoom(scale - 0.35);
   };
 
-  // Touch Gesture Listeners: Pinch-to-zoom & 1-finger pan with native preventDefault
+  // Touch Gesture Listeners: Pinch-to-zoom & 1-finger pan with native preventDefault and momentum
   useEffect(() => {
-    const container = mapContainerRef.current;
+    // Listen on the full-screen container so touches anywhere on screen scroll the map
+    const container = screenContainerRef.current || mapContainerRef.current;
     if (!container) return;
 
     const onTouchStart = (e: TouchEvent) => {
+      // Cancel any ongoing momentum flick animation immediately on finger touch
+      if (momentumAnimRef.current) {
+        cancelAnimationFrame(momentumAnimRef.current);
+        momentumAnimRef.current = null;
+      }
+
       const touches = e.touches;
       const ts = touchStateRef.current;
       ts.dragDistance = 0;
@@ -133,8 +158,13 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         ts.isDragging = true;
         ts.startX = touches[0].clientX;
         ts.startY = touches[0].clientY;
+        ts.prevX = touches[0].clientX;
+        ts.prevY = touches[0].clientY;
         ts.startPanX = pan.x;
         ts.startPanY = pan.y;
+        ts.lastTime = Date.now();
+        ts.vx = 0;
+        ts.vy = 0;
         setIsInteracting(true);
 
         // Check for double-tap zoom
@@ -146,7 +176,8 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           } else {
             // Zoom in centered around tap
             soundEffects.playBounce();
-            const rect = container.getBoundingClientRect();
+            const target = mapContainerRef.current || container;
+            const rect = target.getBoundingClientRect();
             const tapX = touches[0].clientX - (rect.left + rect.width / 2);
             const tapY = touches[0].clientY - (rect.top + rect.height / 2);
             const targetScale = 1.8;
@@ -158,7 +189,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         ts.lastTapTime = now;
       } else if (touches.length === 2) {
         // Two fingers: Pinch-to-zoom
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         ts.isDragging = false;
         const dist = Math.hypot(
           touches[0].clientX - touches[1].clientX,
@@ -176,7 +207,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
 
       if (touches.length === 2 && ts.initialDistance > 0) {
         // Pinch zoom active
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         const dist = Math.hypot(
           touches[0].clientX - touches[1].clientX,
           touches[0].clientY - touches[1].clientY
@@ -185,46 +216,73 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         const rawScale = ts.initialScale * factor;
         const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, rawScale));
         
-        if (newScale <= 1.02) {
-          setScale(1.0);
-          setPan({ x: 0, y: 0 });
-          setShowPanHint(false);
-        } else {
-          setScale(newScale);
-          setPan((prev) => clampPan(prev.x, prev.y, newScale));
-          setShowPanHint(true);
-        }
+        setScale(newScale);
+        setPan((prev) => clampPan(prev.x, prev.y, newScale));
+        setShowPanHint(true);
       } else if (touches.length === 1 && ts.isDragging) {
-        // 1-finger pan active
+        // 1-finger pan active across the entire screen
         const dx = touches[0].clientX - ts.startX;
         const dy = touches[0].clientY - ts.startY;
         ts.dragDistance = Math.hypot(dx, dy);
 
-        if (scale > 1.02) {
+        // Always prevent native browser scrolling/pulling
+        if (e.cancelable) {
           e.preventDefault();
-          const targetX = ts.startPanX + dx;
-          const targetY = ts.startPanY + dy;
-          setPan(clampPan(targetX, targetY, scale));
-          setShowPanHint(true);
         }
+
+        // Measure speed for natural momentum inertia
+        const now = Date.now();
+        const dt = Math.max(1, now - ts.lastTime);
+        if (dt > 0 && dt < 120) {
+          const moveDx = touches[0].clientX - ts.prevX;
+          const moveDy = touches[0].clientY - ts.prevY;
+          ts.vx = ts.vx * 0.35 + (moveDx / dt) * 0.65;
+          ts.vy = ts.vy * 0.35 + (moveDy / dt) * 0.65;
+        }
+        ts.prevX = touches[0].clientX;
+        ts.prevY = touches[0].clientY;
+        ts.lastTime = now;
+
+        const targetX = ts.startPanX + dx;
+        const targetY = ts.startPanY + dy;
+        setPan(clampPan(targetX, targetY, scale));
+        setShowPanHint(true);
       }
     };
 
     const onTouchEnd = () => {
-      touchStateRef.current.isDragging = false;
-      touchStateRef.current.initialDistance = 0;
+      const ts = touchStateRef.current;
+      ts.isDragging = false;
+      ts.initialDistance = 0;
       setIsInteracting(false);
 
-      // Snap back if scale ended near 1.0 or out of bounds
-      setScale((currScale) => {
-        if (currScale <= 1.04) {
-          setPan({ x: 0, y: 0 });
-          setShowPanHint(false);
-          return 1.0;
-        }
-        setPan((currPan) => clampPan(currPan.x, currPan.y, currScale));
-        return currScale;
-      });
+      // Smooth inertia momentum glide if user flicked with finger
+      const speed = Math.hypot(ts.vx, ts.vy);
+      if (speed > 0.12 && ts.dragDistance > 8) {
+        if (momentumAnimRef.current) cancelAnimationFrame(momentumAnimRef.current);
+        
+        let vx = ts.vx * 14;
+        let vy = ts.vy * 14;
+
+        const momentumStep = () => {
+          vx *= 0.92;
+          vy *= 0.92;
+
+          if (Math.abs(vx) < 0.25 && Math.abs(vy) < 0.25) {
+            return;
+          }
+
+          setPan((curr) => {
+            const nextX = curr.x + vx;
+            const nextY = curr.y + vy;
+            return clampPan(nextX, nextY, scale);
+          });
+
+          momentumAnimRef.current = requestAnimationFrame(momentumStep);
+        };
+
+        momentumAnimRef.current = requestAnimationFrame(momentumStep);
+      }
     };
 
     container.addEventListener('touchstart', onTouchStart, { passive: false });
@@ -237,6 +295,9 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       container.removeEventListener('touchmove', onTouchMove);
       container.removeEventListener('touchend', onTouchEnd);
       container.removeEventListener('touchcancel', onTouchEnd);
+      if (momentumAnimRef.current) {
+        cancelAnimationFrame(momentumAnimRef.current);
+      }
     };
   }, [scale, pan, clampPan]);
 
@@ -268,9 +329,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     const dy = e.clientY - ts.startY;
     ts.dragDistance = Math.hypot(dx, dy);
 
-    if (scale > 1.0) {
-      setPan(clampPan(ts.startPanX + dx, ts.startPanY + dy, scale));
-    }
+    setPan(clampPan(ts.startPanX + dx, ts.startPanY + dy, scale));
   };
 
   const handleMouseUp = () => {
@@ -370,27 +429,29 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[100dvh] min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center overflow-hidden pt-9 sm:pt-12 px-1 sm:px-2 pb-1 select-none">
+    <div
+      ref={screenContainerRef}
+      onWheel={handleWheel}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      style={{ touchAction: 'none' }}
+      className="relative w-full h-[100dvh] min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center overflow-hidden pt-9 sm:pt-12 px-1 sm:px-2 pb-1 select-none touch-none cursor-grab active:cursor-grabbing"
+    >
       {/* Subtle Full-Screen Ambient Mist drifting across the background */}
       <DriftingMist fullScreen />
 
       {/* 2400x1080 (20:9) Landscape Game Canvas Viewport Container */}
       <div
         ref={mapContainerRef}
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
         style={{
           width: 'min(calc(100vw - 8px), calc((100dvh - 44px) * (2400 / 1080)))',
           height: 'min(calc((100vw - 8px) * (1080 / 2400)), calc(100dvh - 44px))',
           maxWidth: '1920px',
           touchAction: 'none',
         }}
-        className={`relative aspect-[20/9] shadow-2xl overflow-hidden bg-slate-900 border border-purple-900/50 rounded-xl sm:rounded-2xl mx-auto shrink-0 ${
-          scale > 1.0 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
-        }`}
+        className="relative aspect-[20/9] shadow-2xl overflow-hidden bg-slate-900 border border-purple-900/50 rounded-xl sm:rounded-2xl mx-auto shrink-0 select-none"
       >
         {/* Zoom & Pan Transform Layer */}
         <div

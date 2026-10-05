@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Maximize, RotateCw, Sparkles, Smartphone, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Maximize, RotateCw, Sparkles, Smartphone, CheckCircle2, ChevronRight, Share2, HelpCircle } from 'lucide-react';
 import { soundEffects } from '../services/soundEffects';
 import { ambientSound } from '../services/ambientAudio';
 
@@ -27,6 +27,29 @@ export const OrientationSetupScreen: React.FC<OrientationSetupScreenProps> = ({ 
       doc.msFullscreenElement
     );
   });
+
+  const [supportsFullscreen] = useState<boolean>(() => {
+    if (typeof document === 'undefined') return false;
+    const elem = document.documentElement as HTMLElement & {
+      webkitRequestFullscreen?: () => Promise<void>;
+      mozRequestFullScreen?: () => Promise<void>;
+      msRequestFullscreen?: () => Promise<void>;
+    };
+    return !!(
+      elem.requestFullscreen ||
+      elem.webkitRequestFullscreen ||
+      elem.mozRequestFullScreen ||
+      elem.msRequestFullscreen
+    );
+  });
+
+  const [isIPhone] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+    const ua = navigator.userAgent || '';
+    return /iPhone|iPod/.test(ua) || (!supportsFullscreen && /iPad|Macintosh/.test(ua));
+  });
+
+  const [showIosTip, setShowIosTip] = useState(false);
 
   // Track screen orientation changes
   useEffect(() => {
@@ -67,38 +90,39 @@ export const OrientationSetupScreen: React.FC<OrientationSetupScreenProps> = ({ 
     soundEffects.playBounce();
     ambientSound.start();
 
-    const elem = document.documentElement as HTMLElement & {
-      webkitRequestFullscreen?: () => Promise<void>;
-      mozRequestFullScreen?: () => Promise<void>;
-      msRequestFullscreen?: () => Promise<void>;
-    };
-
-    try {
-      if (elem.requestFullscreen) {
-        await elem.requestFullscreen();
-      } else if (elem.webkitRequestFullscreen) {
-        await elem.webkitRequestFullscreen();
-      } else if (elem.mozRequestFullScreen) {
-        await elem.mozRequestFullScreen();
-      } else if (elem.msRequestFullscreen) {
-        await elem.msRequestFullscreen();
-      }
-    } catch (err) {
-      console.warn('Fullscreen could not be enabled:', err);
-    }
-
-    try {
-      const orientation = screen.orientation as ScreenOrientation & {
-        lock?: (orientation: string) => Promise<void>;
+    if (supportsFullscreen) {
+      const elem = document.documentElement as HTMLElement & {
+        webkitRequestFullscreen?: () => Promise<void>;
+        mozRequestFullScreen?: () => Promise<void>;
+        msRequestFullscreen?: () => Promise<void>;
       };
-      if (orientation?.lock) {
-        await orientation.lock('landscape').catch(() => {});
+
+      try {
+        if (elem.requestFullscreen) {
+          await elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          await elem.webkitRequestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+          await elem.mozRequestFullScreen();
+        } else if (elem.msRequestFullscreen) {
+          await elem.msRequestFullscreen();
+        }
+      } catch (err) {
+        console.warn('Fullscreen could not be enabled:', err);
       }
-    } catch {
-      // Ignore orientation lock restriction if not supported
+
+      try {
+        const orientation = screen.orientation as ScreenOrientation & {
+          lock?: (orientation: string) => Promise<void>;
+        };
+        if (orientation?.lock) {
+          await orientation.lock('landscape').catch(() => {});
+        }
+      } catch {
+        // Ignore orientation lock restriction if not supported
+      }
     }
 
-    // Small delay to allow fullscreen render before screen transition
     setTimeout(() => {
       onContinue();
     }, 250);
@@ -111,7 +135,10 @@ export const OrientationSetupScreen: React.FC<OrientationSetupScreenProps> = ({ 
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-slate-950 flex flex-col items-center justify-between p-4 sm:p-6 overflow-hidden select-none font-['Fredoka'] text-white">
+    <div
+      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+      className="relative w-full min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-between p-4 sm:p-6 overflow-y-auto overflow-x-hidden select-none font-['Fredoka'] text-white touch-pan-y"
+    >
       {/* Ambient Animated Spooky Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-purple-950/80 via-slate-950 to-slate-950 pointer-events-none" />
 
@@ -132,113 +159,148 @@ export const OrientationSetupScreen: React.FC<OrientationSetupScreenProps> = ({ 
             <path d="M12 4c-1.5 0-3 1-3.5 2.5C7.5 5 5 4.5 3 6c1 2 2 3 3.5 3C5 10 3 12 2 15c2.5-1 5 0 6.5 1.5.5-1.5 2-2.5 3.5-2.5s3 1 3.5 2.5C17 15 19.5 14 22 15c-1-3-3-5-4.5-6 1.5 0 2.5-1 3.5-3-2-1.5-4.5-1-5.5.5C15 5 13.5 4 12 4z" />
           </svg>
         </div>
-        <div className="absolute bottom-[20%] left-[8%] animate-pulse delay-1000">
-          <svg className="w-6 h-6 text-purple-300" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 4c-1.5 0-3 1-3.5 2.5C7.5 5 5 4.5 3 6c1 2 2 3 3.5 3C5 10 3 12 2 15c2.5-1 5 0 6.5 1.5.5-1.5 2-2.5 3.5-2.5s3 1 3.5 2.5C17 15 19.5 14 22 15c-1-3-3-5-4.5-6 1.5 0 2.5-1 3.5-3-2-1.5-4.5-1-5.5.5C15 5 13.5 4 12 4z" />
-          </svg>
-        </div>
       </div>
 
       {/* TOP HEADER: Badge */}
-      <div className="relative z-10 flex flex-col items-center text-center mt-2 sm:mt-4">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-900/60 border border-purple-500/40 text-amber-300 text-xs sm:text-sm font-semibold shadow-lg backdrop-blur-sm animate-bounce">
+      <div className="relative z-10 flex flex-col items-center text-center mt-1 sm:mt-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-900/60 border border-purple-500/40 text-amber-300 text-xs sm:text-sm font-semibold shadow-lg backdrop-blur-sm animate-bounce">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>Configuración Óptima del Juego</span>
+          <span>Configuración de Pantalla Recomendada</span>
           <span className="text-base">🎃</span>
         </div>
       </div>
 
       {/* CENTER CARD: Phone Rotation Graphic & Clear Instructions */}
       <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-lg w-full my-auto px-2">
-        {/* Dynamic Main Title */}
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-amber-200 tracking-wide drop-shadow-md mb-2">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-amber-200 tracking-wide drop-shadow-md mb-1.5">
           Gira tu celular horizontalmente
         </h1>
-        <p className="text-sm sm:text-base text-purple-200/90 font-medium max-w-md mx-auto mb-6">
-          Para ver toda la isla de Halloween, explorar el mapa y encontrar las 10 casas embrujadas con facilidad.
+        <p className="text-xs sm:text-sm text-purple-200/90 font-medium max-w-md mx-auto mb-3">
+          Para recorrer toda la isla de Halloween, explorar el mapa y encontrar las 10 casas embrujadas.
         </p>
 
         {/* Animated Phone Graphic (Rotating 0 to 90 degrees) */}
-        <div className="relative w-44 h-44 sm:w-52 sm:h-52 flex items-center justify-center my-2">
+        <div className="relative w-36 h-36 sm:w-44 sm:h-44 flex items-center justify-center my-1">
           {/* Subtle Outer Orbit Ring with Rotation Arrows */}
           <div className="absolute inset-0 rounded-full border-2 border-dashed border-amber-500/30 animate-[spin_10s_linear_infinite]" />
 
           {/* Rotating Phone Container */}
-          <div className="relative w-24 h-40 sm:w-28 sm:h-44 rounded-2xl p-1.5 bg-slate-900 border-2 border-amber-400/80 shadow-[0_0_25px_rgba(245,158,11,0.45)] transition-all animate-phoneRotate">
+          <div className="relative w-20 h-32 sm:w-24 sm:h-38 rounded-2xl p-1.5 bg-slate-900 border-2 border-amber-400/80 shadow-[0_0_25px_rgba(245,158,11,0.45)] transition-all animate-phoneRotate">
             {/* Camera notch */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-4 h-1 rounded-full bg-slate-700" />
+            <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-1 rounded-full bg-slate-700" />
 
             {/* Inner Phone Screen with Spooky Mini-Island Preview */}
-            <div className="w-full h-full rounded-xl overflow-hidden bg-slate-950 flex flex-col items-center justify-center relative p-1.5 border border-purple-900/60">
-              <div className="text-2xl sm:text-3xl mb-1 animate-pulse">🏰</div>
-              <div className="text-[9px] sm:text-[10px] text-amber-300 font-bold tracking-tight">
+            <div className="w-full h-full rounded-xl overflow-hidden bg-slate-950 flex flex-col items-center justify-center relative p-1 border border-purple-900/60">
+              <div className="text-xl sm:text-2xl mb-0.5 animate-pulse">🏰</div>
+              <div className="text-[8px] sm:text-[9px] text-amber-300 font-bold tracking-tight">
                 ISLA MÁGICA
               </div>
-              <div className="text-[8px] text-purple-300/80">Modo 20:9</div>
-
-              {/* Little pumpkins in the phone display */}
-              <div className="flex gap-1.5 mt-2">
-                <span className="text-xs">🎃</span>
-                <span className="text-xs">👻</span>
-                <span className="text-xs">🍬</span>
+              <div className="text-[7px] text-purple-300/80">Modo Horizontal</div>
+              <div className="flex gap-1 mt-1">
+                <span className="text-[10px]">🎃</span>
+                <span className="text-[10px]">👻</span>
               </div>
             </div>
           </div>
 
           {/* Curved Directional Arrow Graphic */}
-          <div className="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 p-2 sm:p-2.5 rounded-full shadow-lg border-2 border-white animate-spin">
-            <RotateCw className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 p-2 rounded-full shadow-lg border-2 border-white animate-spin">
+            <RotateCw className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
 
         {/* Real-Time Device Orientation Status Badge */}
-        <div className="mt-4 mb-2">
+        <div className="mt-2 mb-2">
           {isLandscape ? (
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 text-xs sm:text-sm font-bold shadow-md animate-fadeIn">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>¡Excelente! Tu celular ya está en posición horizontal</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 text-xs font-bold shadow-md animate-fadeIn">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>¡Excelente! Celular en posición horizontal</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-950/80 border border-amber-500/60 text-amber-300 text-xs sm:text-sm font-bold shadow-md animate-pulse">
-              <Smartphone className="w-4 h-4 text-amber-400 rotate-90 shrink-0" />
-              <span>Gira tu teléfono de lado para la mejor experiencia</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-950/80 border border-amber-500/60 text-amber-300 text-xs font-bold shadow-md animate-pulse">
+              <Smartphone className="w-3.5 h-3.5 text-amber-400 rotate-90 shrink-0" />
+              <span>Gira tu teléfono de lado para comenzar</span>
             </div>
           )}
         </div>
+
+        {/* iOS / iPhone Safari Tip Banner */}
+        {isIPhone && (
+          <div className="w-full max-w-sm mt-1 mb-2 text-left">
+            <button
+              onClick={() => setShowIosTip(!showIosTip)}
+              className="w-full px-3 py-1.5 rounded-xl bg-purple-950/60 border border-purple-600/40 text-purple-200 text-[11px] flex items-center justify-between hover:bg-purple-900/40 cursor-pointer transition-all"
+            >
+              <div className="flex items-center gap-1.5 text-amber-300 font-bold">
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span>¿Usas iPhone (Safari)? Ver cómo maximizar</span>
+              </div>
+              <span className="text-xs font-mono">{showIosTip ? '▲' : '▼'}</span>
+            </button>
+
+            {showIosTip && (
+              <div className="mt-1.5 p-2.5 rounded-xl bg-slate-900/90 border border-amber-500/40 text-[11px] text-purple-100 shadow-xl space-y-1.5 animate-fadeIn">
+                <p className="text-amber-300 font-bold flex items-center gap-1">
+                  <span>ℹ️</span> Apple restringe el botón automático de pantalla completa en Safari de iPhone.
+                </p>
+                <div className="space-y-1 text-slate-300">
+                  <p>
+                    <span className="text-white font-bold">Opción 1:</span> Toca el ícono <strong className="text-amber-300">"aA"</strong> en la barra de Safari ➔ <strong className="text-white">"Ocultar barra de herramientas"</strong>.
+                  </p>
+                  <p>
+                    <span className="text-white font-bold">Opción 2 (Mejor):</span> Toca <strong className="text-amber-300">Compartir 📤</strong> ➔ <strong className="text-white">"Agregar a pantalla de inicio"</strong> para abrirlo como una App nativa sin barras.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* BOTTOM ACTIONS: Highly Prominent Fullscreen Button */}
-      <div className="relative z-10 flex flex-col items-center w-full max-w-md mx-auto gap-3 pb-3 sm:pb-6">
-        {/* BIG HYPER-ATTRACTIVE FULLSCREEN BUTTON */}
+      {/* BOTTOM ACTIONS: Highly Prominent Button */}
+      <div className="relative z-10 flex flex-col items-center w-full max-w-md mx-auto gap-2 pb-2 sm:pb-4">
+        {/* BIG HYPER-ATTRACTIVE BUTTON */}
         <button
           onClick={handleActivateFullscreenAndContinue}
-          className="relative group w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:via-orange-400 hover:to-amber-400 text-slate-950 font-black text-base sm:text-lg tracking-wide uppercase shadow-[0_0_35px_rgba(245,158,11,0.65)] hover:shadow-[0_0_50px_rgba(245,158,11,0.9)] active:scale-98 transition-all duration-200 cursor-pointer overflow-hidden border-2 border-white/60 flex items-center justify-center gap-3 animate-pulse"
+          className="relative group w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 hover:from-amber-300 hover:via-orange-400 hover:to-amber-400 text-slate-950 font-black text-sm sm:text-base tracking-wide uppercase shadow-[0_0_35px_rgba(245,158,11,0.65)] hover:shadow-[0_0_50px_rgba(245,158,11,0.9)] active:scale-98 transition-all duration-200 cursor-pointer overflow-hidden border-2 border-white/60 flex items-center justify-center gap-3 animate-pulse"
         >
           {/* Shimmer light sweep animation */}
           <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
 
-          <div className="w-8 h-8 rounded-xl bg-slate-950/20 flex items-center justify-center shrink-0">
-            <Maximize className="w-5 h-5 text-slate-950 stroke-[3]" />
+          <div className="w-7 h-7 rounded-xl bg-slate-950/20 flex items-center justify-center shrink-0">
+            {supportsFullscreen ? (
+              <Maximize className="w-4 h-4 text-slate-950 stroke-[3]" />
+            ) : (
+              <Sparkles className="w-4 h-4 text-slate-950 stroke-[2.5]" />
+            )}
           </div>
 
           <div className="flex flex-col items-start text-left leading-tight">
-            <span className="text-sm sm:text-base font-black">
-              {isFullscreen ? 'PANTALLA COMPLETA ACTIVADA' : 'COLOCAR EN PANTALLA COMPLETA'}
+            <span className="text-xs sm:text-sm font-black">
+              {supportsFullscreen
+                ? isFullscreen
+                  ? 'PANTALLA COMPLETA ACTIVADA'
+                  : 'COLOCAR EN PANTALLA COMPLETA'
+                : 'CONTINUAR AL JUEGO'}
             </span>
-            <span className="text-[11px] sm:text-xs font-semibold text-slate-900/80">
-              Toca aquí para expandir y comenzar ➔
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-900/80">
+              {supportsFullscreen
+                ? 'Toca aquí para expandir y comenzar ➔'
+                : 'Toca aquí para comenzar la aventura ➔'}
             </span>
           </div>
         </button>
 
-        {/* Secondary Alternative: Continue directly */}
-        <button
-          onClick={handleContinueWithoutFullscreen}
-          className="px-4 py-1.5 rounded-xl text-xs sm:text-sm text-purple-300/80 hover:text-white hover:bg-white/5 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer font-medium"
-        >
-          <span>Continuar sin pantalla completa</span>
-          <ChevronRight className="w-4 h-4 text-purple-400" />
-        </button>
+        {/* Secondary Alternative: Continue directly if on fullscreen-supported device */}
+        {supportsFullscreen && (
+          <button
+            onClick={handleContinueWithoutFullscreen}
+            className="px-4 py-1 text-xs text-purple-300/80 hover:text-white hover:bg-white/5 active:scale-95 transition-all flex items-center gap-1 cursor-pointer font-medium"
+          >
+            <span>Continuar sin pantalla completa</span>
+            <ChevronRight className="w-3.5 h-3.5 text-purple-400" />
+          </button>
+        )}
       </div>
 
       {/* Embedded CSS animations for phone rotation preview */}

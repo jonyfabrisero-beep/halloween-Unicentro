@@ -245,9 +245,31 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
     }, // right grass bank near waterfall (moved higher onto grass)
   ]);
 
+  const touchStartRef = useRef<{ x: number; y: number; time: number }>({ x: 0, y: 0, time: 0 });
+
+  const recordTouchStart = (e: React.TouchEvent) => {
+    if (e.touches[0]) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now(),
+      };
+    }
+  };
+
+  const isDragGesture = (e: React.MouseEvent): boolean => {
+    if (touchStartRef.current.time === 0) return false;
+    const dist = Math.hypot(
+      e.clientX - touchStartRef.current.x,
+      e.clientY - touchStartRef.current.y
+    );
+    return dist > 8;
+  };
+
   // Ghost tap handler: canvas particle burst + sound
   const handleGhostTap = (ghost: GhostState, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isDragGesture(e)) return;
     soundEffects.playGhostPop();
 
     if (particleTriggerRef?.current) {
@@ -299,6 +321,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
   // Pumpkin tap handler: dirt particles for buried, candies/wobble for others
   const handlePumpkinTap = (p: PumpkinState, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isDragGesture(e)) return;
 
     if (particleTriggerRef?.current) {
       if (p.isBuried) {
@@ -376,6 +399,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
         return (
           <div
             key={ghost.id}
+            onTouchStart={recordTouchStart}
             onClick={(e) => handleGhostTap(ghost, e)}
             style={{
               left: `${ghost.x}%`,
@@ -518,6 +542,7 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
         return (
           <div
             key={p.id}
+            onTouchStart={recordTouchStart}
             onClick={(e) => handlePumpkinTap(p, e)}
             style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.widthPercent }}
             className={`absolute -translate-x-1/2 -translate-y-1/2 z-15 cursor-pointer select-none transition-transform duration-200 ${

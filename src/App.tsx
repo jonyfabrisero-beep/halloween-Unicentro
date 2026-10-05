@@ -110,7 +110,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-slate-950 font-['Fredoka'] text-white select-none overflow-x-hidden">
+    <div className="relative w-full min-h-[100dvh] bg-slate-950 font-['Fredoka'] text-white select-none overflow-x-hidden">
       {/* Mobile Landscape Orientation Advisory (only when playing or inside intro/registration) */}
       {currentScreen !== 'ORIENTATION_SETUP' && <OrientationWarning />}
 

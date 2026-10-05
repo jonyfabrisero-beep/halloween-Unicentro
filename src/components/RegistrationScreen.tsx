@@ -58,7 +58,10 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#1d0533] via-[#0f0426] to-[#050114] text-white overflow-y-auto">
+    <div
+      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+      className="relative w-full min-h-[100dvh] flex items-center justify-center p-3 sm:p-5 bg-gradient-to-br from-[#1d0533] via-[#0f0426] to-[#050114] text-white overflow-y-auto overflow-x-hidden touch-pan-y"
+    >
       {/* Background ambience elements */}
       <div className="absolute top-4 left-4 w-72 h-72 rounded-full bg-purple-600/10 blur-3xl pointer-events-none" />
       <div className="absolute bottom-4 right-4 w-72 h-72 rounded-full bg-orange-600/10 blur-3xl pointer-events-none" />

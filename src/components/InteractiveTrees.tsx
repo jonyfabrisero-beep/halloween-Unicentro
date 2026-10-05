@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { soundEffects } from '../services/soundEffects';
 import { ParticleTrigger } from './ParticleCanvas';
 
@@ -116,9 +116,30 @@ export const InteractiveTrees: React.FC<InteractiveTreesProps> = ({
   containerRef,
 }) => {
   const [rustlingTreeId, setRustlingTreeId] = useState<string | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number; time: number }>({ x: 0, y: 0, time: 0 });
+
+  const recordTouchStart = (e: React.TouchEvent) => {
+    if (e.touches[0]) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now(),
+      };
+    }
+  };
+
+  const isDragGesture = (e: React.MouseEvent): boolean => {
+    if (touchStartRef.current.time === 0) return false;
+    const dist = Math.hypot(
+      e.clientX - touchStartRef.current.x,
+      e.clientY - touchStartRef.current.y
+    );
+    return dist > 8;
+  };
 
   const handleTreeTap = (tree: TreeData, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isDragGesture(e)) return;
 
     // Sound: soft leaf rustle
     soundEffects.playLeafRustle();
@@ -143,6 +164,7 @@ export const InteractiveTrees: React.FC<InteractiveTreesProps> = ({
         return (
           <div
             key={tree.id}
+            onTouchStart={recordTouchStart}
             onClick={(e) => handleTreeTap(tree, e)}
             style={{
               left: `${tree.x}%`,
