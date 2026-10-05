@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 
 export interface ParticleTrigger {
-  burstGhost: (x: number, y: number) => void;
-  burstPumpkin: (x: number, y: number) => void;
-  burstStars: (x: number, y: number) => void;
-  burstDirt: (x: number, y: number) => void;
-  burstTreeLeaves: (x: number, y: number) => void;
+  burstGhost: (x: number, y: number, isPercent?: boolean) => void;
+  burstPumpkin: (x: number, y: number, isPercent?: boolean) => void;
+  burstStars: (x: number, y: number, isPercent?: boolean) => void;
+  burstDirt: (x: number, y: number, isPercent?: boolean) => void;
+  burstTreeLeaves: (x: number, y: number, isPercent?: boolean) => void;
 }
 
 interface Particle {
@@ -28,19 +28,33 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
   const particlesRef = useRef<Particle[]>([]);
   const animFrameRef = useRef<number | null>(null);
 
-  // Resize canvas to match parent
+  // Resize canvas to match parent element precisely
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const handleResize = () => {
-      canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
-      canvas.height = canvas.parentElement?.clientHeight || window.innerHeight;
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      const width = parent.clientWidth || window.innerWidth;
+      const height = parent.clientHeight || window.innerHeight;
+      if (width > 0 && height > 0) {
+        canvas.width = width;
+        canvas.height = height;
+      }
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const observer = new ResizeObserver(handleResize);
+    if (canvas.parentElement) {
+      observer.observe(canvas.parentElement);
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      observer.disconnect();
+    };
   }, []);
 
   // Main animation loop
@@ -61,10 +75,10 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
         p.vy += p.gravity;
         if (p.type === 'leaf') {
           // Gentle fluttering air drift
-          p.vx += Math.sin(p.rotation * 2) * 0.1;
+          p.vx += Math.sin(p.rotation * 2) * 0.08;
           p.vx *= 0.98;
         } else {
-          p.vx *= 0.96;
+          p.vx *= 0.95;
         }
         p.rotation += p.vRot;
         p.alpha -= p.decay;
@@ -80,29 +94,29 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
         ctx.rotate(p.rotation);
 
         if (p.type === 'glowMote') {
-          // Tiny, intensely illuminated ghost sparkle with glowing aura
+          // Responsive sparkling ghost mote with delicate glow aura
           ctx.beginPath();
           ctx.arc(0, 0, p.size, 0, Math.PI * 2);
           ctx.fillStyle = p.color;
           ctx.shadowColor = p.color;
-          ctx.shadowBlur = 14;
+          ctx.shadowBlur = Math.max(2, Math.round(p.size * 3.2));
           ctx.fill();
 
-          // Brilliant white center core for intense luminescence
+          // White center core
           ctx.beginPath();
-          ctx.arc(0, 0, Math.max(0.6, p.size * 0.45), 0, Math.PI * 2);
+          ctx.arc(0, 0, Math.max(0.4, p.size * 0.45), 0, Math.PI * 2);
           ctx.fillStyle = '#FFFFFF';
           ctx.shadowColor = '#FFFFFF';
-          ctx.shadowBlur = 8;
+          ctx.shadowBlur = Math.max(1, Math.round(p.size * 1.8));
           ctx.fill();
         } else if (p.type === 'dirt') {
-          // Earthy soil speck
+          // Fine earthy soil speck
           ctx.beginPath();
           ctx.arc(0, 0, p.size, 0, Math.PI * 2);
           ctx.fillStyle = p.color;
           ctx.fill();
         } else if (p.type === 'smoke') {
-          // Soft glowing smoke puff
+          // Soft smoke puff
           ctx.beginPath();
           ctx.arc(0, 0, p.size, 0, Math.PI * 2);
           ctx.fillStyle = p.color;
@@ -117,51 +131,69 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
           ctx.closePath();
           ctx.fillStyle = p.color;
           ctx.shadowColor = p.color;
-          ctx.shadowBlur = 8;
+          ctx.shadowBlur = Math.max(1, Math.round(p.size * 2));
           ctx.fill();
         } else if (p.type === 'ring') {
-          // Shockwave expanding ring with luminous aura
+          // Expanding luminous shockwave ring
           ctx.beginPath();
           ctx.arc(0, 0, p.size, 0, Math.PI * 2);
           ctx.strokeStyle = p.color;
           ctx.shadowColor = p.color;
-          ctx.shadowBlur = 12;
-          ctx.lineWidth = 1.8;
+          ctx.shadowBlur = Math.max(2, Math.round(p.size * 1.2));
+          ctx.lineWidth = Math.max(0.8, p.size * 0.18);
           ctx.stroke();
-          p.size += 2.0;
+          p.size += 1.2;
         } else if (p.type === 'candy') {
-          // Wrapped candy piece
+          // Cute miniature wrapped candy piece (responsive proportions)
           ctx.fillStyle = p.color;
           ctx.fillRect(-p.size, -p.size * 0.5, p.size * 2, p.size);
           // Candy wrapper twists
           ctx.beginPath();
           ctx.moveTo(-p.size, 0);
-          ctx.lineTo(-p.size * 1.6, -p.size * 0.6);
-          ctx.lineTo(-p.size * 1.6, p.size * 0.6);
+          ctx.lineTo(-p.size * 1.5, -p.size * 0.55);
+          ctx.lineTo(-p.size * 1.5, p.size * 0.55);
           ctx.closePath();
           ctx.fill();
           ctx.beginPath();
           ctx.moveTo(p.size, 0);
-          ctx.lineTo(p.size * 1.6, -p.size * 0.6);
-          ctx.lineTo(p.size * 1.6, p.size * 0.6);
+          ctx.lineTo(p.size * 1.5, -p.size * 0.55);
+          ctx.lineTo(p.size * 1.5, p.size * 0.55);
           ctx.closePath();
           ctx.fill();
         } else if (p.type === 'leaf') {
-          // Very small autumn leaf fluttering down
+          // Delicate fluttering autumn leaf
           ctx.beginPath();
-          ctx.moveTo(0, -p.size * 1.3);
-          ctx.quadraticCurveTo(p.size * 0.8, 0, 0, p.size * 1.3);
-          ctx.quadraticCurveTo(-p.size * 0.8, 0, 0, -p.size * 1.3);
+          ctx.moveTo(0, -p.size * 1.2);
+          ctx.quadraticCurveTo(p.size * 0.7, 0, 0, p.size * 1.2);
+          ctx.quadraticCurveTo(-p.size * 0.7, 0, 0, -p.size * 1.2);
           ctx.fillStyle = p.color;
           ctx.fill();
 
           // Tiny leaf spine
-          ctx.strokeStyle = 'rgba(0, 0, 0, 0.28)';
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
           ctx.lineWidth = 0.5;
           ctx.beginPath();
-          ctx.moveTo(0, -p.size * 1.1);
-          ctx.lineTo(0, p.size * 1.1);
+          ctx.moveTo(0, -p.size * 1.0);
+          ctx.lineTo(0, p.size * 1.0);
           ctx.stroke();
+        } else if (p.type === 'star') {
+          // Golden star
+          ctx.beginPath();
+          for (let s = 0; s < 5; s++) {
+            const rot = (Math.PI / 5) * 2 * s - Math.PI / 2;
+            const rx = Math.cos(rot) * p.size;
+            const ry = Math.sin(rot) * p.size;
+            if (s === 0) ctx.moveTo(rx, ry);
+            else ctx.lineTo(rx, ry);
+
+            const rotInner = rot + Math.PI / 5;
+            ctx.lineTo(Math.cos(rotInner) * (p.size * 0.45), Math.sin(rotInner) * (p.size * 0.45));
+          }
+          ctx.closePath();
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = Math.max(1, Math.round(p.size * 1.5));
+          ctx.fill();
         }
 
         ctx.restore();
@@ -177,12 +209,49 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
     };
   }, []);
 
+  // Helper to resolve coordinates whether passed as percentage (0-100) or screen pixels
+  const resolveCoordinates = (inX: number, inY: number, isPercent?: boolean): { x: number; y: number } => {
+    const canvas = canvasRef.current;
+    if (!canvas || canvas.width === 0 || canvas.height === 0) {
+      return { x: inX, y: inY };
+    }
+
+    // If explicitly marked as percentage, or if inX and inY are in 0-100 range
+    if (isPercent || (inX >= 0 && inX <= 100 && inY >= 0 && inY <= 100)) {
+      return {
+        x: (inX / 100) * canvas.width,
+        y: (inY / 100) * canvas.height,
+      };
+    }
+
+    // If screen coordinates were provided, convert via canvas bounding rect
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      return {
+        x: (inX - rect.left) * (canvas.width / rect.width),
+        y: (inY - rect.top) * (canvas.height / rect.height),
+      };
+    }
+
+    return { x: inX, y: inY };
+  };
+
+  // Dynamic responsive scaling factor: on mobile phone screens (~600-800px), particles scale down to ~45-55%
+  const getResponsiveScale = (): number => {
+    const canvas = canvasRef.current;
+    if (!canvas || canvas.width === 0) return 1;
+    // Base reference width: 1400px. Clamped between 0.42 and 1.15
+    return Math.max(0.42, Math.min(1.15, canvas.width / 1350));
+  };
+
   useImperativeHandle(ref, () => ({
-    burstGhost(x: number, y: number) {
-      // High-luminance ethereal neon spectrum: pure white, neon cyan, electric aqua, spectral mint, glowing violet
+    burstGhost(rawX: number, rawY: number, isPercent?: boolean) {
+      const { x, y } = resolveCoordinates(rawX, rawY, isPercent);
+      const scale = getResponsiveScale();
+
       const colors = ['#FFFFFF', '#38BDF8', '#67E8F9', '#A7F3D0', '#C084FC', '#F0ABFC'];
 
-      // Thin ethereal luminous shockwave ring
+      // Ethereal luminous shockwave ring
       particlesRef.current.push({
         x,
         y,
@@ -190,7 +259,7 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
         vy: 0,
         alpha: 0.95,
         decay: 0.045,
-        size: 4,
+        size: Math.max(2, 3.5 * scale),
         color: '#67E8F9',
         rotation: 0,
         vRot: 0,
@@ -198,30 +267,33 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
         gravity: 0,
       });
 
-      // 45 tiny, intensely illuminated sparkling motes
-      for (let i = 0; i < 45; i++) {
+      // 36 delicate, intensely illuminated sparkling motes
+      for (let i = 0; i < 36; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = 1.2 + Math.random() * 4.6;
+        const speed = (1.0 + Math.random() * 3.5) * scale;
         const color = colors[Math.floor(Math.random() * colors.length)];
 
         particlesRef.current.push({
           x,
           y,
           vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed - 1.2,
+          vy: Math.sin(angle) * speed - 0.8 * scale,
           alpha: 1,
-          decay: 0.016 + Math.random() * 0.018, // floats and shines smoothly
-          size: 1.2 + Math.random() * 2.2, // much smaller: 1.2px to 3.4px
+          decay: 0.018 + Math.random() * 0.018,
+          size: (0.7 + Math.random() * 1.5) * scale, // Clean, tiny sparkles (0.7px - 2.2px)
           color,
           rotation: Math.random() * Math.PI,
           vRot: (Math.random() - 0.5) * 0.2,
           type: 'glowMote',
-          gravity: -0.025, // floats upwards like luminous stardust
+          gravity: -0.02 * scale, // Floats upward
         });
       }
     },
 
-    burstPumpkin(x: number, y: number) {
+    burstPumpkin(rawX: number, rawY: number, isPercent?: boolean) {
+      const { x, y } = resolveCoordinates(rawX, rawY, isPercent);
+      const scale = getResponsiveScale();
+
       const candyColors = ['#F59E0B', '#EF4444', '#10B981', '#EC4899', '#8B5CF6', '#FBBF24'];
 
       // Orange pulp shockwave
@@ -232,7 +304,7 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
         vy: 0,
         alpha: 0.9,
         decay: 0.04,
-        size: 6,
+        size: Math.max(2.5, 5 * scale),
         color: '#F97316',
         rotation: 0,
         vRot: 0,
@@ -240,11 +312,11 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
         gravity: 0,
       });
 
-      // Flying candies and pulp sparks
-      for (let i = 0; i < 28; i++) {
-        const angle = -Math.PI * 0.8 + Math.random() * Math.PI * 0.6; // Upward fountain
-        const speed = 2.5 + Math.random() * 6;
-        const isCandy = Math.random() > 0.4;
+      // Flying cute candies and pulp sparks
+      for (let i = 0; i < 22; i++) {
+        const angle = -Math.PI * 0.85 + Math.random() * Math.PI * 0.7; // Upward fountain
+        const speed = (1.8 + Math.random() * 4.2) * scale;
+        const isCandy = Math.random() > 0.45;
         const color = isCandy
           ? candyColors[Math.floor(Math.random() * candyColors.length)]
           : '#EA580C';
@@ -255,21 +327,24 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           alpha: 1,
-          decay: 0.025 + Math.random() * 0.015,
-          size: isCandy ? 6 + Math.random() * 4 : 3 + Math.random() * 4,
+          decay: 0.026 + Math.random() * 0.015,
+          size: (isCandy ? 2.4 + Math.random() * 1.6 : 1.4 + Math.random() * 1.6) * scale,
           color,
           rotation: Math.random() * Math.PI,
           vRot: (Math.random() - 0.5) * 0.35,
           type: isCandy ? 'candy' : 'spark',
-          gravity: 0.16, // falls down nicely
+          gravity: 0.14 * scale,
         });
       }
     },
 
-    burstStars(x: number, y: number) {
-      for (let i = 0; i < 20; i++) {
+    burstStars(rawX: number, rawY: number, isPercent?: boolean) {
+      const { x, y } = resolveCoordinates(rawX, rawY, isPercent);
+      const scale = getResponsiveScale();
+
+      for (let i = 0; i < 18; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = 2 + Math.random() * 4;
+        const speed = (1.6 + Math.random() * 3.2) * scale;
         particlesRef.current.push({
           x,
           y,
@@ -277,43 +352,48 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
           vy: Math.sin(angle) * speed,
           alpha: 1,
           decay: 0.025,
-          size: 5 + Math.random() * 5,
+          size: (2.2 + Math.random() * 2.5) * scale,
           color: '#FDE047',
           rotation: Math.random() * Math.PI,
           vRot: (Math.random() - 0.5) * 0.25,
           type: 'star',
-          gravity: 0.05,
+          gravity: 0.04 * scale,
         });
       }
     },
 
-    burstDirt(x: number, y: number) {
+    burstDirt(rawX: number, rawY: number, isPercent?: boolean) {
+      const { x, y } = resolveCoordinates(rawX, rawY, isPercent);
+      const scale = getResponsiveScale();
+
       const dirtColors = ['#5C3A21', '#78350F', '#8B4513', '#A0522D', '#92400E', '#451A03'];
-      // Emits 24 small dirt, earth & soil specks
-      for (let i = 0; i < 24; i++) {
-        const angle = -Math.PI * 0.95 + Math.random() * Math.PI * 0.9; // Upward soil puff
-        const speed = 1.5 + Math.random() * 4.5;
+
+      for (let i = 0; i < 20; i++) {
+        const angle = -Math.PI * 0.95 + Math.random() * Math.PI * 0.9;
+        const speed = (1.2 + Math.random() * 3.2) * scale;
         const color = dirtColors[Math.floor(Math.random() * dirtColors.length)];
 
         particlesRef.current.push({
-          x: x + (Math.random() - 0.5) * 25,
-          y: y + (Math.random() - 0.5) * 8,
+          x: x + (Math.random() - 0.5) * 16 * scale,
+          y: y + (Math.random() - 0.5) * 6 * scale,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           alpha: 0.95,
-          decay: 0.02 + Math.random() * 0.02,
-          size: 2 + Math.random() * 3.5,
+          decay: 0.022 + Math.random() * 0.02,
+          size: (1.0 + Math.random() * 1.8) * scale,
           color,
           rotation: Math.random() * Math.PI,
           vRot: (Math.random() - 0.5) * 0.4,
           type: 'dirt',
-          gravity: 0.22,
+          gravity: 0.18 * scale,
         });
       }
     },
 
-    burstTreeLeaves(x: number, y: number) {
-      // Warm autumn palette: rich pumpkin orange, golden amber, deep crimson, rustic yellow, russet
+    burstTreeLeaves(rawX: number, rawY: number, isPercent?: boolean) {
+      const { x, y } = resolveCoordinates(rawX, rawY, isPercent);
+      const scale = getResponsiveScale();
+
       const leafColors = [
         '#F97316',
         '#EA580C',
@@ -325,27 +405,26 @@ export const ParticleCanvas = forwardRef<ParticleTrigger, {}>((_, ref) => {
         '#78350F',
       ];
 
-      // Shower 24 very small fluttering autumn leaves
-      for (let i = 0; i < 24; i++) {
-        const spreadX = (Math.random() - 0.5) * 45;
-        const spreadY = (Math.random() - 0.5) * 40 - 25; // Centered on foliage crown
+      for (let i = 0; i < 20; i++) {
+        const spreadX = (Math.random() - 0.5) * 36 * scale;
+        const spreadY = (Math.random() - 0.5) * 28 * scale - 12 * scale;
         const angle = -Math.PI * 0.8 + Math.random() * Math.PI * 0.6;
-        const speed = 0.8 + Math.random() * 2.2;
+        const speed = (0.6 + Math.random() * 1.8) * scale;
         const color = leafColors[Math.floor(Math.random() * leafColors.length)];
 
         particlesRef.current.push({
           x: x + spreadX,
           y: y + spreadY,
-          vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 1.5,
-          vy: Math.sin(angle) * speed - 0.6,
+          vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 1.2 * scale,
+          vy: Math.sin(angle) * speed - 0.4 * scale,
           alpha: 1,
-          decay: 0.007 + Math.random() * 0.006, // Floats all the way down smoothly
-          size: 2.2 + Math.random() * 2.2, // Very small leaves (2.2px to 4.4px)
+          decay: 0.008 + Math.random() * 0.006,
+          size: (1.5 + Math.random() * 1.8) * scale,
           color,
           rotation: Math.random() * Math.PI * 2,
           vRot: (Math.random() - 0.5) * 0.22,
           type: 'leaf',
-          gravity: 0.075 + Math.random() * 0.035, // Gentle fluttering descent
+          gravity: (0.05 + Math.random() * 0.03) * scale,
         });
       }
     },

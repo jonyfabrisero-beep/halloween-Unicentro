@@ -123,12 +123,9 @@ export const InteractiveTrees: React.FC<InteractiveTreesProps> = ({
     // Sound: soft leaf rustle
     soundEffects.playLeafRustle();
 
-    // Trigger canvas shower of small falling autumn leaves
-    if (particleTriggerRef?.current && containerRef?.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const clientX = e.clientX - rect.left;
-      const clientY = e.clientY - rect.top;
-      particleTriggerRef.current.burstTreeLeaves(clientX, clientY);
+    // Trigger canvas shower of small falling autumn leaves from tree crown
+    if (particleTriggerRef?.current) {
+      particleTriggerRef.current.burstTreeLeaves(tree.x, tree.y - 4.5, true);
     }
 
     // Elastic rustle shake on tree crown

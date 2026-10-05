@@ -250,11 +250,9 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
     e.stopPropagation();
     soundEffects.playGhostPop();
 
-    if (particleTriggerRef?.current && containerRef?.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const clientX = e.clientX - rect.left;
-      const clientY = e.clientY - rect.top;
-      particleTriggerRef.current.burstGhost(clientX, clientY);
+    if (particleTriggerRef?.current) {
+      // Trigger burst from the exact center of the ghost on the canvas
+      particleTriggerRef.current.burstGhost(ghost.x, ghost.y, true);
     }
 
     // Instantly hide the tapped ghost
@@ -302,17 +300,13 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
   const handlePumpkinTap = (p: PumpkinState, e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (particleTriggerRef?.current && containerRef?.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const clientX = e.clientX - rect.left;
-      const clientY = e.clientY - rect.top;
-
+    if (particleTriggerRef?.current) {
       if (p.isBuried) {
-        // Special dirt particles for semi-buried pumpkins (no jump, no wobble)
-        particleTriggerRef.current.burstDirt(clientX, clientY);
+        // Special dirt particles for semi-buried pumpkins (at ground contact point)
+        particleTriggerRef.current.burstDirt(p.x, p.y + 0.6, true);
       } else {
-        // Candy and pulp fountain for free pumpkins
-        particleTriggerRef.current.burstPumpkin(clientX, clientY);
+        // Candy and pulp fountain from exact pumpkin center
+        particleTriggerRef.current.burstPumpkin(p.x, p.y, true);
       }
     }
 
