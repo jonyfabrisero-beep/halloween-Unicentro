@@ -10,6 +10,7 @@ import { storageService } from './services/storage';
 import { soundEffects } from './services/soundEffects';
 import { ambientSound } from './services/ambientAudio';
 import OrientationWarning from './components/OrientationWarning';
+import { OrientationSetupScreen } from './components/OrientationSetupScreen';
 import { IntroScreen } from './components/IntroScreen';
 import { RegistrationScreen } from './components/RegistrationScreen';
 import { InteractiveMap } from './components/InteractiveMap';
@@ -21,10 +22,7 @@ export default function App() {
     storageService.getCurrentPlayer()
   );
 
-  const [currentScreen, setCurrentScreen] = useState<GameScreen>(() => {
-    const existing = storageService.getCurrentPlayer();
-    return existing ? 'MAP' : 'INTRO';
-  });
+  const [currentScreen, setCurrentScreen] = useState<GameScreen>('ORIENTATION_SETUP');
 
   const [isMuted, setIsMuted] = useState<boolean>(() => soundEffects.getIsMuted());
   const [volume, setVolume] = useState<number>(() => soundEffects.getMusicVolume());
@@ -113,10 +111,22 @@ export default function App() {
 
   return (
     <div className="relative w-full h-full min-h-screen bg-slate-950 font-['Fredoka'] text-white select-none overflow-x-hidden">
-      {/* Mobile Landscape Orientation Advisory */}
-      <OrientationWarning />
+      {/* Mobile Landscape Orientation Advisory (only when playing or inside intro/registration) */}
+      {currentScreen !== 'ORIENTATION_SETUP' && <OrientationWarning />}
 
       {/* Screen Router */}
+      {currentScreen === 'ORIENTATION_SETUP' && (
+        <OrientationSetupScreen
+          onContinue={() => {
+            if (currentPlayer) {
+              setCurrentScreen('MAP');
+            } else {
+              setCurrentScreen('INTRO');
+            }
+          }}
+        />
+      )}
+
       {currentScreen === 'INTRO' && (
         <IntroScreen onStart={handleStartFromIntro} />
       )}

@@ -181,28 +181,12 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
   const [pumpkins, setPumpkins] = useState<PumpkinState[]>([
     {
       id: 'p1',
-      x: 13.8,
-      y: 89.0,
+      x: 64.0,
+      y: 53.0,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_rostro.png',
       widthPercent: '2.7%',
-    }, // maze
-    {
-      id: 'p2',
-      x: 24.0,
-      y: 65.5,
-      wobbling: false,
-      imageSrc: '/pumpkins/calabaza_sin_rostro.png',
-      widthPercent: '2.7%',
-    }, // left path
-    {
-      id: 'p3',
-      x: 35.2,
-      y: 32.5,
-      wobbling: false,
-      imageSrc: '/pumpkins/trio_calabazas.png',
-      widthPercent: '3.8%',
-    }, // upper left
+    }, // path below central castle plaza stairs
     {
       id: 'p4',
       x: 40.8,
@@ -213,53 +197,52 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
     }, // next to opticolor
     {
       id: 'p5',
-      x: 28.8,
-      y: 79.0,
+      x: 47.0,
+      y: 26.5,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_rostro.png',
       widthPercent: '2.7%',
-    }, // south-west path near AG Decoraciones
+    }, // curve of road north of castle
     {
       id: 'p6',
-      x: 68.4,
-      y: 33.0,
+      x: 71.5,
+      y: 41.5,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_rostro.png',
       widthPercent: '2.7%',
-    }, // north-east curve between Clarks and Movilmat
+    }, // road curve shoulder before bridge
     {
       id: 'p7',
-      x: 54.8,
-      y: 27.0,
+      x: 53.0,
+      y: 31.5,
       wobbling: false,
       imageSrc: '/pumpkins/calabaza_sin_rostro.png',
       widthPercent: '2.7%',
-    }, // upper road
+    }, // grass patch below road northeast of castle
     {
       id: 'p8',
-      x: 79.6,
-      y: 73.0,
+      x: 73.5,
+      y: 73.5,
       wobbling: false,
-      imageSrc: '/pumpkins/calabazas_duo.png',
-      widthPercent: '3.2%',
-    }, // right road
+      imageSrc: '/pumpkins/calabaza_rostro.png',
+      widthPercent: '2.7%',
+    }, // southeast road next to lamppost
     {
       id: 'p9',
-      x: 59.2,
-      y: 93.5,
+      x: 49.0,
+      y: 83.5,
       wobbling: false,
       imageSrc: '/pumpkins/trio_calabazas_enterradas.png',
-      isBuried: true,
       widthPercent: '4.2%',
-    }, // bottom dirt patch - SEMI-ENTERRADAS
+    }, // left grass bank near waterfall (moved further left towards house)
     {
       id: 'p10',
-      x: 64.0,
-      y: 94.5,
+      x: 64.2,
+      y: 81.0,
       wobbling: false,
       imageSrc: '/pumpkins/trio_calabazas.png',
       widthPercent: '3.8%',
-    }, // bottom right grass
+    }, // right grass bank near waterfall (moved higher onto grass)
   ]);
 
   // Ghost tap handler: canvas particle burst + sound

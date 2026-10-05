@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Smartphone, RotateCw } from 'lucide-react';
+import { Smartphone, X } from 'lucide-react';
 
 export default function OrientationWarning() {
   const [isPortrait, setIsPortrait] = useState(false);
@@ -7,14 +7,15 @@ export default function OrientationWarning() {
 
   useEffect(() => {
     const checkOrientation = () => {
-      // Check if width < height and width < 900 (mobile portrait)
-      const portrait = window.innerWidth < window.innerHeight && window.innerWidth < 850;
-      setIsPortrait(portrait);
+      // Instant check: only show if portrait orientation on smaller screens
+      const isMobile = window.innerWidth < 850;
+      const portrait = window.matchMedia('(orientation: portrait)').matches || (window.innerWidth < window.innerHeight);
+      setIsPortrait(portrait && isMobile);
     };
 
     checkOrientation();
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
+    window.addEventListener('resize', checkOrientation, { passive: true });
+    window.addEventListener('orientationchange', checkOrientation, { passive: true });
 
     return () => {
       window.removeEventListener('resize', checkOrientation);
@@ -25,27 +26,45 @@ export default function OrientationWarning() {
   if (!isPortrait || dismissed) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center text-white animate-fadeIn">
-      <div className="relative mb-6">
-        <div className="w-20 h-20 rounded-2xl bg-orange-600/30 border border-orange-500/50 flex items-center justify-center animate-pulse">
-          <Smartphone className="w-12 h-12 text-orange-400 rotate-90 transition-transform duration-700" />
+    <div
+      className="fixed bottom-3 sm:bottom-4 left-3 right-3 sm:left-auto sm:right-4 z-40 max-w-sm sm:max-w-md pointer-events-auto select-none transition-all duration-300 animate-slideUp"
+      style={{
+        // Pure CSS guarantee: disappears instantaneously when rotated to landscape with zero JS lag
+      }}
+    >
+      <style>{`
+        @media screen and (orientation: landscape) {
+          .orientation-banner-container {
+            display: none !important;
+          }
+        }
+      `}</style>
+      <div className="orientation-banner-container rounded-2xl bg-slate-950/85 backdrop-blur-md border-2 border-amber-500/70 p-3 sm:p-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.85)] flex items-center gap-3">
+        {/* Animated Rotating Phone Icon */}
+        <div className="relative shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/30 to-purple-600/30 border border-amber-400/50 flex items-center justify-center">
+          <Smartphone className="w-5 h-5 text-amber-300 animate-pulse rotate-90" />
         </div>
-        <RotateCw className="w-8 h-8 text-amber-300 absolute -top-2 -right-2 animate-spin" style={{ animationDuration: '3s' }} />
+
+        {/* Text Prompt */}
+        <div className="flex-1 text-left min-w-0">
+          <h4 className="text-xs font-black text-amber-300 tracking-wide font-['Lilita_One'] uppercase leading-tight">
+            ¡Gira tu celular en horizontal!
+          </h4>
+          <p className="text-[11px] text-slate-300 font-['Fredoka'] leading-tight mt-0.5">
+            Para recorrer cómodamente la isla y encontrar todas las casas.
+          </p>
+        </div>
+
+        {/* Close / Dismiss Button */}
+        <button
+          onClick={() => setDismissed(true)}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer shrink-0"
+          title="Cerrar aviso"
+          aria-label="Cerrar aviso de orientación"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
-
-      <h2 className="text-2xl font-black text-amber-400 tracking-wide mb-2 font-['Lilita_One']">
-        ¡GIRA TU CELULAR!
-      </h2>
-      <p className="text-sm text-slate-300 max-w-xs mb-6 font-['Fredoka']">
-        Para disfrutar al máximo el mapa interactivo de <span className="text-orange-400 font-bold">Unicentro Maracay</span>, juega con el teléfono en posición horizontal.
-      </p>
-
-      <button
-        onClick={() => setDismissed(true)}
-        className="px-6 py-2.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-bold text-sm shadow-lg shadow-orange-500/30 hover:scale-105 active:scale-95 transition-transform"
-      >
-        Continuar de todos modos
-      </button>
     </div>
   );
 }

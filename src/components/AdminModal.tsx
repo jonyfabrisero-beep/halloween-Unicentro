@@ -464,7 +464,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       className="p-3 rounded-2xl bg-purple-950/40 border border-purple-800/60 flex flex-col items-center text-center relative"
                     >
                       <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-900 border border-purple-600/40 text-[10px] font-mono font-bold text-amber-400">
-                        #{idx + 1}
+                        Casa #{store.slotNumber ?? (idx + 1)}
                       </div>
 
                       <div className="w-10 h-10 mb-1 flex items-center justify-center">

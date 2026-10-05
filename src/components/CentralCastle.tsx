@@ -64,33 +64,33 @@ export const CentralCastle: React.FC<CentralCastleProps> = ({
         />
 
         {/* Central Padlock ("candado central" using authentic parte superior & inferior) */}
-        <div className="absolute top-[52%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center select-none">
-          <div className="relative flex flex-col items-center">
+        <div className="absolute top-[52%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center select-none w-[22%] pointer-events-none">
+          <div className="relative flex flex-col items-center w-full">
             {/* Shackle: parte superior candado.png (Animates lifting up & rotating open when unlocked) */}
             <div
-              className={`relative transition-all duration-700 ease-out z-10 ${
+              className={`relative transition-all duration-700 ease-out z-10 w-[72%] ${
                 isUnlocked
-                  ? '-translate-y-3 sm:-translate-y-4 -rotate-[24deg] origin-bottom-right drop-shadow-[0_0_12px_rgba(251,191,36,0.9)]'
+                  ? '-translate-y-1 sm:-translate-y-2 -rotate-[24deg] origin-bottom-right drop-shadow-[0_0_8px_rgba(251,191,36,0.9)]'
                   : 'translate-y-0 rotate-0 drop-shadow-md'
               }`}
             >
               <img
                 src="/castle/parte_superior_candado.png"
                 alt="Grillete del Candado"
-                className="w-6 sm:w-8 md:w-10 h-auto object-contain -mb-2 sm:-mb-2.5 pointer-events-none"
+                className="w-full h-auto object-contain -mb-[22%] pointer-events-none"
                 loading="eager"
               />
             </div>
 
             {/* Lock Body: parte inferior candado.png */}
-            <div className="relative z-20">
+            <div className="relative z-20 w-full">
               <img
                 src="/castle/parte_inferior_candado.png"
                 alt="Cuerpo del Candado"
-                className={`w-8 sm:w-10 md:w-12 h-auto object-contain pointer-events-none transition-all duration-500 ${
+                className={`w-full h-auto object-contain pointer-events-none transition-all duration-500 ${
                   isUnlocked
-                    ? 'filter drop-shadow-[0_0_16px_rgba(251,191,36,0.9)] animate-pulse'
-                    : 'filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.85)]'
+                    ? 'filter drop-shadow-[0_0_12px_rgba(251,191,36,0.9)] animate-pulse'
+                    : 'filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]'
                 }`}
                 loading="eager"
               />
@@ -98,11 +98,11 @@ export const CentralCastle: React.FC<CentralCastleProps> = ({
 
             {/* Badge Indicator: ¡ABIERTO! or Progress Count */}
             {isUnlocked ? (
-              <span className="mt-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-green-400 text-slate-950 text-[8px] sm:text-[9px] md:text-[10px] font-black font-['Lilita_One'] uppercase tracking-wider shadow-[0_0_12px_rgba(52,211,153,0.8)] animate-bounce border border-white">
+              <span className="mt-0.5 px-1 sm:px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-green-400 text-slate-950 text-[6.5px] sm:text-[8px] font-black font-['Lilita_One'] uppercase tracking-wider shadow-[0_0_8px_rgba(52,211,153,0.8)] border border-white whitespace-nowrap">
                 ¡ABIERTO!
               </span>
             ) : (
-              <span className="mt-0.5 px-1.5 py-0.5 rounded-full bg-slate-950/95 border border-amber-400/80 text-amber-300 text-[8px] sm:text-[9px] font-bold font-mono shadow-sm">
+              <span className="mt-0.5 px-1 py-0.2 rounded-full bg-slate-950/95 border border-amber-400/80 text-amber-300 text-[6.5px] sm:text-[8px] font-bold font-mono shadow-sm whitespace-nowrap">
                 {completedCount}/10
               </span>
             )}

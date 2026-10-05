@@ -42,8 +42,9 @@ export const HauntedHouse: React.FC<HauntedHouseProps> = ({
         left: `${store.x}%`,
         top: `${store.y}%`,
         width: store.customWidthPercent || `${6.2 * (store.scaleFactor || 1.0)}%`,
+        zIndex: store.zIndex ?? 15,
       }}
-      className={`absolute -translate-x-1/2 -translate-y-[85%] cursor-pointer z-15 select-none origin-bottom transition-transform duration-200 ${
+      className={`absolute -translate-x-1/2 -translate-y-[85%] cursor-pointer select-none origin-bottom transition-transform duration-200 ${
         isBouncing || isAnimating
           ? 'animate-groundedWobble'
           : isHovered
