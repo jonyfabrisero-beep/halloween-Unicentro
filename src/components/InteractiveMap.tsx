@@ -715,6 +715,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           player={player}
           onClose={() => setShowVictoryModal(false)}
           onRestart={onRestartGame}
+          onPlayerUpdate={onUpdatePlayer}
         />
       )}
     </div>

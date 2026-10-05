@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "player": {
+      "title": "Player",
+      "description": "Participant in the Unicentro Maracay Halloween Trick or Treat game",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique participant identifier"
+        },
+        "playerName": {
+          "type": "string",
+          "description": "Child's name"
+        },
+        "parentName": {
+          "type": "string",
+          "description": "Parent or guardian's name"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["boy", "girl"],
+          "description": "Selected avatar gender"
+        },
+        "unlockedStores": {
+          "type": "array",
+          "description": "List of unlocked store IDs"
+        },
+        "storeStars": {
+          "type": "object",
+          "description": "Stars awarded per store"
+        },
+        "scanHistory": {
+          "type": "array",
+          "description": "Chronological scan history timestamps and stores"
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "ISO timestamp when the 10 stores were unlocked"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of registration"
+        },
+        "prizeDelivered": {
+          "type": "boolean",
+          "description": "Whether the child redeemed their candy prize"
+        },
+        "prizeDeliveredAt": {
+          "type": "string",
+          "description": "ISO timestamp when the candy prize was delivered"
+        }
+      },
+      "required": ["id", "playerName", "parentName", "gender", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/players/{playerId}": {
+      "schema": {
+        "$ref": "player"
+      },
+      "description": "Stores participant records, game progression, and prize redemption status for real-time synchronization between phones and admin dashboard"
+    }
+  }
+}

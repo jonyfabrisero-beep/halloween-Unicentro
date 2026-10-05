@@ -1,20 +1,45 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PlayerData } from '../types/game';
 import { soundEffects } from '../services/soundEffects';
+import { storageService } from '../services/storage';
 import confetti from 'canvas-confetti';
 import { Award, Gift, Sparkles, Check, X } from 'lucide-react';
+
+const STAFF_PASSCODE = 'Uni2026mcy';
 
 interface VictoryModalProps {
   player: PlayerData;
   onClose: () => void;
   onRestart: () => void;
+  onPlayerUpdate?: (updated: PlayerData) => void;
 }
 
 export const VictoryModal: React.FC<VictoryModalProps> = ({
   player,
   onClose,
   onRestart,
+  onPlayerUpdate,
 }) => {
+  const [showStaffPinInput, setShowStaffPinInput] = useState(false);
+  const [staffPin, setStaffPin] = useState('');
+  const [pinError, setPinError] = useState(false);
+  const [isDelivered, setIsDelivered] = useState(!!player.prizeDelivered);
+
+  useEffect(() => {
+    setIsDelivered(!!player.prizeDelivered);
+    const unsubscribe = storageService.subscribeToPlayer(player.id, (remotePlayer) => {
+      if (remotePlayer.prizeDelivered) {
+        setIsDelivered(true);
+        if (onPlayerUpdate) {
+          onPlayerUpdate(remotePlayer);
+        }
+      }
+    });
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [player.id, player.prizeDelivered, onPlayerUpdate]);
+
   useEffect(() => {
     soundEffects.playVictoryFanfare();
 
@@ -40,6 +65,26 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   }, []);
 
   const ticketCode = `DULCE-${player.id.slice(-6).toUpperCase()}`;
+
+  const handleValidateRedemption = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (staffPin.trim() === STAFF_PASSCODE) {
+      const updated = storageService.togglePrizeDelivered(player.id);
+      if (updated) {
+        setIsDelivered(true);
+        setShowStaffPinInput(false);
+        soundEffects.playVictoryFanfare();
+        confetti({ particleCount: 70, spread: 80, origin: { y: 0.7 } });
+        if (onPlayerUpdate) {
+          onPlayerUpdate(updated);
+        }
+      }
+    } else {
+      setPinError(true);
+      soundEffects.playPumpkinSquish();
+      setTimeout(() => setPinError(false), 2000);
+    }
+  };
 
   return (
     <div 
@@ -103,11 +148,16 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
           </p>
         </div>
 
-        {/* Candy Redemption Voucher Ticket */}
-        <div className="p-3 sm:p-4 rounded-2xl bg-purple-950/70 border-2 border-dashed border-amber-400/80 mb-4 sm:mb-5 relative overflow-hidden">
+        {/* Candy Redemption Voucher Ticket with dynamic validity / delivered stamp */}
+        <div className={`p-3 sm:p-4 rounded-2xl border-2 border-dashed mb-4 sm:mb-5 relative overflow-hidden transition-all ${
+          isDelivered 
+            ? 'bg-emerald-950/40 border-emerald-400/80 shadow-[0_0_20px_rgba(52,211,153,0.25)]' 
+            : 'bg-purple-950/70 border-amber-400/80'
+        }`}>
+          {/* Header of Ticket */}
           <div className="flex items-center justify-between gap-2 border-b border-purple-800/80 pb-1.5 sm:pb-2 mb-1.5 sm:mb-2">
             <div className="flex items-center gap-2 text-left">
-              <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-pink-400 shrink-0" />
+              <Gift className={`w-5 h-5 sm:w-6 sm:h-6 shrink-0 ${isDelivered ? 'text-emerald-400' : 'text-pink-400'}`} />
               <div>
                 <div className="text-[10px] sm:text-[11px] text-amber-300 uppercase font-bold font-mono">
                   Vale de Retiro de Dulces
@@ -117,11 +167,21 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
                 </div>
               </div>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 text-[9px] sm:text-[10px] font-bold uppercase">
-              VÁLIDO
-            </span>
+
+            {/* Dynamic Status Badge */}
+            {isDelivered ? (
+              <span className="px-2.5 py-1 rounded-full bg-emerald-500/30 text-emerald-300 border border-emerald-400 text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                <Check className="w-3.5 h-3.5" />
+                <span>CANJEADO</span>
+              </span>
+            ) : (
+              <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 text-[10px] sm:text-xs font-bold uppercase tracking-wider animate-pulse">
+                🟢 VÁLIDO
+              </span>
+            )}
           </div>
 
+          {/* Ticket Information */}
           <div className="grid grid-cols-2 gap-2 text-left text-xs font-['Fredoka']">
             <div>
               <span className="text-purple-300 text-[10px] block">Niño/a:</span>
@@ -132,11 +192,73 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
               <span className="font-bold text-white truncate block">{player.parentName}</span>
             </div>
             <div className="col-span-2 pt-1 border-t border-purple-900/60 flex items-center justify-between">
-              <span className="text-purple-300 text-[10px]">Código de Canje:</span>
-              <span className="font-mono font-bold text-amber-300 text-xs sm:text-sm tracking-widest bg-black/40 px-2 py-0.5 rounded border border-amber-400/40">
+              <span className="text-purple-300 text-[10px]">Código de Canje Único:</span>
+              <span className="font-mono font-black text-amber-300 text-xs sm:text-sm tracking-widest bg-black/50 px-2 py-0.5 rounded border border-amber-400/50">
                 {ticketCode}
               </span>
             </div>
+          </div>
+
+          {/* Status Message */}
+          <div className="mt-2.5 pt-2 border-t border-purple-900/40 text-[10px] sm:text-[11px]">
+            {isDelivered ? (
+              <div className="p-2 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 font-['Fredoka'] flex flex-col items-center justify-center">
+                <span className="font-bold text-emerald-300">🎉 ¡Dulces entregados con éxito!</span>
+                <span className="text-[10px] text-emerald-400/90 mt-0.5">
+                  {player.prizeDeliveredAt
+                    ? `Canjeado el ${new Date(player.prizeDeliveredAt).toLocaleDateString()} a las ${new Date(player.prizeDeliveredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                    : 'Registrado como canjeado'}
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-1.5">
+                <p className="text-purple-200/80 font-['Fredoka']">
+                  Presenta este código en el Punto de Información para recibir tu premio.
+                </p>
+
+                {/* Staff Quick Redemption Validation Button */}
+                {!showStaffPinInput ? (
+                  <button
+                    onClick={() => setShowStaffPinInput(true)}
+                    className="mt-1 px-3 py-1 rounded-lg bg-purple-900/60 hover:bg-purple-800 border border-purple-500/40 text-purple-200 text-[10px] sm:text-xs font-['Fredoka'] flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <span>🔐 Validar Canje (Personal de Stand)</span>
+                  </button>
+                ) : (
+                  <form onSubmit={handleValidateRedemption} className="w-full max-w-xs mt-1 p-2 rounded-xl bg-slate-950/90 border border-amber-500/50 flex flex-col items-center gap-1.5 animate-fadeIn">
+                    <span className="text-[10px] text-amber-300 font-bold uppercase tracking-wider">
+                      Clave de Autorización Staff
+                    </span>
+                    <div className="flex gap-1.5 w-full">
+                      <input
+                        type="password"
+                        value={staffPin}
+                        onChange={(e) => setStaffPin(e.target.value)}
+                        placeholder="Contraseña de staff"
+                        className="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-purple-500 text-xs text-white placeholder-slate-500 text-center font-mono focus:outline-none focus:border-amber-400"
+                        autoFocus
+                      />
+                      <button
+                        type="submit"
+                        className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs cursor-pointer active:scale-95 transition-transform"
+                      >
+                        Canjear
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowStaffPinInput(false)}
+                        className="px-2 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    {pinError && (
+                      <span className="text-[10px] text-red-400 font-bold">PIN incorrecto</span>
+                    )}
+                  </form>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

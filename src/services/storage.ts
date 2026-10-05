@@ -1,4 +1,15 @@
 import { PlayerData } from '../types/game';
+import { db } from './firebase';
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  updateDoc, 
+  onSnapshot, 
+  query, 
+  orderBy, 
+  getDocs 
+} from 'firebase/firestore';
 
 const CURRENT_PLAYER_KEY = 'unicentro_dulce_truco_current_player';
 const ALL_PLAYERS_KEY = 'unicentro_dulce_truco_all_players_v2';
@@ -17,6 +28,30 @@ export const storageService = {
     try {
       localStorage.setItem(CURRENT_PLAYER_KEY, JSON.stringify(player));
       this.upsertToAllPlayers(player);
+
+      // Asynchronous cloud sync to Firestore
+      const cleanData: Record<string, any> = {
+        id: player.id,
+        playerName: player.playerName || '',
+        parentName: player.parentName || '',
+        gender: player.gender || 'boy',
+        unlockedStores: player.unlockedStores || [],
+        storeStars: player.storeStars || {},
+        scanHistory: player.scanHistory || [],
+        createdAt: player.createdAt || new Date().toISOString(),
+        prizeDelivered: !!player.prizeDelivered,
+      };
+
+      if (player.completedAt) {
+        cleanData.completedAt = player.completedAt;
+      }
+      if (player.prizeDeliveredAt) {
+        cleanData.prizeDeliveredAt = player.prizeDeliveredAt;
+      }
+
+      setDoc(doc(db, 'players', player.id), cleanData, { merge: true }).catch((err) => {
+        console.warn('Notice: Firestore sync fallback to local storage:', err);
+      });
     } catch (e) {
       console.error('Error saving current player', e);
     }
@@ -59,10 +94,12 @@ export const storageService = {
 
       const currentPrize = !!all[index].prizeDelivered;
       const newStatus = !currentPrize;
+      const deliveredTime = newStatus ? new Date().toISOString() : undefined;
+
       all[index] = {
         ...all[index],
         prizeDelivered: newStatus,
-        prizeDeliveredAt: newStatus ? new Date().toISOString() : undefined,
+        prizeDeliveredAt: deliveredTime,
       };
 
       localStorage.setItem(ALL_PLAYERS_KEY, JSON.stringify(all));
@@ -73,10 +110,18 @@ export const storageService = {
         const updatedCurrent = {
           ...current,
           prizeDelivered: newStatus,
-          prizeDeliveredAt: all[index].prizeDeliveredAt,
+          prizeDeliveredAt: deliveredTime,
         };
         localStorage.setItem(CURRENT_PLAYER_KEY, JSON.stringify(updatedCurrent));
       }
+
+      // Sync to cloud Firestore
+      updateDoc(doc(db, 'players', playerId), {
+        prizeDelivered: newStatus,
+        prizeDeliveredAt: deliveredTime || null,
+      }).catch((err) => {
+        console.warn('Notice: Firestore prize update fallback:', err);
+      });
 
       return all[index];
     } catch (e) {
@@ -99,11 +144,78 @@ export const storageService = {
     }
   },
 
+  /**
+   * Real-time subscription to all players in Firestore.
+   * Enables the Admin PC dashboard to display new registrations and scans live without refresh.
+   */
+  subscribeToAllPlayers(callback: (players: PlayerData[]) => void): () => void {
+    try {
+      const playersCol = collection(db, 'players');
+      const q = query(playersCol, orderBy('createdAt', 'desc'));
+
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const remoteList: PlayerData[] = [];
+          snapshot.forEach((snapDoc) => {
+            const data = snapDoc.data() as PlayerData;
+            remoteList.push(data);
+          });
+
+          if (remoteList.length > 0) {
+            localStorage.setItem(ALL_PLAYERS_KEY, JSON.stringify(remoteList));
+            callback(remoteList);
+          } else {
+            callback(this.getAllPlayers());
+          }
+        },
+        (error) => {
+          console.warn('Firestore subscription fallback to local cache:', error);
+          callback(this.getAllPlayers());
+        }
+      );
+
+      return unsubscribe;
+    } catch (e) {
+      console.warn('Could not establish real-time Firestore listener, using local storage:', e);
+      callback(this.getAllPlayers());
+      return () => {};
+    }
+  },
+
+  /**
+   * Real-time subscription to a single player's document.
+   * If the administrator marks their prize delivered from the PC,
+   * the child's phone instantly updates to "CANJEADO" in real-time.
+   */
+  subscribeToPlayer(playerId: string, callback: (player: PlayerData) => void): () => void {
+    try {
+      const playerRef = doc(db, 'players', playerId);
+      return onSnapshot(
+        playerRef,
+        (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.data() as PlayerData;
+            localStorage.setItem(CURRENT_PLAYER_KEY, JSON.stringify(data));
+            this.upsertToAllPlayers(data);
+            callback(data);
+          }
+        },
+        (err) => {
+          console.warn('Player document listener notice:', err);
+        }
+      );
+    } catch {
+      return () => {};
+    }
+  },
+
   exportToCSV(): void {
     const players = this.getAllPlayers();
 
     const headers = [
       'ID Participante',
+      'Código de Canje (Ticket)',
       'Fecha Registro',
       'Nombre del Niño',
       'Nombre del Representante',
@@ -123,12 +235,14 @@ export const storageService = {
       const isCompleted = storesDone >= 10 ? 'SÍ' : 'NO';
       const prizeStatus = p.prizeDelivered ? 'SÍ' : 'NO';
       const prizeTime = p.prizeDeliveredAt ? p.prizeDeliveredAt : 'Pendiente';
+      const ticketCode = `DULCE-${p.id.slice(-6).toUpperCase()}`;
       const historyStr = (p.scanHistory || [])
         .map((h) => `${h.storeName} (${h.timestamp.slice(11, 19)})`)
         .join(' | ');
 
       return [
         `"${p.id}"`,
+        `"${ticketCode}"`,
         `"${p.createdAt}"`,
         `"${p.playerName.replace(/"/g, '""')}"`,
         `"${p.parentName.replace(/"/g, '""')}"`,

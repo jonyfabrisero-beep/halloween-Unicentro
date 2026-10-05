@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PlayerData } from '../types/game';
 import { STORES_DATA } from '../data/stores';
 import { storageService } from '../services/storage';
@@ -19,7 +19,8 @@ import {
   LogOut,
   Gift,
   QrCode,
-  Printer
+  Printer,
+  Search
 } from 'lucide-react';
 
 const ADMIN_PASSCODE = 'Uni2026mcy';
@@ -45,10 +46,21 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isShaking, setIsShaking] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [players, setPlayers] = useState<PlayerData[]>(() => storageService.getAllPlayers());
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const unsubscribe = storageService.subscribeToAllPlayers((remoteList) => {
+      setPlayers(remoteList);
+    });
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [isAuthenticated]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,6 +118,18 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   const completedCount = players.filter((p) => (p.unlockedStores?.length || 0) >= 10).length;
   const prizesDeliveredCount = players.filter((p) => !!p.prizeDelivered).length;
+
+  const filteredPlayers = players.filter((p) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    const ticketCode = `DULCE-${p.id.slice(-6).toUpperCase()}`.toLowerCase();
+    return (
+      ticketCode.includes(q) ||
+      p.id.toLowerCase().includes(q) ||
+      p.playerName.toLowerCase().includes(q) ||
+      p.parentName.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div 
@@ -374,11 +398,32 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               </div>
 
+              {/* Quick Search Bar for Instant Validation */}
+              <div className="relative mb-2.5">
+                <Search className="w-4 h-4 text-purple-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar por código de canje (ej: DULCE-...), niño o representante..."
+                  className="w-full pl-9 pr-8 py-2 rounded-xl bg-purple-950/50 border border-purple-500/40 text-xs text-white placeholder-purple-300/50 focus:outline-none focus:border-amber-400 font-['Fredoka']"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
               {/* Participants Table with "Premio Entregado" Checking Column */}
               <div className="flex-1 overflow-auto rounded-2xl border border-purple-900/60 bg-black/40">
                 <table className="w-full text-left text-xs font-['Fredoka']">
                   <thead className="bg-purple-950/80 text-purple-200 uppercase text-[10px] tracking-wider sticky top-0">
                     <tr>
+                      <th className="p-2.5">Código de Canje</th>
                       <th className="p-2.5">Niño / Avatar</th>
                       <th className="p-2.5">Representante</th>
                       <th className="p-2.5">Progreso</th>
@@ -388,18 +433,24 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-purple-950/60">
-                    {players.length === 0 ? (
+                    {filteredPlayers.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="p-6 text-center text-purple-300/60 font-['Fredoka']">
-                          No hay participantes registrados todavía.
+                        <td colSpan={7} className="p-6 text-center text-purple-300/60 font-['Fredoka']">
+                          {searchQuery ? 'No se encontraron participantes que coincidan con la búsqueda.' : 'No hay participantes registrados todavía.'}
                         </td>
                       </tr>
                     ) : (
-                      players.map((p) => {
+                      filteredPlayers.map((p) => {
                         const storesDone = p.unlockedStores?.length || 0;
                         const isComplete = storesDone >= 10;
+                        const ticketCode = `DULCE-${p.id.slice(-6).toUpperCase()}`;
                         return (
                           <tr key={p.id} className="hover:bg-purple-900/20 transition-colors">
+                            <td className="p-2.5">
+                              <span className="font-mono font-bold text-amber-300 bg-purple-950/90 px-2 py-0.5 rounded border border-purple-800 text-[11px] tracking-wider select-all">
+                                {ticketCode}
+                              </span>
+                            </td>
                             <td className="p-2.5 font-semibold text-white flex items-center gap-2">
                               <span>{p.gender === 'girl' ? '🧙‍♀️' : '🧟‍♂️'}</span>
                               <span className="truncate max-w-[120px]">{p.playerName}</span>
