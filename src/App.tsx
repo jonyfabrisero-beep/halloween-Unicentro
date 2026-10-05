@@ -76,12 +76,16 @@ export default function App() {
   const handleToggleMute = () => {
     const newMuted = soundEffects.toggleMute();
     setIsMuted(newMuted);
+    ambientSound.setMuted(newMuted);
   };
 
   const handleVolumeChange = (newVol: number) => {
     soundEffects.setMusicVolume(newVol);
     setVolume(newVol);
-    setIsMuted(newVol === 0);
+    const shouldMute = newVol === 0;
+    setIsMuted(shouldMute);
+    ambientSound.setVolume(newVol);
+    ambientSound.setMuted(shouldMute);
   };
 
   const handleStartFromIntro = () => {

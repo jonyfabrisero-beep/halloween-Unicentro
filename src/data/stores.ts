@@ -36,12 +36,12 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
   },
   4: {
     slot: 4,
-    x: 41.5,
-    y: 15.0,
-    zIndex: 12,
+    x: 23.0,
+    y: 61.2,
+    zIndex: 19,
     houseType: 2,
     imagePath: '/houses/casa_02.png',
-    label: 'Casa 04 (Cima Norte - Junto al Molino)',
+    label: 'Casa 04 (Acantilado Suroeste - Sobre Cementerio)',
   },
   5: {
     slot: 5,

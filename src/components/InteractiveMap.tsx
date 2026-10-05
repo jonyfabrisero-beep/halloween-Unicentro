@@ -42,11 +42,62 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const [isInteracting, setIsInteracting] = useState(false);
   const [showPanHint, setShowPanHint] = useState(false);
 
+  // Dynamic Orientation & Container Dimension Tracking for Responsive Vertical & Horizontal Adaptation
+  const [isPortrait, setIsPortrait] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerHeight > window.innerWidth;
+  });
+
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+
   const screenContainerRef = useRef<HTMLDivElement | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapContentRef = useRef<HTMLDivElement | null>(null);
   const particleTriggerRef = useRef<ParticleTrigger | null>(null);
   const momentumAnimRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const portrait = window.innerHeight > window.innerWidth;
+      setIsPortrait(portrait);
+      if (mapContainerRef.current) {
+        const rect = mapContainerRef.current.getBoundingClientRect();
+        setContainerSize({ width: rect.width, height: rect.height });
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    let ro: ResizeObserver | null = null;
+    if (mapContainerRef.current && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setContainerSize({
+            width: entry.contentRect.width,
+            height: entry.contentRect.height,
+          });
+        }
+      });
+      ro.observe(mapContainerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+      if (ro) ro.disconnect();
+    };
+  }, []);
+
+  // When switching between portrait and landscape, reset zoom/pan smoothly to centered view
+  useEffect(() => {
+    setScale(1.0);
+    setPan({ x: 0, y: 0 });
+  }, [isPortrait]);
 
   // Gesture tracking refs (avoid re-rendering during 60fps drag/pinch)
   const touchStateRef = useRef<{
@@ -81,20 +132,28 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     vy: 0,
   });
 
-  // Clamp pan coordinates based on container dimensions and zoom scale
-  // Provides generous free panning range across the entire island in all directions
+  // Clamp pan coordinates strictly to the GIF image borders across both vertical & horizontal modes
+  // The scaled map content edges will never pull away from or cross inside the container viewport
   const clampPan = useCallback((x: number, y: number, currentScale: number) => {
     if (!mapContainerRef.current) {
       return { x: 0, y: 0 };
     }
-    const rect = mapContainerRef.current.getBoundingClientRect();
-    const baseMarginX = Math.max(160, rect.width * 0.38);
-    const baseMarginY = Math.max(100, rect.height * 0.38);
-    const zoomExtraX = Math.max(0, ((currentScale - 1) * rect.width) / 2);
-    const zoomExtraY = Math.max(0, ((currentScale - 1) * rect.height) / 2);
+    const containerRect = mapContainerRef.current.getBoundingClientRect();
+    const containerW = containerRect.width;
+    const containerH = containerRect.height;
 
-    const maxX = baseMarginX + zoomExtraX;
-    const maxY = baseMarginY + zoomExtraY;
+    // The map background has an architectural 2400:1080 (20:9) aspect ratio
+    // In portrait, base height fills containerH and base width is containerH * (2400 / 1080)
+    // In landscape, base width and height match container dimensions
+    const baseH = containerH;
+    const baseW = Math.max(containerW, containerH * (2400 / 1080));
+
+    const renderedW = baseW * currentScale;
+    const renderedH = baseH * currentScale;
+
+    // Strict boundary limits: image edge must never pull inward from container viewport
+    const maxX = Math.max(0, (renderedW - containerW) / 2);
+    const maxY = Math.max(0, (renderedH - containerH) / 2);
 
     return {
       x: Math.max(-maxX, Math.min(maxX, x)),
@@ -428,6 +487,11 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     setActiveStoreModal(store);
   };
 
+  const baseMapWidth =
+    isPortrait && containerSize.height > 0
+      ? Math.round(containerSize.height * (2400 / 1080))
+      : undefined;
+
   return (
     <div
       ref={screenContainerRef}
@@ -437,31 +501,50 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       style={{ touchAction: 'none' }}
-      className="relative w-full h-[100dvh] min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center overflow-hidden pt-9 sm:pt-12 px-1 sm:px-2 pb-1 select-none touch-none cursor-grab active:cursor-grabbing"
+      className={`relative w-full h-[100dvh] min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center overflow-hidden px-1 sm:px-2 pb-1 select-none touch-none cursor-grab active:cursor-grabbing ${
+        isPortrait ? 'pt-10 sm:pt-12' : 'pt-9 sm:pt-12'
+      }`}
     >
       {/* Subtle Full-Screen Ambient Mist drifting across the background */}
       <DriftingMist fullScreen />
 
-      {/* 2400x1080 (20:9) Landscape Game Canvas Viewport Container */}
+      {/* Game Canvas Viewport Container: Adaptive Full-Height in Portrait & 20:9 in Landscape */}
       <div
         ref={mapContainerRef}
-        style={{
-          width: 'min(calc(100vw - 8px), calc((100dvh - 44px) * (2400 / 1080)))',
-          height: 'min(calc((100vw - 8px) * (1080 / 2400)), calc(100dvh - 44px))',
-          maxWidth: '1920px',
-          touchAction: 'none',
-        }}
-        className="relative aspect-[20/9] shadow-2xl overflow-hidden bg-slate-900 border border-purple-900/50 rounded-xl sm:rounded-2xl mx-auto shrink-0 select-none"
+        style={
+          isPortrait
+            ? {
+                width: 'calc(100vw - 8px)',
+                height: 'calc(100dvh - 54px)',
+                maxWidth: '768px',
+                touchAction: 'none',
+              }
+            : {
+                width: 'min(calc(100vw - 8px), calc((100dvh - 44px) * (2400 / 1080)))',
+                height: 'min(calc((100vw - 8px) * (1080 / 2400)), calc(100dvh - 44px))',
+                maxWidth: '1920px',
+                touchAction: 'none',
+              }
+        }
+        className={`relative shadow-2xl overflow-hidden bg-slate-900 border border-purple-900/50 rounded-xl sm:rounded-2xl mx-auto shrink-0 select-none ${
+          isPortrait ? 'w-full flex-1 my-auto' : 'aspect-[20/9]'
+        }`}
       >
         {/* Zoom & Pan Transform Layer */}
         <div
           ref={mapContentRef}
           style={{
-            transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${scale})`,
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            height: '100%',
+            width: isPortrait && baseMapWidth ? `${baseMapWidth}px` : '100%',
+            aspectRatio: '2400 / 1080',
+            transform: `translate3d(calc(-50% + ${pan.x}px), calc(-50% + ${pan.y}px), 0) scale(${scale})`,
             transformOrigin: 'center center',
             transition: isInteracting ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0, 0, 1)',
           }}
-          className="relative w-full h-full will-change-transform select-none"
+          className="will-change-transform select-none"
         >
           {/* Animated 2400x1080 Map Background matching fondo animado juego.gif */}
           <img
@@ -581,11 +664,15 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           )}
         </div>
 
-        {/* Subtle helper pill when zoomed */}
-        {scale > 1.05 && (
-          <div className="absolute top-2 left-2 z-40 pointer-events-none flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-950/80 border border-purple-500/30 text-[10px] text-amber-300 font-['Fredoka'] animate-fadeIn">
+        {/* Subtle helper pill when in portrait or zoomed */}
+        {(scale > 1.05 || isPortrait) && (
+          <div className="absolute top-2 left-2 z-40 pointer-events-none flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-950/85 border border-purple-500/40 text-[10px] text-amber-300 font-['Fredoka'] animate-fadeIn shadow-lg backdrop-blur-sm">
             <Move className="w-3 h-3 text-amber-400" />
-            <span>Arrastra con 1 dedo para moverte · Pellizca para zoom</span>
+            <span>
+              {scale > 1.05
+                ? 'Arrastra con 1 dedo para moverte · Pellizca para zoom'
+                : 'Desliza para explorar la isla · Pellizca para zoom'}
+            </span>
           </div>
         )}
       </div>

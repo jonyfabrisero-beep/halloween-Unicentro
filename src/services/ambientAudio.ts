@@ -1,5 +1,5 @@
-// Web Audio API Synthesizer for Immersive Halloween Ambience
-// Procedural Wind, Distant Owls, and Creaking Branches with Zero External Dependencies
+// Web Audio API Synthesizer & MP3 Soundtrack Player for Immersive Halloween Ambience
+// Plays high-fidelity background music (/musica_fondo.mp3) with procedural wind and owls
 
 class AmbientSoundEngine {
   private ctx: AudioContext | null = null;
@@ -11,30 +11,55 @@ class AmbientSoundEngine {
   private baseVolume = 0.75;
   private owlTimer: number | null = null;
   private woodTimer: number | null = null;
+  private bgMusic: HTMLAudioElement | null = null;
+
+  private initMusic() {
+    if (!this.bgMusic && typeof window !== 'undefined') {
+      try {
+        const audio = new Audio('/musica_fondo.mp3');
+        audio.loop = true;
+        audio.preload = 'auto';
+        audio.volume = this.isMuted ? 0 : this.baseVolume * 0.65;
+        this.bgMusic = audio;
+      } catch (err) {
+        console.warn('Audio element initialization notice:', err);
+      }
+    }
+  }
 
   private initContext() {
-    if (!this.ctx) {
+    if (!this.ctx && typeof window !== 'undefined') {
       const AudioCtx =
         window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      this.ctx = new AudioCtx();
-
-      this.ambientGain = this.ctx.createGain();
-      this.ambientGain.gain.value = this.isMuted ? 0 : 0.28 * this.baseVolume;
-      this.ambientGain.connect(this.ctx.destination);
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+        this.ambientGain = this.ctx.createGain();
+        this.ambientGain.gain.value = this.isMuted ? 0 : 0.12 * this.baseVolume;
+        this.ambientGain.connect(this.ctx.destination);
+      }
     }
 
-    if (this.ctx.state === 'suspended') {
+    if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume().catch(() => {});
     }
   }
 
   public start() {
-    if (this.isRunning) return;
     this.initContext();
-    if (!this.ctx || !this.ambientGain) return;
+    this.initMusic();
 
     this.isRunning = true;
+
+    // Play background soundtrack
+    if (this.bgMusic) {
+      this.bgMusic.volume = this.isMuted ? 0 : this.baseVolume * 0.65;
+      this.bgMusic.play().catch(() => {
+        // Browser autoplay policy will resume on first user interaction
+      });
+    }
+
+    // Layer subtle procedural breeze & night sounds underneath
     this.startWindLoop();
     this.scheduleNextOwl();
     this.scheduleNextWood();
@@ -42,6 +67,9 @@ class AmbientSoundEngine {
 
   public stop() {
     this.isRunning = false;
+    if (this.bgMusic) {
+      this.bgMusic.pause();
+    }
     this.stopWindLoop();
 
     if (this.owlTimer !== null) {
@@ -56,20 +84,29 @@ class AmbientSoundEngine {
 
   public setVolume(volume: number) {
     this.baseVolume = Math.max(0, Math.min(1, volume));
+    if (this.bgMusic && !this.isMuted) {
+      this.bgMusic.volume = this.baseVolume * 0.65;
+    }
     if (this.ambientGain && this.ctx && !this.isMuted) {
       const now = this.ctx.currentTime;
       this.ambientGain.gain.cancelScheduledValues(now);
-      this.ambientGain.gain.linearRampToValueAtTime(0.28 * this.baseVolume, now + 0.15);
+      this.ambientGain.gain.linearRampToValueAtTime(0.12 * this.baseVolume, now + 0.15);
     }
   }
 
   public setMuted(muted: boolean) {
     this.isMuted = muted;
+    if (this.bgMusic) {
+      this.bgMusic.volume = muted ? 0 : this.baseVolume * 0.65;
+      if (!muted && this.isRunning && this.bgMusic.paused) {
+        this.bgMusic.play().catch(() => {});
+      }
+    }
     if (this.ambientGain && this.ctx) {
       const now = this.ctx.currentTime;
       this.ambientGain.gain.cancelScheduledValues(now);
       this.ambientGain.gain.setValueAtTime(this.ambientGain.gain.value, now);
-      this.ambientGain.gain.linearRampToValueAtTime(muted ? 0 : 0.28 * this.baseVolume, now + 0.3);
+      this.ambientGain.gain.linearRampToValueAtTime(muted ? 0 : 0.12 * this.baseVolume, now + 0.3);
     }
   }
 

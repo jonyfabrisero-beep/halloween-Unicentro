@@ -27,7 +27,7 @@ export default function OrientationWarning() {
 
   return (
     <div
-      className="fixed bottom-3 sm:bottom-4 left-3 right-3 sm:left-auto sm:right-4 z-40 max-w-sm sm:max-w-md pointer-events-auto select-none transition-all duration-300 animate-slideUp"
+      className="fixed bottom-12 sm:bottom-14 left-3 right-3 sm:left-auto sm:right-4 z-40 max-w-sm sm:max-w-md pointer-events-auto select-none transition-all duration-300 animate-slideUp"
       style={{
         // Pure CSS guarantee: disappears instantaneously when rotated to landscape with zero JS lag
       }}
