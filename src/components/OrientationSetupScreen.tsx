@@ -176,7 +176,7 @@ export const OrientationSetupScreen: React.FC<OrientationSetupScreenProps> = ({ 
           Gira tu celular horizontalmente
         </h1>
         <p className="text-xs sm:text-sm text-purple-200/90 font-medium max-w-md mx-auto mb-3">
-          Para recorrer toda la isla de Halloween, explorar el mapa y encontrar las 10 casas embrujadas.
+          Para recorrer toda la isla de Halloween, explorar el mapa y encontrar las 10 tiendas embrujadas.
         </p>
 
         {/* Animated Phone Graphic (Rotating 0 to 90 degrees) */}

@@ -62,7 +62,7 @@ export const HauntedHouse: React.FC<HauntedHouseProps> = ({
         {/* User's authentic house illustration */}
         <img
           src={store.imagePath}
-          alt={`Casa de ${store.name}`}
+          alt={`Tienda de ${store.name}`}
           className="w-full h-full object-contain pointer-events-none"
           loading="eager"
         />

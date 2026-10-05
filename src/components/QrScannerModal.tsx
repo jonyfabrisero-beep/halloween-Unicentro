@@ -181,7 +181,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
               ¡QR CORRECTO!
             </h3>
             <p className="text-xs sm:text-sm text-purple-200 font-['Fredoka'] mt-1">
-              ¡Completaste esta casa! Se están rellenando tus estrellas... ⭐⭐⭐
+              ¡Completaste esta tienda! Se están rellenando tus estrellas... ⭐⭐⭐
             </p>
           </div>
         ) : isAlreadyUnlocked ? (
@@ -191,7 +191,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
               <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-400" />
             </div>
             <h3 className="text-base sm:text-lg font-black text-emerald-300 font-['Lilita_One']">
-              ¡Esta casa ya fue liberada!
+              ¡Esta tienda ya fue liberada!
             </h3>
             <p className="text-[11px] sm:text-xs text-slate-300 font-['Fredoka'] max-w-xs mt-1">
               Ya tienes las 3 estrellas de <span className="text-amber-300 font-bold">{store.name}</span>. Visita las demás tiendas para abrir el castillo central.

@@ -51,7 +51,7 @@ export default function OrientationWarning() {
             ¡Gira tu celular en horizontal!
           </h4>
           <p className="text-[11px] text-slate-300 font-['Fredoka'] leading-tight mt-0.5">
-            Para recorrer cómodamente la isla y encontrar todas las casas.
+            Para recorrer cómodamente la isla y encontrar todas las tiendas.
           </p>
         </div>
 

@@ -20,7 +20,14 @@ import {
   Gift,
   QrCode,
   Printer,
-  Search
+  Search,
+  Trash2,
+  LayoutDashboard,
+  TrendingUp,
+  BarChart3,
+  Star,
+  Zap,
+  Store
 } from 'lucide-react';
 
 const ADMIN_PASSCODE = 'Uni2026mcy';
@@ -29,19 +36,19 @@ const ADMIN_STORAGE_KEY = 'unicentro_admin_authenticated';
 interface AdminModalProps {
   onClose: () => void;
   onRefreshCurrentPlayer: () => void;
-  initialTab?: 'participants' | 'qr_vault';
+  initialTab?: 'dashboard' | 'participants' | 'qr_vault';
 }
 
 export const AdminModal: React.FC<AdminModalProps> = ({
   onClose,
   onRefreshCurrentPlayer,
-  initialTab = 'participants',
+  initialTab = 'dashboard',
 }) => {
   // Check if authenticated in current session
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return sessionStorage.getItem(ADMIN_STORAGE_KEY) === 'true';
   });
-  const [activeTab, setActiveTab] = useState<'participants' | 'qr_vault'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'participants' | 'qr_vault'>(initialTab);
   const [passcode, setPasscode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -112,12 +119,63 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     setShowClearConfirm(false);
   };
 
+  const handleDeletePlayer = (playerId: string) => {
+    storageService.deletePlayer(playerId);
+    setPlayers(storageService.getAllPlayers());
+    onRefreshCurrentPlayer();
+  };
+
   const handlePrintQRs = () => {
     window.print();
   };
 
+  const totalStoresUnlocked = players.reduce((sum, p) => sum + (p.unlockedStores?.length || 0), 0);
+  const totalStars = players.reduce(
+    (sum, p) => sum + Object.values(p.storeStars || {}).reduce((a, b) => a + b, 0),
+    0
+  );
   const completedCount = players.filter((p) => (p.unlockedStores?.length || 0) >= 10).length;
   const prizesDeliveredCount = players.filter((p) => !!p.prizeDelivered).length;
+  const pendingPrizesCount = Math.max(0, completedCount - prizesDeliveredCount);
+  const girlsCount = players.filter((p) => p.gender === 'girl').length;
+  const boysCount = players.filter((p) => p.gender === 'boy').length;
+  const completionPercentage = players.length > 0 ? Math.round((completedCount / players.length) * 100) : 0;
+  const averageStoresPerPlayer = players.length > 0 ? (totalStoresUnlocked / players.length).toFixed(1) : '0';
+
+  // Store ranking by scan count from Firestore
+  const storeRankings = STORES_DATA.map((store) => {
+    const visitCount = players.filter((p) => p.unlockedStores?.includes(store.id)).length;
+    const percentage = players.length > 0 ? Math.round((visitCount / players.length) * 100) : 0;
+    return {
+      ...store,
+      visitCount,
+      percentage,
+    };
+  }).sort((a, b) => b.visitCount - a.visitCount);
+
+  // Player progress distribution
+  const segment10 = completedCount;
+  const segment6to9 = players.filter(
+    (p) => (p.unlockedStores?.length || 0) >= 6 && (p.unlockedStores?.length || 0) < 10
+  ).length;
+  const segment1to5 = players.filter(
+    (p) => (p.unlockedStores?.length || 0) >= 1 && (p.unlockedStores?.length || 0) <= 5
+  ).length;
+  const segment0 = players.filter((p) => (p.unlockedStores?.length || 0) === 0).length;
+
+  // Real-time live feed of scans across the mall
+  const recentScans = players
+    .flatMap((p) =>
+      (p.scanHistory || []).map((h) => ({
+        playerId: p.id,
+        playerName: p.playerName,
+        gender: p.gender,
+        storeName: h.storeName,
+        timestamp: h.timestamp,
+      }))
+    )
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, 6);
 
   const filteredPlayers = players.filter((p) => {
     if (!searchQuery.trim()) return true;
@@ -260,32 +318,288 @@ export const AdminModal: React.FC<AdminModalProps> = ({
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 mb-3 bg-purple-950/40 p-1 rounded-2xl border border-purple-900/60">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-3 bg-purple-950/40 p-1.5 rounded-2xl border border-purple-900/60">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`flex-1 py-2 px-2.5 sm:px-3 rounded-xl text-xs font-bold font-['Fredoka'] flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                activeTab === 'dashboard'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 shadow-md font-black'
+                  : 'text-purple-300 hover:text-white hover:bg-purple-900/40'
+              }`}
+            >
+              <LayoutDashboard className="w-4 h-4 shrink-0" />
+              <span>Dashboard en Vivo</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse hidden sm:inline-block" />
+            </button>
             <button
               onClick={() => setActiveTab('participants')}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold font-['Fredoka'] flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 py-2 px-2.5 sm:px-3 rounded-xl text-xs font-bold font-['Fredoka'] flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 activeTab === 'participants'
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
                   : 'text-purple-300 hover:text-white hover:bg-purple-900/40'
               }`}
             >
-              <Users className="w-4 h-4" />
-              <span>Lista de Participantes ({players.length})</span>
+              <Users className="w-4 h-4 shrink-0" />
+              <span>Participantes ({players.length})</span>
             </button>
             <button
               onClick={() => setActiveTab('qr_vault')}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold font-['Fredoka'] flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 py-2 px-2.5 sm:px-3 rounded-xl text-xs font-bold font-['Fredoka'] flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 activeTab === 'qr_vault'
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md font-black'
                   : 'text-purple-300 hover:text-white hover:bg-purple-900/40'
               }`}
             >
-              <QrCode className="w-4 h-4" />
-              <span>Bóveda de Códigos QR (10 Tiendas)</span>
+              <QrCode className="w-4 h-4 shrink-0" />
+              <span>Bóveda QR (10 Tiendas)</span>
             </button>
           </div>
 
-          {activeTab === 'participants' ? (
+          {activeTab === 'dashboard' ? (
+            <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-1">
+              {/* Top Banner with Real-time Status */}
+              <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl bg-gradient-to-r from-purple-950/70 via-slate-950/70 to-indigo-950/70 border border-purple-800/60">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-white font-['Lilita_One'] tracking-wide">
+                      Métricas en Tiempo Real · Halloween Unicentro
+                    </h3>
+                    <p className="text-[11px] text-purple-200/80 font-['Fredoka']">
+                      Datos sincronizados directamente desde Google Cloud Firestore
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-mono font-bold">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    <span>NUBE CONECTADA</span>
+                  </div>
+
+                  <button
+                    onClick={handleExportCSV}
+                    className="px-3 py-1.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 border border-purple-500/40 text-purple-200 text-xs font-['Fredoka'] flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Exportar CSV</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Main Real-Time KPI Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+                {/* 1. Total Registered */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-purple-950/60 to-purple-900/30 border border-purple-700/50 shadow-sm relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-bold text-purple-300 uppercase tracking-wider font-['Fredoka']">
+                      Total Registrados
+                    </span>
+                    <div className="p-1.5 rounded-lg bg-purple-900/80 text-purple-300">
+                      <Users className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-white font-mono">{players.length}</div>
+                  <div className="text-[10px] text-purple-200/80 font-['Fredoka'] mt-1 flex items-center gap-2">
+                    <span>🧙‍♀️ {girlsCount} niñas</span>
+                    <span>•</span>
+                    <span>🧟‍♂️ {boysCount} niños</span>
+                  </div>
+                </div>
+
+                {/* 2. Total Stores Unlocked */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-950/60 to-orange-900/30 border border-amber-700/50 shadow-sm relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider font-['Fredoka']">
+                      Tiendas Desbloqueadas
+                    </span>
+                    <div className="p-1.5 rounded-lg bg-amber-900/80 text-amber-300">
+                      <Store className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-amber-300 font-mono">{totalStoresUnlocked}</div>
+                  <div className="text-[10px] text-amber-200/80 font-['Fredoka'] mt-1">
+                    Promedio: <span className="font-bold text-white">{averageStoresPerPlayer}</span> tiendas por jugador
+                  </div>
+                </div>
+
+                {/* 3. Castles Completed (10/10) */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/60 to-teal-900/30 border border-emerald-700/50 shadow-sm relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider font-['Fredoka']">
+                      Castillo Completado (10/10)
+                    </span>
+                    <div className="p-1.5 rounded-lg bg-emerald-900/80 text-emerald-300">
+                      <CheckCircle className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-emerald-300 font-mono">{completedCount}</div>
+                  <div className="text-[10px] text-emerald-200/80 font-['Fredoka'] mt-1">
+                    <span className="font-bold text-white">{completionPercentage}%</span> de los niños ganaron
+                  </div>
+                </div>
+
+                {/* 4. Candy Prizes Delivered */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-pink-950/60 to-rose-900/30 border border-pink-700/50 shadow-sm relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-bold text-pink-300 uppercase tracking-wider font-['Fredoka']">
+                      Premios Canjeados
+                    </span>
+                    <div className="p-1.5 rounded-lg bg-pink-900/80 text-pink-300">
+                      <Gift className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-pink-300 font-mono">{prizesDeliveredCount}</div>
+                  <div className="text-[10px] text-pink-200/80 font-['Fredoka'] mt-1">
+                    <span className="font-bold text-white">{pendingPrizesCount}</span> vales pendientes de entrega
+                  </div>
+                </div>
+              </div>
+
+              {/* Two Column Section: Store Rankings & Player Funnel / Live Feed */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {/* Column 1: Store-by-Store Traffic Ranking */}
+                <div className="p-3.5 rounded-2xl bg-black/40 border border-purple-900/60 flex flex-col">
+                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-purple-900/40">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-amber-400" />
+                      <h4 className="text-xs font-black text-white font-['Lilita_One'] tracking-wide">
+                        Ranking de Tráfico por Tienda (QRs Escaneados)
+                      </h4>
+                    </div>
+                    <span className="text-[10px] text-purple-300 font-['Fredoka']">
+                      10 Tiendas Participantes
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 overflow-y-auto max-h-[280px] pr-1">
+                    {storeRankings.map((store, idx) => (
+                      <div key={store.id} className="p-2 rounded-xl bg-purple-950/30 border border-purple-800/40 flex flex-col gap-1">
+                        <div className="flex items-center justify-between text-xs font-['Fredoka']">
+                          <div className="flex items-center gap-2 truncate">
+                            <span className="w-5 h-5 rounded-full bg-purple-900 text-amber-300 text-[10px] font-mono font-bold flex items-center justify-center shrink-0">
+                              #{idx + 1}
+                            </span>
+                            <span className="font-bold text-white truncate">{store.brand}</span>
+                            <span className="text-[10px] text-purple-300/80 truncate">({store.category})</span>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="font-mono font-bold text-amber-300">{store.visitCount}</span>
+                            <span className="text-[10px] text-slate-400 ml-1">({store.percentage}%)</span>
+                          </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="w-full h-1.5 rounded-full bg-purple-950 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500"
+                            style={{ width: `${Math.max(store.percentage, 4)}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Column 2: Progress Funnel & Real-time Live Feed */}
+                <div className="flex flex-col gap-3">
+                  {/* Progress Funnel */}
+                  <div className="p-3.5 rounded-2xl bg-black/40 border border-purple-900/60">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-purple-900/40">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4 text-yellow-400" />
+                        <h4 className="text-xs font-black text-white font-['Lilita_One'] tracking-wide">
+                          Distribución del Progreso de Niños
+                        </h4>
+                      </div>
+                      <span className="text-[10px] text-purple-300 font-['Fredoka']">
+                        {totalStars} Estrellas Totales
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs font-['Fredoka']">
+                      <div className="p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30">
+                        <div className="text-[10px] text-emerald-300 font-bold uppercase">Castillo (10 Tiendas)</div>
+                        <div className="text-lg font-black text-white font-mono mt-0.5">{segment10}</div>
+                        <div className="text-[10px] text-slate-400">Listos para dulces</div>
+                      </div>
+
+                      <div className="p-2 rounded-xl bg-indigo-950/40 border border-indigo-500/30">
+                        <div className="text-[10px] text-indigo-300 font-bold uppercase">Avanzados (6-9)</div>
+                        <div className="text-lg font-black text-white font-mono mt-0.5">{segment6to9}</div>
+                        <div className="text-[10px] text-slate-400">A pocas tiendas de ganar</div>
+                      </div>
+
+                      <div className="p-2 rounded-xl bg-purple-950/40 border border-purple-500/30">
+                        <div className="text-[10px] text-purple-300 font-bold uppercase">Explorando (1-5)</div>
+                        <div className="text-lg font-black text-white font-mono mt-0.5">{segment1to5}</div>
+                        <div className="text-[10px] text-slate-400">En recorrido del centro</div>
+                      </div>
+
+                      <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-700/50">
+                        <div className="text-[10px] text-slate-300 font-bold uppercase">Iniciando (0)</div>
+                        <div className="text-lg font-black text-white font-mono mt-0.5">{segment0}</div>
+                        <div className="text-[10px] text-slate-400">Aún sin escanear</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Real-time Activity Feed */}
+                  <div className="p-3.5 rounded-2xl bg-black/40 border border-purple-900/60 flex-1">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-purple-900/40">
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-amber-400 animate-pulse" />
+                        <h4 className="text-xs font-black text-white font-['Lilita_One'] tracking-wide">
+                          Actividad en Directo (Últimos Escaneos)
+                        </h4>
+                      </div>
+                      <span className="text-[10px] text-emerald-400 font-mono font-bold">
+                        ● EN VIVO
+                      </span>
+                    </div>
+
+                    {recentScans.length === 0 ? (
+                      <div className="p-4 text-center text-purple-300/60 text-xs font-['Fredoka']">
+                        No hay escaneos recientes todavía.
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {recentScans.map((scan, i) => (
+                          <div
+                            key={`${scan.playerId}-${i}`}
+                            className="p-1.5 px-2.5 rounded-xl bg-purple-950/40 border border-purple-900/40 flex items-center justify-between text-xs font-['Fredoka']"
+                          >
+                            <div className="flex items-center gap-2 truncate">
+                              <span>{scan.gender === 'girl' ? '🧙‍♀️' : '🧟‍♂️'}</span>
+                              <span className="font-bold text-white truncate">{scan.playerName}</span>
+                              <span className="text-purple-300/80">desbloqueó</span>
+                              <span className="font-semibold text-amber-300 truncate">{scan.storeName}</span>
+                            </div>
+                            <span className="text-[10px] font-mono text-slate-400 shrink-0 ml-2">
+                              {new Date(scan.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Quick Jump Action */}
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  onClick={() => setActiveTab('participants')}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs font-['Fredoka'] flex items-center gap-2 cursor-pointer shadow-md transition-all active:scale-95"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>Ver Lista Completa de Participantes y Entregar Premios →</span>
+                </button>
+              </div>
+            </div>
+          ) : activeTab === 'participants' ? (
             <>
               {/* Stats Summary Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3">
@@ -305,7 +619,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   </div>
                   <div>
                     <div className="text-lg font-black text-emerald-300 font-mono">{completedCount}</div>
-                    <div className="text-[10px] text-emerald-300/80 font-['Fredoka']">10/10 Casas</div>
+                    <div className="text-[10px] text-emerald-300/80 font-['Fredoka']">10/10 Tiendas</div>
                   </div>
                 </div>
 
@@ -430,12 +744,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <th className="p-2.5">Estado</th>
                       <th className="p-2.5 text-center">Premio Entregado</th>
                       <th className="p-2.5">Fecha y Hora</th>
+                      <th className="p-2.5 text-center">Acción</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-purple-950/60">
                     {filteredPlayers.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="p-6 text-center text-purple-300/60 font-['Fredoka']">
+                        <td colSpan={8} className="p-6 text-center text-purple-300/60 font-['Fredoka']">
                           {searchQuery ? 'No se encontraron participantes que coincidan con la búsqueda.' : 'No hay participantes registrados todavía.'}
                         </td>
                       </tr>
@@ -458,7 +773,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <td className="p-2.5 text-slate-300 truncate max-w-[130px]">{p.parentName}</td>
                             <td className="p-2.5 font-mono">
                               <span className="text-amber-400 font-bold">{storesDone}/10</span>
-                              <span className="text-slate-400 text-[10px] ml-1">casas</span>
+                              <span className="text-slate-400 text-[10px] ml-1">tiendas</span>
                             </td>
                             <td className="p-2.5">
                               {isComplete ? (
@@ -497,6 +812,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <td className="p-2.5 text-slate-400 text-[11px] font-mono">
                               {new Date(p.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </td>
+                            {/* Individual Delete Action */}
+                            <td className="p-2.5 text-center">
+                              <button
+                                onClick={() => handleDeletePlayer(p.id)}
+                                className="p-1 rounded-lg bg-red-950/60 hover:bg-red-800 border border-red-500/40 text-red-300 hover:text-white transition-colors cursor-pointer"
+                                title="Eliminar este registro de prueba"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
                           </tr>
                         );
                       })
@@ -533,7 +858,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       className="p-3 rounded-2xl bg-purple-950/40 border border-purple-800/60 flex flex-col items-center text-center relative"
                     >
                       <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-900 border border-purple-600/40 text-[10px] font-mono font-bold text-amber-400">
-                        Casa #{store.slotNumber ?? (idx + 1)}
+                        Tienda #{store.slotNumber ?? (idx + 1)}
                       </div>
 
                       <div className="w-10 h-10 mb-1 flex items-center justify-center">

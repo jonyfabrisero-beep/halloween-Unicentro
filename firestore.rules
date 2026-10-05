@@ -7,7 +7,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.resource.data.keys().hasAll(['id', 'playerName', 'parentName', 'gender', 'createdAt']);
       allow update: if true;
-      allow delete: if false;
+      allow delete: if true;
     }
 
     // Health check collection for connection validation

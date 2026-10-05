@@ -144,7 +144,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
             ¡Ya puedes retirar tus dulces!
           </h3>
           <p className="text-[11px] sm:text-sm text-purple-200/90 font-['Fredoka'] mt-0.5 max-w-sm mx-auto">
-            ¡Felicitaciones <span className="text-amber-300 font-bold">{player.playerName}</span>! Desbloqueaste las 10 casas embrujadas y el castillo central de Unicentro Maracay.
+            ¡Felicitaciones <span className="text-amber-300 font-bold">{player.playerName}</span>! Desbloqueaste las 10 tiendas embrujadas y el castillo central de Unicentro Maracay.
           </p>
         </div>
 

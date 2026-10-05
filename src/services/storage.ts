@@ -5,6 +5,7 @@ import {
   doc, 
   setDoc, 
   updateDoc, 
+  deleteDoc,
   onSnapshot, 
   query, 
   orderBy, 
@@ -130,15 +131,43 @@ export const storageService = {
     }
   },
 
+  deletePlayer(playerId: string): void {
+    try {
+      // 1. Remove from local storage
+      const all = this.getAllPlayers().filter((p) => p.id !== playerId);
+      localStorage.setItem(ALL_PLAYERS_KEY, JSON.stringify(all));
+
+      const current = this.getCurrentPlayer();
+      if (current && current.id === playerId) {
+        localStorage.removeItem(CURRENT_PLAYER_KEY);
+      }
+
+      // 2. Delete from cloud Firestore
+      deleteDoc(doc(db, 'players', playerId)).catch((err) => {
+        console.warn('Notice: Firestore deleteDoc fallback:', err);
+      });
+    } catch (e) {
+      console.error('Error deleting player', e);
+    }
+  },
+
   clearCurrentPlayer(): void {
     localStorage.removeItem(CURRENT_PLAYER_KEY);
   },
 
   clearAllPlayers(): void {
     try {
+      const all = this.getAllPlayers();
       localStorage.setItem(ALL_PLAYERS_KEY, JSON.stringify([]));
       localStorage.removeItem(CURRENT_PLAYER_KEY);
       localStorage.removeItem('unicentro_dulce_truco_all_players_v1');
+
+      // Delete from cloud Firestore
+      all.forEach((p) => {
+        deleteDoc(doc(db, 'players', p.id)).catch((err) => {
+          console.warn('Notice: Firestore clearAll deleteDoc fallback:', err);
+        });
+      });
     } catch (e) {
       console.error('Error clearing all players', e);
     }

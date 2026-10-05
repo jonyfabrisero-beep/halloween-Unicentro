@@ -99,7 +99,7 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
             ¡Prepárate para la Aventura!
           </h2>
           <p className="text-xs sm:text-sm text-purple-200/80 font-['Fredoka'] mt-0.5">
-            Ingresa tus datos para registrar tus tiendas y reclamar tus dulces
+            Llena tus datos para desbloquear tiendas embrujadas y ganar tus dulces
           </p>
         </div>
 

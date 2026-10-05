@@ -45,7 +45,7 @@ export const CentralCastle: React.FC<CentralCastleProps> = ({
       {/* Tooltip if locked */}
       {showTooltip && (
         <div className="absolute -top-12 sm:-top-16 left-1/2 -translate-x-1/2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-purple-950/95 border-2 border-amber-400 text-amber-200 text-[10px] sm:text-xs font-bold font-['Fredoka'] whitespace-nowrap shadow-xl z-40 animate-bounce">
-          🔒 ¡Te faltan {totalStores - completedCount} casas por escanear!
+          🔒 ¡Te faltan {totalStores - completedCount} tiendas por escanear!
         </div>
       )}
 

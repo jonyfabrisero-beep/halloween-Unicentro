@@ -14,7 +14,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     zIndex: 8,
     houseType: 5,
     imagePath: '/houses/casa_05.png',
-    label: 'Casa 01 (Colina Oeste - Vía Principal)',
+    label: 'Tienda 01 (Colina Oeste - Vía Principal)',
   },
   2: {
     slot: 2,
@@ -23,7 +23,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     zIndex: 12,
     houseType: 4,
     imagePath: '/houses/casa_04.png',
-    label: 'Casa 02 (Colina Oeste - Curva)',
+    label: 'Tienda 02 (Colina Oeste - Curva)',
   },
   3: {
     slot: 3,
@@ -32,7 +32,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     zIndex: 14,
     houseType: 6,
     imagePath: '/houses/casa_06.png',
-    label: 'Casa 03 (Noroeste - Entrada al Castillo)',
+    label: 'Tienda 03 (Noroeste - Entrada al Castillo)',
   },
   4: {
     slot: 4,
@@ -41,7 +41,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     zIndex: 19,
     houseType: 2,
     imagePath: '/houses/casa_02.png',
-    label: 'Casa 04 (Acantilado Suroeste - Sobre Cementerio)',
+    label: 'Tienda 04 (Acantilado Suroeste - Sobre Cementerio)',
   },
   5: {
     slot: 5,
@@ -51,7 +51,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     houseType: 7,
     imagePath: '/houses/casa_07.png',
     scaleFactor: 1.15,
-    label: 'Casa 05 (Risco Noreste - Mirador Superior)',
+    label: 'Tienda 05 (Risco Noreste - Mirador Superior)',
   },
   6: {
     slot: 6,
@@ -60,7 +60,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     zIndex: 14,
     houseType: 9,
     imagePath: '/houses/casa_09.png',
-    label: 'Casa 06 (Carretera Noreste)',
+    label: 'Tienda 06 (Carretera Noreste)',
   },
   7: {
     slot: 7,
@@ -69,7 +69,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     zIndex: 14,
     houseType: 10,
     imagePath: '/houses/casa_10.png',
-    label: 'Casa 07 (Acantilado Este)',
+    label: 'Tienda 07 (Acantilado Este)',
   },
   8: {
     slot: 8,
@@ -79,7 +79,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     houseType: 8,
     imagePath: '/houses/casa_08.png',
     scaleFactor: 1.28,
-    label: 'Casa 08 (Ribera Sureste)',
+    label: 'Tienda 08 (Ribera Sureste)',
   },
   9: {
     slot: 9,
@@ -88,7 +88,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     zIndex: 20,
     houseType: 1,
     imagePath: '/houses/casa_01.png',
-    label: 'Casa 09 (Salida del Laberinto - Cascada)',
+    label: 'Tienda 09 (Salida del Laberinto - Cascada)',
   },
   10: {
     slot: 10,
@@ -97,7 +97,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     zIndex: 18,
     houseType: 3,
     imagePath: '/houses/casa_03.png',
-    label: 'Casa 10 (Suroeste - Cementerio / Laberinto)',
+    label: 'Tienda 10 (Suroeste - Cementerio / Laberinto)',
   },
 };
 
