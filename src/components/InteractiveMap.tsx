@@ -435,68 +435,84 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     setAnimatingStoreId(store.id);
 
     // Progressive star filling and purification sequence
-    soundEffects.playStarChime(1);
+    try {
+      soundEffects.playStarChime(1);
+    } catch {}
 
     setTimeout(() => {
-      soundEffects.playStarChime(2);
+      try {
+        soundEffects.playStarChime(2);
+      } catch {}
     }, 400);
 
     setTimeout(() => {
-      soundEffects.playStarChime(3);
+      try {
+        soundEffects.playStarChime(3);
+      } catch {}
 
       // Subtle celebratory sparkles directly over the store
-      if (particleTriggerRef.current && mapContainerRef.current) {
-        const rect = mapContainerRef.current.getBoundingClientRect();
-        const posX = (store.x / 100) * rect.width;
-        const posY = (store.y / 100) * rect.height - 30;
-        particleTriggerRef.current.burstStars(posX, posY);
-      }
+      try {
+        if (particleTriggerRef.current && mapContainerRef.current) {
+          const rect = mapContainerRef.current.getBoundingClientRect();
+          const posX = (store.x / 100) * rect.width;
+          const posY = (store.y / 100) * rect.height - 30;
+          particleTriggerRef.current.burstStars(posX, posY);
+        }
+      } catch {}
 
-      confetti({
-        particleCount: 28,
-        spread: 45,
-        ticks: 60,
-        gravity: 0.8,
-        origin: { x: store.x / 100, y: Math.max(0.1, store.y / 100 - 0.05) },
-        colors: ['#F59E0B', '#10B981', '#FBBF24', '#34D399', '#A78BFA'],
-      });
+      try {
+        confetti({
+          particleCount: 28,
+          spread: 45,
+          ticks: 60,
+          gravity: 0.8,
+          origin: { x: store.x / 100, y: Math.max(0.1, store.y / 100 - 0.05) },
+          colors: ['#F59E0B', '#10B981', '#FBBF24', '#34D399', '#A78BFA'],
+        });
+      } catch {}
 
-      // Update player state with 3 stars and unlocked store
-      const updatedUnlocked = Array.from(new Set([...(player.unlockedStores || []), store.id]));
-      const updatedStars = {
-        ...(player.storeStars || {}),
-        [store.id]: 3,
-      };
+      try {
+        // Update player state with 3 stars and unlocked store
+        const updatedUnlocked = Array.from(new Set([...(player.unlockedStores || []), store.id]));
+        const updatedStars = {
+          ...(player.storeStars || {}),
+          [store.id]: 3,
+        };
 
-      const updatedHistory = [
-        ...(player.scanHistory || []),
-        {
-          storeId: store.id,
-          storeName: store.name,
-          timestamp: new Date().toISOString(),
-          code: store.code,
-        },
-      ];
+        const updatedHistory = [
+          ...(player.scanHistory || []),
+          {
+            storeId: store.id,
+            storeName: store.name,
+            timestamp: new Date().toISOString(),
+            code: store.code,
+          },
+        ];
 
-      const allNowComplete = updatedUnlocked.length >= 10;
+        const allNowComplete = updatedUnlocked.length >= 10;
 
-      const updatedPlayer: PlayerData = {
-        ...player,
-        unlockedStores: updatedUnlocked,
-        storeStars: updatedStars,
-        scanHistory: updatedHistory,
-        completedAt: allNowComplete ? new Date().toISOString() : player.completedAt,
-      };
+        const updatedPlayer: PlayerData = {
+          ...player,
+          unlockedStores: updatedUnlocked,
+          storeStars: updatedStars,
+          scanHistory: updatedHistory,
+          completedAt: allNowComplete ? new Date().toISOString() : player.completedAt,
+        };
 
-      storageService.saveCurrentPlayer(updatedPlayer);
-      onUpdatePlayer(updatedPlayer);
+        storageService.saveCurrentPlayer(updatedPlayer);
+        onUpdatePlayer(updatedPlayer);
 
-      // If all 10 stores are unlocked, open the central castle lock with fanfare!
-      if (allNowComplete) {
-        setTimeout(() => {
-          soundEffects.playUnlock();
-          setShowVictoryModal(true);
-        }, 1600);
+        // If all 10 stores are unlocked, open the central castle lock with fanfare!
+        if (allNowComplete) {
+          setTimeout(() => {
+            try {
+              soundEffects.playUnlock();
+            } catch {}
+            setShowVictoryModal(true);
+          }, 1600);
+        }
+      } catch (err) {
+        console.error('Error updating player scan state:', err);
       }
     }, 700);
 

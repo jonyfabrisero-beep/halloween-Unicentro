@@ -21,8 +21,10 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
 }) => {
   const [scannerActive, setScannerActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
-  const [scanStatus, setScanStatus] = useState<'IDLE' | 'SUCCESS' | 'ERROR'>('IDLE');
+  const [scanStatus, setScanStatus] = useState<'IDLE' | 'SUCCESS'>('IDLE');
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const isHandlingScanRef = useRef<boolean>(false);
+  const isStoppingRef = useRef<boolean>(false);
   const readerElementId = 'html5-qr-reader';
 
   // Bats positions around modal
@@ -35,69 +37,135 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
     { bottom: '-25px', right: '15%', delay: '0.3s', size: 1.1 },
   ];
 
-  // Stop scanner on unmount
+  // Gracefully stop camera media tracks & scanner instance
+  const stopCameraScanner = async (): Promise<void> => {
+    if (isStoppingRef.current) return;
+    isStoppingRef.current = true;
+
+    // Direct stream stop safeguard for mobile WebKit & Blink
+    try {
+      const videoEl = document.querySelector(`#${readerElementId} video`) as HTMLVideoElement | null;
+      if (videoEl && videoEl.srcObject) {
+        const stream = videoEl.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => {
+          try {
+            track.stop();
+          } catch {}
+        });
+        videoEl.srcObject = null;
+      }
+    } catch {}
+
+    const scanner = scannerRef.current;
+    scannerRef.current = null;
+
+    if (scanner) {
+      try {
+        if (scanner.isScanning) {
+          await scanner.stop();
+        }
+      } catch (err) {
+        console.warn('Notice: Html5Qrcode stop notice:', err);
+      }
+
+      try {
+        scanner.clear();
+      } catch (err) {
+        console.warn('Notice: Html5Qrcode clear notice:', err);
+      }
+    }
+
+    setScannerActive(false);
+    isStoppingRef.current = false;
+  };
+
+  // Safe unmount cleanup
   useEffect(() => {
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {}).finally(() => {
-          scannerRef.current?.clear();
-        });
-      }
+      // Fire-and-forget safe cleanup
+      stopCameraScanner().catch(() => {});
     };
   }, []);
-
-  const stopCameraScanner = async () => {
-    if (scannerRef.current) {
-      try {
-        await scannerRef.current.stop();
-      } catch {
-        // ignore
-      }
-      scannerRef.current = null;
-    }
-    setScannerActive(false);
-  };
 
   const handleClose = async () => {
     await stopCameraScanner();
     onClose();
   };
 
-  const triggerVictory = () => {
+  const triggerVictory = async () => {
+    if (isHandlingScanRef.current) return;
+    isHandlingScanRef.current = true;
+
+    // First stop camera hardware gracefully
+    await stopCameraScanner();
+
+    // Set success UI state
     setScanStatus('SUCCESS');
-    soundEffects.playUnlock();
 
-    // Trigger colorful Halloween confetti
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#F59E0B', '#10B981', '#8B5CF6', '#EC4899', '#F97316'],
-    });
+    // Play unlock sound
+    try {
+      soundEffects.playUnlock();
+    } catch {}
 
+    // Confetti celebration
+    try {
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#F59E0B', '#10B981', '#8B5CF6', '#EC4899', '#F97316'],
+      });
+    } catch {}
+
+    // Notify parent to unlock house and update stars
     setTimeout(() => {
-      onSuccess(store);
-    }, 700);
+      try {
+        onSuccess(store);
+      } catch (e) {
+        console.error('Error invoking onSuccess:', e);
+        onClose();
+      }
+    }, 750);
   };
 
-  const handleQrPayload = (decodedText: string) => {
-    const text = decodedText.trim().toUpperCase();
-    const expected = store.code.toUpperCase();
+  const handleQrPayload = async (decodedText: string) => {
+    if (isHandlingScanRef.current || isStoppingRef.current) return;
 
-    // Allow exact code or matching store id/number
-    if (
-      text === expected ||
-      text.includes(store.brand.toUpperCase()) ||
-      text.includes(store.id.toUpperCase())
-    ) {
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {});
-      }
-      triggerVictory();
+    const raw = (decodedText || '').trim();
+    const upper = raw.toUpperCase();
+    const expected = store.code.toUpperCase();
+    const brandUpper = store.brand.toUpperCase();
+    const nameUpper = store.name.toUpperCase();
+    const idUpper = store.id.toUpperCase();
+    const slotStr = String(store.slotNumber);
+    const slotPadded = String(store.slotNumber).padStart(2, '0');
+
+    // Flexible match against code, brand, name, ID, or slot parameter/URL
+    const isMatch =
+      upper === expected ||
+      upper.includes(expected) ||
+      upper.includes(brandUpper) ||
+      upper.includes(nameUpper) ||
+      upper.includes(idUpper) ||
+      upper.includes(`STORE=${slotStr}`) ||
+      upper.includes(`TIENDA=${slotStr}`) ||
+      upper.includes(`TIENDA_${slotStr}`) ||
+      upper.includes(`TIENDA-${slotStr}`) ||
+      upper.includes(`TIENDA_${slotPadded}`) ||
+      upper.includes(`TIENDA-${slotPadded}`) ||
+      upper.endsWith(`/${slotStr}`) ||
+      upper.endsWith(`/${slotPadded}`) ||
+      raw === slotStr ||
+      raw === slotPadded;
+
+    if (isMatch) {
+      await triggerVictory();
     } else {
-      soundEffects.playPumpkinSquish();
-      setCameraError(`Ese QR no corresponde a "${store.name}". ¡Busca el cartel de ${store.brand}!`);
-      setTimeout(() => setCameraError(null), 3500);
+      try {
+        soundEffects.playPumpkinSquish();
+      } catch {}
+      setCameraError(`QR detectado (${raw.slice(0, 24)}...), pero no corresponde a "${store.name}". ¡Busca el cartel de ${store.brand}!`);
+      setTimeout(() => setCameraError(null), 3800);
     }
   };
 
@@ -106,6 +174,9 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
     setScannerActive(true);
 
     try {
+      // Ensure any existing instance is cleaned up
+      await stopCameraScanner();
+
       const html5QrCode = new Html5Qrcode(readerElementId);
       scannerRef.current = html5QrCode;
 
@@ -123,13 +194,14 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
           handleQrPayload(decodedText);
         },
         () => {
-          // Frame error (normal during searching)
+          // Frame error during active video scan is standard
         }
       );
     } catch (err: unknown) {
       console.warn('Camera start error:', err);
       setCameraError('No se pudo acceder a la cámara. Por favor autoriza el permiso de la cámara.');
       setScannerActive(false);
+      scannerRef.current = null;
     }
   };
 
@@ -168,12 +240,12 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-slate-900/80 border border-slate-700 text-slate-400 hover:text-white hover:bg-red-950 hover:border-red-500 transition-colors flex items-center justify-center cursor-pointer"
+          className="absolute top-3 right-3 z-30 w-8 h-8 rounded-full bg-slate-900/80 border border-slate-700 text-slate-400 hover:text-white hover:bg-red-950 hover:border-red-500 transition-colors flex items-center justify-center cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Success State */}
+        {/* Success Overlay View */}
         {scanStatus === 'SUCCESS' ? (
           <div className="py-6 sm:py-8 flex flex-col items-center justify-center animate-scaleUp">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-500/20 border-4 border-emerald-400 flex items-center justify-center mb-3 shadow-[0_0_30px_rgba(52,211,153,0.8)] animate-bounce">
@@ -183,7 +255,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
               ¡QR CORRECTO!
             </h3>
             <p className="text-sm text-purple-200 font-['Fredoka'] mt-1">
-              ¡Completaste esta tienda! Se están rellenando tus estrellas... ⭐⭐⭐
+              ¡Completaste <span className="text-amber-300 font-bold">{store.name}</span>! Se están rellenando tus estrellas... ⭐⭐⭐
             </p>
           </div>
         ) : isAlreadyUnlocked ? (
@@ -223,10 +295,11 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
 
             {/* Large Camera Viewfinder */}
             <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 max-w-full aspect-square mx-auto rounded-2xl bg-black border-2 sm:border-3 border-emerald-400 overflow-hidden shadow-[0_0_30px_rgba(52,211,153,0.3)] flex flex-col items-center justify-center">
+              {/* Camera reader div is ALWAYS firmly in the DOM, never unmounted prematurely */}
               <div id={readerElementId} className="w-full h-full" />
 
               {!scannerActive && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-slate-950/95">
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-slate-950/95 z-20">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-emerald-950/80 border-2 border-emerald-400/60 flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(52,211,153,0.4)]">
                     <Camera className="w-9 h-9 sm:w-11 sm:h-11 text-emerald-400" />
                   </div>
@@ -264,6 +337,13 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                 ⚡ Simular Escaneo
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Hidden persistent placeholder for html5-qr-reader if in success/unlocked state, ensuring DOM node is never missing */}
+        {scanStatus === 'SUCCESS' && (
+          <div className="hidden pointer-events-none" aria-hidden="true">
+            <div id={`${readerElementId}-backup`} />
           </div>
         )}
       </div>

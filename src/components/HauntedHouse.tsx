@@ -31,12 +31,15 @@ export const HauntedHouse: React.FC<HauntedHouseProps> = ({
   const cleanBrand = store.brand.toLowerCase().replace(/[^a-z0-9]/g, '_');
   const candidatePaths: string[] = [
     store.savedImagePath || '',
+    `/tiendas/salvadas/${cleanName}_salvada.webp`,
+    `/tiendas/salvadas/${cleanBrand}_salvada.webp`,
+    `/tiendas/salvadas/${store.slotNumber}_salvada.webp`,
+    `/tiendas/salvadas/tienda_${String(store.slotNumber).padStart(2, '0')}_salvada.webp`,
+    `/tiendas/salvadas/tienda_${store.slotNumber}_salvada.webp`,
     `/tiendas/salvadas/${store.slotNumber}_salvada.png`,
     `/tiendas/salvadas/${cleanName}_salvada.png`,
     `/tiendas/salvadas/${cleanBrand}_salvada.png`,
     `/tiendas/salvadas/${store.slotNumber}.png`,
-    `/tiendas/salvadas/tienda_${String(store.slotNumber).padStart(2, '0')}_salvada.png`,
-    `/tiendas/salvadas/tienda_${store.slotNumber}_salvada.png`,
   ].filter(Boolean);
 
   const isAnimating = animatingStoreId === store.id;
@@ -129,15 +132,6 @@ export const HauntedHouse: React.FC<HauntedHouseProps> = ({
           <StarsBadge stars={stars} isAnimating={isAnimating} />
         </div>
       </div>
-
-      {/* Ground Shadow & Foundation: Firmly grounds the building to the landscape without floating */}
-      <div
-        className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-2.5 rounded-full pointer-events-none transition-all duration-500 ${
-          isNowSaved
-            ? 'bg-amber-400/25 blur-[3px] shadow-[0_0_12px_rgba(251,191,36,0.35)]'
-            : 'bg-black/45 blur-[2px]'
-        }`}
-      />
 
       {/* Isometric Building Container */}
       <div className="relative w-full aspect-square flex items-center justify-center">

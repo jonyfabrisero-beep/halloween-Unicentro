@@ -13,7 +13,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     y: 31.2,
     zIndex: 8,
     houseType: 5,
-    imagePath: '/tiendas/embrujadas/bambu_tea_embrujada.png',
+    imagePath: '/tiendas/embrujadas/bambu_tea_embrujada.webp',
     label: 'Tienda 01 (Colina Oeste - Vía Principal)',
   },
   2: {
@@ -22,7 +22,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     y: 29.5,
     zIndex: 12,
     houseType: 4,
-    imagePath: '/tiendas/embrujadas/biella_embrujada.png',
+    imagePath: '/tiendas/embrujadas/biella_embrujada.webp',
     label: 'Tienda 02 (Colina Oeste - Curva)',
   },
   3: {
@@ -31,7 +31,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     y: 21.5,
     zIndex: 14,
     houseType: 6,
-    imagePath: '/tiendas/embrujadas/depekes_embrujada.png',
+    imagePath: '/tiendas/embrujadas/depekes_embrujada.webp',
     label: 'Tienda 03 (Noroeste - Entrada al Castillo)',
   },
   4: {
@@ -40,7 +40,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     y: 61.2,
     zIndex: 19,
     houseType: 2,
-    imagePath: '/tiendas/embrujadas/farmatodo_embrujada.png',
+    imagePath: '/tiendas/embrujadas/farmatodo_embrujada.webp',
     label: 'Tienda 04 (Acantilado Suroeste - Sobre Cementerio)',
   },
   5: {
@@ -49,7 +49,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     y: 22.5,
     zIndex: 14,
     houseType: 7,
-    imagePath: '/tiendas/embrujadas/jadu_embrujada.png',
+    imagePath: '/tiendas/embrujadas/jadu_embrujada.webp',
     scaleFactor: 1.15,
     label: 'Tienda 05 (Risco Noreste - Mirador Superior)',
   },
@@ -59,7 +59,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     y: 35.5,
     zIndex: 14,
     houseType: 9,
-    imagePath: '/tiendas/embrujadas/jump_embrujada.png',
+    imagePath: '/tiendas/embrujadas/jump_embrujada.webp',
     label: 'Tienda 06 (Carretera Noreste)',
   },
   7: {
@@ -68,7 +68,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     y: 44.5,
     zIndex: 14,
     houseType: 10,
-    imagePath: '/tiendas/embrujadas/mobalu_embrujada.png',
+    imagePath: '/tiendas/embrujadas/mobalu_embrujada.webp',
     label: 'Tienda 07 (Acantilado Este)',
   },
   8: {
@@ -77,7 +77,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     y: 66.5,
     zIndex: 16,
     houseType: 8,
-    imagePath: '/tiendas/embrujadas/probiovida_embrujada.png',
+    imagePath: '/tiendas/embrujadas/probiovida_embrujada.webp',
     scaleFactor: 1.28,
     label: 'Tienda 08 (Ribera Sureste)',
   },
@@ -87,7 +87,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     y: 84.0,
     zIndex: 20,
     houseType: 1,
-    imagePath: '/tiendas/embrujadas/quiero_galleta_embrujada.png',
+    imagePath: '/tiendas/embrujadas/quiero_galleta_embrujada.webp',
     label: 'Tienda 09 (Salida del Laberinto - Cascada)',
   },
   10: {
@@ -96,7 +96,7 @@ export const HOUSE_SLOTS: Record<number, HouseSlotConfig> = {
     y: 43.5,
     zIndex: 18,
     houseType: 3,
-    imagePath: '/tiendas/embrujadas/siddhi_embrujada.png',
+    imagePath: '/tiendas/embrujadas/siddhi_embrujada.webp',
     label: 'Tienda 10 (Suroeste - Cementerio / Laberinto)',
   },
 };
@@ -163,8 +163,8 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Tés exóticos, bubble tea refrescante y pociones deliciosas de Halloween.',
     color: '#059669',
     accentColor: '#34D399',
-    imagePath: '/tiendas/embrujadas/bambu_tea_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/bambu_tea_salvada.png',
+    imagePath: '/tiendas/embrujadas/bambu_tea_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/bambu_tea_salvada.webp',
   },
   {
     slot: 2,
@@ -177,8 +177,8 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Calzado y accesorios con estilo único para recorrer Unicentro.',
     color: '#D97706',
     accentColor: '#F59E0B',
-    imagePath: '/tiendas/embrujadas/biella_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/biella_salvada.png',
+    imagePath: '/tiendas/embrujadas/biella_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/biella_salvada.webp',
   },
   {
     slot: 3,
@@ -191,8 +191,8 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Ropa para niños, detalles encantadores y disfraces para los pequeños.',
     color: '#0284C7',
     accentColor: '#38BDF8',
-    imagePath: '/tiendas/embrujadas/depekes_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/depekes_salvada.png',
+    imagePath: '/tiendas/embrujadas/depekes_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/depekes_salvada.webp',
   },
   {
     slot: 4,
@@ -205,8 +205,8 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Golosinas, cuidado personal y todo para tu noche de Dulce o Truco.',
     color: '#1D4ED8',
     accentColor: '#60A5FA',
-    imagePath: '/tiendas/embrujadas/farmatodo_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/farmatodo_salvada.png',
+    imagePath: '/tiendas/embrujadas/farmatodo_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/farmatodo_salvada.webp',
   },
   {
     slot: 5,
@@ -219,8 +219,8 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Accesorios en tendencia y detalles mágicos para brillar.',
     color: '#7C3AED',
     accentColor: '#A78BFA',
-    imagePath: '/tiendas/embrujadas/jadu_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/jadu_salvada.png',
+    imagePath: '/tiendas/embrujadas/jadu_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/jadu_salvada.webp',
   },
   {
     slot: 6,
@@ -233,8 +233,8 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: '¡Parque de trampolines, adrenalina y diversión al máximo!',
     color: '#EA580C',
     accentColor: '#FB923C',
-    imagePath: '/tiendas/embrujadas/jump_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/jump_salvada.png',
+    imagePath: '/tiendas/embrujadas/jump_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/jump_salvada.webp',
   },
   {
     slot: 7,
@@ -247,8 +247,8 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Gadgets electrónicos, accesorios para smartphones y novedades.',
     color: '#0F766E',
     accentColor: '#2DD4BF',
-    imagePath: '/tiendas/embrujadas/mobalu_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/mobalu_salvada.png',
+    imagePath: '/tiendas/embrujadas/mobalu_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/mobalu_salvada.webp',
   },
   {
     slot: 8,
@@ -261,8 +261,8 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Bienestar, nutrición y estilo de vida saludable.',
     color: '#15803D',
     accentColor: '#4ADE80',
-    imagePath: '/tiendas/embrujadas/probiovida_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/probiovida_salvada.png',
+    imagePath: '/tiendas/embrujadas/probiovida_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/probiovida_salvada.webp',
   },
   {
     slot: 9,
@@ -275,8 +275,8 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Galletas crujientes, postres espeluznantes y dulces horneados.',
     color: '#B45309',
     accentColor: '#FBBF24',
-    imagePath: '/tiendas/embrujadas/quiero_galleta_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/quiero_galleta_salvada.png',
+    imagePath: '/tiendas/embrujadas/quiero_galleta_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/quiero_galleta_salvada.webp',
   },
   {
     slot: 10,
@@ -289,8 +289,8 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Diseños de moda exclusivos, elegancia y accesorios de temporada.',
     color: '#BE123C',
     accentColor: '#FB7185',
-    imagePath: '/tiendas/embrujadas/siddhi_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/siddhi_salvada.png',
+    imagePath: '/tiendas/embrujadas/siddhi_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/siddhi_salvada.webp',
   },
 ];
 
@@ -309,8 +309,8 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Rolls frescos, cebiches artesanales y sabores del mar.',
     color: '#E11D48',
     accentColor: '#FB7185',
-    imagePath: '/tiendas/embrujadas/sushi_&cebiches_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/sushi&_cebiches_salvada.png',
+    imagePath: '/tiendas/embrujadas/sushi_&_cebiches_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/sushi_&_cebiches_salvada.webp',
   },
   {
     slot: 2,
@@ -323,8 +323,8 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Tentaciones dulces, pastelería artesanal y postres temáticos.',
     color: '#D97706',
     accentColor: '#F59E0B',
-    imagePath: '/tiendas/embrujadas/yalorde_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/yalorde_salvada.png',
+    imagePath: '/tiendas/embrujadas/yalorde_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/yalorde_salvada.webp',
   },
   {
     slot: 3,
@@ -337,8 +337,8 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Moda exclusiva y accesorios encantadores.',
     color: '#DB2777',
     accentColor: '#F472B6',
-    imagePath: '/tiendas/embrujadas/maison_rose_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/maison_rose_salvada.png',
+    imagePath: '/tiendas/embrujadas/maison_rose_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/maison_rose_salvada.webp',
   },
   {
     slot: 4,
@@ -351,8 +351,8 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Joyería fina, accesorios y detalles radiantes.',
     color: '#64748B',
     accentColor: '#94A3B8',
-    imagePath: '/tiendas/embrujadas/my_platinum_embrujada.png',
-    savedImagePath: '/tiendas/salvadas/my_platinum_salvada.png',
+    imagePath: '/tiendas/embrujadas/my_platinum_embrujada.webp',
+    savedImagePath: '/tiendas/salvadas/my_platinum_salvada.webp',
   },
   {
     slot: 5,
@@ -365,7 +365,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Escanea el código QR de la Tienda #5.',
     color: '#10B981',
     accentColor: '#34D399',
-    imagePath: '/tiendas/embrujadas/jadu_embrujada.png',
+    imagePath: '/tiendas/embrujadas/jadu_embrujada.webp',
   },
   {
     slot: 6,
@@ -378,7 +378,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Escanea el código QR de la Tienda #6.',
     color: '#DB2777',
     accentColor: '#F472B6',
-    imagePath: '/tiendas/embrujadas/jump_embrujada.png',
+    imagePath: '/tiendas/embrujadas/jump_embrujada.webp',
   },
   {
     slot: 7,
@@ -391,7 +391,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Escanea el código QR de la Tienda #7.',
     color: '#CA8A04',
     accentColor: '#EAB308',
-    imagePath: '/tiendas/embrujadas/mobalu_embrujada.png',
+    imagePath: '/tiendas/embrujadas/mobalu_embrujada.webp',
   },
   {
     slot: 8,
@@ -404,7 +404,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Escanea el código QR de la Tienda #8.',
     color: '#8B5CF6',
     accentColor: '#A78BFA',
-    imagePath: '/tiendas/embrujadas/probiovida_embrujada.png',
+    imagePath: '/tiendas/embrujadas/probiovida_embrujada.webp',
   },
   {
     slot: 9,
@@ -417,7 +417,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Escanea el código QR de la Tienda #9.',
     color: '#EC4899',
     accentColor: '#F472B6',
-    imagePath: '/tiendas/embrujadas/quiero_galleta_embrujada.png',
+    imagePath: '/tiendas/embrujadas/quiero_galleta_embrujada.webp',
   },
   {
     slot: 10,
@@ -430,7 +430,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
     description: 'Escanea el código QR de la Tienda #10.',
     color: '#DC2626',
     accentColor: '#EF4444',
-    imagePath: '/tiendas/embrujadas/siddhi_embrujada.png',
+    imagePath: '/tiendas/embrujadas/siddhi_embrujada.webp',
   },
 ];
 
