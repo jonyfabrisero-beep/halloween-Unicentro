@@ -23,7 +23,7 @@ interface InteractiveMapProps {
 }
 
 const MIN_SCALE = 1.0;
-const MAX_SCALE = 2.6;
+const MAX_SCALE = 3.0;
 
 export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   player,

@@ -99,8 +99,8 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
           <div style="background: #fff; padding: 6px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px;">
             <img src="${item.qrDataUrl}" style="width: 140px; height: 140px; display: block;" />
           </div>
-          <div style="font-family: monospace; font-size: 10px; font-weight: bold; background: #f0f0f0; padding: 4px 8px; border-radius: 4px; word-break: break-all;">
-            ${item.store.code}
+          <div style="font-family: monospace; font-size: 11px; font-weight: bold; background: #f0f0f0; padding: 4px 8px; border-radius: 4px; word-break: break-all;">
+            Código Manual: <strong>${item.store.code}</strong>
           </div>
           <div style="font-size: 9px; color: #888; margin-top: 6px;">
             ✂️ Recortar y colocar en mostrador
@@ -285,7 +285,7 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
         ctx.fillStyle = '#FCD34D';
         ctx.font = 'bold 13px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(item.store.code, cardX + cardWidth / 2, cardY + 356);
+        ctx.fillText(`Código: ${item.store.code}`, cardX + cardWidth / 2, cardY + 356);
 
         // Scissors footnote
         ctx.fillStyle = '#94A3B8';
@@ -454,6 +454,7 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
                   className="mt-2 text-[11px] font-mono font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded border border-slate-300 cursor-pointer transition-colors flex items-center gap-1.5"
                   title="Toca para copiar código"
                 >
+                  <span className="text-slate-500 font-sans font-normal text-[10px]">Cód:</span>
                   <span>{item.store.code}</span>
                   {copiedCode === item.store.code ? (
                     <Check className="w-3 h-3 text-emerald-600" />

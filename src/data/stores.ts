@@ -155,7 +155,7 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 1,
     id: 'store-bambu-tea-01',
-    code: 'UNICENTRO-BAMBU-TEA-01',
+    code: 'LUNA-42',
     name: 'Bambu Tea',
     brand: 'Bambu Tea',
     category: 'Bebidas y Bubble Tea',
@@ -169,7 +169,7 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 2,
     id: 'store-biella-02',
-    code: 'UNICENTRO-BIELLA-02',
+    code: 'RAYO-18',
     name: 'Biella',
     brand: 'Biella',
     category: 'Calzado y Moda',
@@ -183,7 +183,7 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 3,
     id: 'store-depekes-03',
-    code: 'UNICENTRO-DEPEKES-03',
+    code: 'MAGIA-29',
     name: 'Depekes',
     brand: 'Depekes',
     category: 'Moda Infantil y Bebés',
@@ -197,7 +197,7 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 4,
     id: 'store-farmatodo-04',
-    code: 'UNICENTRO-FARMATODO-04',
+    code: 'POCION-92',
     name: 'Farmatodo',
     brand: 'Farmatodo',
     category: 'Farmacia, Golosinas y Cuidado',
@@ -211,7 +211,7 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 5,
     id: 'store-jadu-05',
-    code: 'UNICENTRO-JADU-05',
+    code: 'CHISPA-37',
     name: 'Jadu',
     brand: 'Jadu',
     category: 'Tendencia y Accesorios',
@@ -225,7 +225,7 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 6,
     id: 'store-jump-06',
-    code: 'UNICENTRO-JUMP-06',
+    code: 'FUEGO-16',
     name: 'Jump',
     brand: 'Jump',
     category: 'Entretenimiento y Trampolines',
@@ -239,7 +239,7 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 7,
     id: 'store-mobalu-07',
-    code: 'UNICENTRO-MOBALU-07',
+    code: 'BRUJA-55',
     name: 'Mobalu Store',
     brand: 'Mobalu Store',
     category: 'Tecnología y Móviles',
@@ -253,7 +253,7 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 8,
     id: 'store-probiovida-08',
-    code: 'UNICENTRO-PROBIOVIDA-08',
+    code: 'DUENDE-83',
     name: 'Probiovida',
     brand: 'Probiovida',
     category: 'Salud y Nutrición Natural',
@@ -267,7 +267,7 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 9,
     id: 'store-quiero-galletas-09',
-    code: 'UNICENTRO-QUIERO-GALLETAS-09',
+    code: 'DULCE-64',
     name: 'Quiero Galletas',
     brand: 'Quiero Galletas',
     category: 'Pastelería y Galletas Artesanales',
@@ -281,7 +281,7 @@ export const RUTA_A_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 10,
     id: 'store-siddhi-10',
-    code: 'UNICENTRO-SIDDHI-10',
+    code: 'TRUCO-75',
     name: 'Siddhi',
     brand: 'Siddhi',
     category: 'Boutique y Moda Femenina',
@@ -301,7 +301,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 1,
     id: 'store-sushi-cebiches-01',
-    code: 'UNICENTRO-SUSHI-CEBICHES-01',
+    code: 'NEBULA-41',
     name: 'Sushi y Cebiches',
     brand: 'Sushi y Cebiches',
     category: 'Gastronomía Japonesa y Marina',
@@ -315,7 +315,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 2,
     id: 'store-yalorde-02',
-    code: 'UNICENTRO-YALORDE-02',
+    code: 'MISTERIO-72',
     name: 'Yalorde Tentaciones',
     brand: 'Yalorde Tentaciones',
     category: 'Postres y Dulcería',
@@ -329,7 +329,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 3,
     id: 'store-maison-rose-03',
-    code: 'UNICENTRO-MAISON-ROSE-03',
+    code: 'CRISTAL-53',
     name: 'Maison Rose',
     brand: 'Maison Rose',
     category: 'Moda y Tendencias',
@@ -343,7 +343,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 4,
     id: 'store-my-platinum-04',
-    code: 'UNICENTRO-MY-PLATINUM-04',
+    code: 'PERLA-84',
     name: 'My Platinum',
     brand: 'My Platinum',
     category: 'Joyería y Accesorios',
@@ -357,7 +357,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 5,
     id: 'store-b-05',
-    code: 'UNICENTRO-RUTA-B-05',
+    code: 'VENTO-15',
     name: 'Tienda #5',
     brand: 'Tienda #5',
     category: 'Pendiente Ruta B',
@@ -370,7 +370,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 6,
     id: 'store-b-06',
-    code: 'UNICENTRO-RUTA-B-06',
+    code: 'COMETA-66',
     name: 'Tienda #6',
     brand: 'Tienda #6',
     category: 'Pendiente Ruta B',
@@ -383,7 +383,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 7,
     id: 'store-b-07',
-    code: 'UNICENTRO-RUTA-B-07',
+    code: 'AURORA-27',
     name: 'Tienda #7',
     brand: 'Tienda #7',
     category: 'Pendiente Ruta B',
@@ -396,7 +396,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 8,
     id: 'store-b-08',
-    code: 'UNICENTRO-RUTA-B-08',
+    code: 'PLANETA-38',
     name: 'Tienda #8',
     brand: 'Tienda #8',
     category: 'Pendiente Ruta B',
@@ -409,7 +409,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 9,
     id: 'store-b-09',
-    code: 'UNICENTRO-RUTA-B-09',
+    code: 'ORION-89',
     name: 'Tienda #9',
     brand: 'Tienda #9',
     category: 'Pendiente Ruta B',
@@ -422,7 +422,7 @@ export const RUTA_B_ASSIGNMENTS: StoreSlotAssignment[] = [
   {
     slot: 10,
     id: 'store-b-10',
-    code: 'UNICENTRO-RUTA-B-10',
+    code: 'COSMOS-50',
     name: 'Tienda #10',
     brand: 'Tienda #10',
     category: 'Pendiente Ruta B',
