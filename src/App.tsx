@@ -22,7 +22,9 @@ export default function App() {
     storageService.getCurrentPlayer()
   );
 
-  const [currentScreen, setCurrentScreen] = useState<GameScreen>('ORIENTATION_SETUP');
+  const [currentScreen, setCurrentScreen] = useState<GameScreen>(() =>
+    storageService.getCurrentPlayer() ? 'MAP' : 'REGISTRATION'
+  );
 
   const [isMuted, setIsMuted] = useState<boolean>(() => soundEffects.getIsMuted());
   const [volume, setVolume] = useState<number>(() => soundEffects.getMusicVolume());
@@ -104,7 +106,7 @@ export default function App() {
       ambientSound.start();
     }
     setCurrentPlayer(newPlayer);
-    setCurrentScreen('MAP');
+    setCurrentScreen('ORIENTATION_SETUP');
   };
 
   const handleRestartGame = () => {
@@ -115,8 +117,8 @@ export default function App() {
 
   return (
     <div className="relative w-full min-h-[100dvh] bg-slate-950 font-['Fredoka'] text-white select-none overflow-x-hidden">
-      {/* Mobile Landscape Orientation Advisory (only when playing or inside intro/registration) */}
-      {currentScreen !== 'ORIENTATION_SETUP' && <OrientationWarning />}
+      {/* Mobile Landscape Orientation Advisory (when playing on the map) */}
+      {currentScreen === 'MAP' && <OrientationWarning />}
 
       {/* Screen Router */}
       {currentScreen === 'ORIENTATION_SETUP' && (

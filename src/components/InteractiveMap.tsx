@@ -434,17 +434,17 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     setActiveStoreModal(null);
     setAnimatingStoreId(store.id);
 
-    // Progressive star filling animation matching PDF Page 2
+    // Progressive star filling and purification sequence
     soundEffects.playStarChime(1);
 
     setTimeout(() => {
       soundEffects.playStarChime(2);
-    }, 450);
+    }, 400);
 
     setTimeout(() => {
       soundEffects.playStarChime(3);
 
-      // Particle stars and confetti on the house
+      // Subtle celebratory sparkles directly over the store
       if (particleTriggerRef.current && mapContainerRef.current) {
         const rect = mapContainerRef.current.getBoundingClientRect();
         const posX = (store.x / 100) * rect.width;
@@ -453,10 +453,12 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       }
 
       confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { x: store.x / 100, y: store.y / 100 },
-        colors: ['#F59E0B', '#10B981', '#F472B6'],
+        particleCount: 28,
+        spread: 45,
+        ticks: 60,
+        gravity: 0.8,
+        origin: { x: store.x / 100, y: Math.max(0.1, store.y / 100 - 0.05) },
+        colors: ['#F59E0B', '#10B981', '#FBBF24', '#34D399', '#A78BFA'],
       });
 
       // Update player state with 3 stars and unlocked store
@@ -489,16 +491,19 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
       storageService.saveCurrentPlayer(updatedPlayer);
       onUpdatePlayer(updatedPlayer);
 
-      setAnimatingStoreId(null);
-
       // If all 10 stores are unlocked, open the central castle lock with fanfare!
       if (allNowComplete) {
         setTimeout(() => {
           soundEffects.playUnlock();
           setShowVictoryModal(true);
-        }, 1200);
+        }, 1600);
       }
-    }, 900);
+    }, 700);
+
+    // End purification animation after transformation settles
+    setTimeout(() => {
+      setAnimatingStoreId(null);
+    }, 2400);
   };
 
   const handleHouseSelect = (store: StoreInfo) => {
@@ -614,6 +619,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
                 isUnlocked={isUnlocked}
                 onSelect={handleHouseSelect}
                 animatingStoreId={animatingStoreId}
+                isPurifying={animatingStoreId === store.id}
               />
             );
           })}

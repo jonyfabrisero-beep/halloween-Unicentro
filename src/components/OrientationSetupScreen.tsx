@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Maximize, RotateCw, Sparkles, Smartphone, CheckCircle2, ChevronRight, Share2, HelpCircle } from 'lucide-react';
+import { Maximize, RotateCw, Sparkles, ChevronRight } from 'lucide-react';
 import { soundEffects } from '../services/soundEffects';
 import { ambientSound } from '../services/ambientAudio';
 
@@ -8,7 +8,7 @@ interface OrientationSetupScreenProps {
 }
 
 export const OrientationSetupScreen: React.FC<OrientationSetupScreenProps> = ({ onContinue }) => {
-  const [isLandscape, setIsLandscape] = useState<boolean>(() => {
+  const [, setIsLandscape] = useState<boolean>(() => {
     if (typeof window === 'undefined') return true;
     return window.innerWidth > window.innerHeight;
   });
@@ -42,14 +42,6 @@ export const OrientationSetupScreen: React.FC<OrientationSetupScreenProps> = ({ 
       elem.msRequestFullscreen
     );
   });
-
-  const [isIPhone] = useState<boolean>(() => {
-    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
-    const ua = navigator.userAgent || '';
-    return /iPhone|iPod/.test(ua) || (!supportsFullscreen && /iPad|Macintosh/.test(ua));
-  });
-
-  const [showIosTip, setShowIosTip] = useState(false);
 
   // Track screen orientation changes
   useEffect(() => {
@@ -209,52 +201,7 @@ export const OrientationSetupScreen: React.FC<OrientationSetupScreenProps> = ({ 
           </div>
         </div>
 
-        {/* Real-Time Device Orientation Status Badge */}
-        <div className="mt-2 mb-2">
-          {isLandscape ? (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 text-xs font-bold shadow-md animate-fadeIn">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>¡Excelente! Celular en posición horizontal</span>
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-950/80 border border-amber-500/60 text-amber-300 text-xs font-bold shadow-md animate-pulse">
-              <Smartphone className="w-3.5 h-3.5 text-amber-400 rotate-90 shrink-0" />
-              <span>Gira tu teléfono de lado para comenzar</span>
-            </div>
-          )}
-        </div>
-
-        {/* iOS / iPhone Safari Tip Banner */}
-        {isIPhone && (
-          <div className="w-full max-w-sm mt-1 mb-2 text-left">
-            <button
-              onClick={() => setShowIosTip(!showIosTip)}
-              className="w-full px-3 py-1.5 rounded-xl bg-purple-950/60 border border-purple-600/40 text-purple-200 text-[11px] flex items-center justify-between hover:bg-purple-900/40 cursor-pointer transition-all"
-            >
-              <div className="flex items-center gap-1.5 text-amber-300 font-bold">
-                <HelpCircle className="w-3.5 h-3.5" />
-                <span>¿Usas iPhone (Safari)? Ver cómo maximizar</span>
-              </div>
-              <span className="text-xs font-mono">{showIosTip ? '▲' : '▼'}</span>
-            </button>
-
-            {showIosTip && (
-              <div className="mt-1.5 p-2.5 rounded-xl bg-slate-900/90 border border-amber-500/40 text-[11px] text-purple-100 shadow-xl space-y-1.5 animate-fadeIn">
-                <p className="text-amber-300 font-bold flex items-center gap-1">
-                  <span>ℹ️</span> Apple restringe el botón automático de pantalla completa en Safari de iPhone.
-                </p>
-                <div className="space-y-1 text-slate-300">
-                  <p>
-                    <span className="text-white font-bold">Opción 1:</span> Toca el ícono <strong className="text-amber-300">"aA"</strong> en la barra de Safari ➔ <strong className="text-white">"Ocultar barra de herramientas"</strong>.
-                  </p>
-                  <p>
-                    <span className="text-white font-bold">Opción 2 (Mejor):</span> Toca <strong className="text-amber-300">Compartir 📤</strong> ➔ <strong className="text-white">"Agregar a pantalla de inicio"</strong> para abrirlo como una App nativa sin barras.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Direct Action Button without extraneous orientation banners */}
       </div>
 
       {/* BOTTOM ACTIONS: Highly Prominent Button */}

@@ -369,5 +369,23 @@
   animation: leafFloatDown ease-in-out infinite;
 }
 
+/* Html5Qrcode reader styling */
+#html5-qr-reader {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+}
+
+#html5-qr-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 1rem;
+}
+
+#html5-qr-reader img[alt="Info icon"] {
+  display: none !important;
+}
+
 
 

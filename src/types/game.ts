@@ -32,7 +32,9 @@ export interface StoreInfo {
   x: number; // percentage on map (0 - 100)
   y: number; // percentage on map (0 - 100)
   houseType: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-  imagePath: string;
+  imagePath: string; // Haunted version of the store
+  savedImagePath?: string; // Purified / Saved version of the store
+  defaultImagePath?: string; // Default base illustration fallback
   scaleFactor?: number;
   customWidthPercent?: string;
   zIndex?: number;
@@ -47,6 +49,7 @@ export interface HouseSlotConfig {
   zIndex: number;
   houseType: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
   imagePath: string;
+  savedImagePath?: string;
   scaleFactor?: number;
   customWidthPercent?: string;
   label: string;
@@ -64,6 +67,8 @@ export interface StoreSlotAssignment {
   color: string;
   accentColor: string;
   logoPath?: string;
+  imagePath?: string;
+  savedImagePath?: string;
 }
 
 export interface MapVariant {
