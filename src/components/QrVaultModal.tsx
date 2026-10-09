@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StoreInfo } from '../types/game';
 import { X, Printer, QrCode, Sparkles } from 'lucide-react';
+import { PrintableQrModal } from './PrintableQrModal';
 
 interface QrVaultModalProps {
   stores: StoreInfo[];
@@ -13,8 +14,10 @@ export const QrVaultModal: React.FC<QrVaultModalProps> = ({
   onSimulateScan,
   onClose,
 }) => {
+  const [showPrintModal, setShowPrintModal] = useState(false);
+
   const handlePrint = () => {
-    window.print();
+    setShowPrintModal(true);
   };
 
   return (
@@ -117,6 +120,13 @@ export const QrVaultModal: React.FC<QrVaultModalProps> = ({
           })}
         </div>
       </div>
+
+      {showPrintModal && (
+        <PrintableQrModal
+          stores={stores}
+          onClose={() => setShowPrintModal(false)}
+        />
+      )}
     </div>
   );
 };

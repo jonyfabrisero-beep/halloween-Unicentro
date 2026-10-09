@@ -3,6 +3,7 @@ import { PlayerData } from '../types/game';
 import { STORES_DATA } from '../data/stores';
 import { storageService } from '../services/storage';
 import { soundEffects } from '../services/soundEffects';
+import { PrintableQrModal } from './PrintableQrModal';
 import { 
   X, 
   Download, 
@@ -58,6 +59,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [players, setPlayers] = useState<PlayerData[]>(() => storageService.getAllPlayers());
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showPrintModal, setShowPrintModal] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -126,7 +128,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   };
 
   const handlePrintQRs = () => {
-    window.print();
+    setShowPrintModal(true);
   };
 
   const totalStoresUnlocked = players.reduce((sum, p) => sum + (p.unlockedStores?.length || 0), 0);
@@ -886,6 +888,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
             </div>
           )}
         </div>
+      )}
+
+      {showPrintModal && (
+        <PrintableQrModal
+          stores={STORES_DATA}
+          onClose={() => setShowPrintModal(false)}
+        />
       )}
     </div>
   );

@@ -4,7 +4,7 @@ import { AnimatedBat } from './GameIcons';
 import { soundEffects } from '../services/soundEffects';
 import confetti from 'canvas-confetti';
 import { Html5Qrcode } from 'html5-qrcode';
-import { X, Camera, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { X, Camera, CheckCircle2, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
 
 interface QrScannerModalProps {
   store: StoreInfo;
@@ -20,6 +20,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
   onClose,
 }) => {
   const [scannerActive, setScannerActive] = useState(false);
+  const [isStartingCamera, setIsStartingCamera] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [scanStatus, setScanStatus] = useState<'IDLE' | 'SUCCESS'>('IDLE');
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -42,47 +43,49 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
     if (isStoppingRef.current) return;
     isStoppingRef.current = true;
 
-    // Direct stream stop safeguard for mobile WebKit & Blink
     try {
-      const videoEl = document.querySelector(`#${readerElementId} video`) as HTMLVideoElement | null;
-      if (videoEl && videoEl.srcObject) {
-        const stream = videoEl.srcObject as MediaStream;
-        stream.getTracks().forEach((track) => {
-          try {
-            track.stop();
-          } catch {}
-        });
-        videoEl.srcObject = null;
-      }
-    } catch {}
+      const scanner = scannerRef.current;
+      scannerRef.current = null;
 
-    const scanner = scannerRef.current;
-    scannerRef.current = null;
-
-    if (scanner) {
-      try {
-        if (scanner.isScanning) {
-          await scanner.stop();
+      if (scanner) {
+        try {
+          if (scanner.isScanning) {
+            await scanner.stop();
+          }
+        } catch (err) {
+          console.warn('Notice: Html5Qrcode stop notice:', err);
         }
-      } catch (err) {
-        console.warn('Notice: Html5Qrcode stop notice:', err);
-      }
 
+        try {
+          scanner.clear();
+        } catch (err) {
+          console.warn('Notice: Html5Qrcode clear notice:', err);
+        }
+      }
+    } finally {
+      // Direct stream stop safeguard for mobile WebKit & Blink
       try {
-        scanner.clear();
-      } catch (err) {
-        console.warn('Notice: Html5Qrcode clear notice:', err);
-      }
-    }
+        const videoEl = document.querySelector(`#${readerElementId} video`) as HTMLVideoElement | null;
+        if (videoEl && videoEl.srcObject) {
+          const stream = videoEl.srcObject as MediaStream;
+          stream.getTracks().forEach((track) => {
+            try {
+              track.stop();
+            } catch {}
+          });
+          videoEl.srcObject = null;
+        }
+      } catch {}
 
-    setScannerActive(false);
-    isStoppingRef.current = false;
+      setScannerActive(false);
+      setIsStartingCamera(false);
+      isStoppingRef.current = false;
+    }
   };
 
   // Safe unmount cleanup
   useEffect(() => {
     return () => {
-      // Fire-and-forget safe cleanup
       stopCameraScanner().catch(() => {});
     };
   }, []);
@@ -170,38 +173,122 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
   };
 
   const startCameraScanner = async () => {
+    if (isStartingCamera || scannerActive) return;
+
     setCameraError(null);
-    setScannerActive(true);
+    setIsStartingCamera(true);
 
     try {
-      // Ensure any existing instance is cleaned up
-      await stopCameraScanner();
+      // 1. Cleanly stop any previous scanner instance without resetting states
+      if (scannerRef.current) {
+        try {
+          if (scannerRef.current.isScanning) {
+            await scannerRef.current.stop();
+          }
+        } catch {}
+        try {
+          scannerRef.current.clear();
+        } catch {}
+        scannerRef.current = null;
+      }
+
+      // 2. Ensure container exists in DOM
+      const container = document.getElementById(readerElementId);
+      if (!container) {
+        throw new Error('Elemento de cámara no listo en el DOM');
+      }
 
       const html5QrCode = new Html5Qrcode(readerElementId);
       scannerRef.current = html5QrCode;
 
-      await html5QrCode.start(
-        { facingMode: 'environment' },
-        {
-          fps: 10,
-          qrbox: (viewfinderWidth, viewfinderHeight) => {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const qrboxSize = Math.max(180, Math.floor(minEdge * 0.72));
-            return { width: qrboxSize, height: qrboxSize };
-          },
+      const scanConfig = {
+        fps: 10,
+        qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
+          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+          const qrboxSize = Math.max(160, Math.floor(minEdge * 0.72));
+          return { width: qrboxSize, height: qrboxSize };
         },
-        (decodedText) => {
-          handleQrPayload(decodedText);
-        },
-        () => {
-          // Frame error during active video scan is standard
+        aspectRatio: 1.0,
+      };
+
+      const onScanSuccess = (decodedText: string) => {
+        handleQrPayload(decodedText);
+      };
+
+      const onScanFailure = () => {
+        // Continuous frame analysis miss is normal
+      };
+
+      // 3. Attempt to start camera with environment rear camera first
+      try {
+        await html5QrCode.start(
+          { facingMode: 'environment' },
+          scanConfig,
+          onScanSuccess,
+          onScanFailure
+        );
+      } catch (envErr) {
+        console.warn('Attempt with facingMode environment failed, trying device list...', envErr);
+        
+        // Fallback: enumerate available cameras and choose rear camera
+        try {
+          const devices = await Html5Qrcode.getCameras();
+          if (devices && devices.length > 0) {
+            const backCam =
+              devices.find((d) => /back|rear|environment|trasera|posterior/i.test(d.label)) ||
+              devices[devices.length - 1];
+            await html5QrCode.start(
+              backCam.id,
+              scanConfig,
+              onScanSuccess,
+              onScanFailure
+            );
+          } else {
+            // Fallback to default user camera
+            await html5QrCode.start(
+              { facingMode: 'user' },
+              scanConfig,
+              onScanSuccess,
+              onScanFailure
+            );
+          }
+        } catch (fallbackErr) {
+          // If fallback also fails, rethrow to outer catch
+          throw fallbackErr || envErr;
         }
-      );
+      }
+
+      // Camera is now successfully capturing and streaming frames
+      setScannerActive(true);
+      setIsStartingCamera(false);
     } catch (err: unknown) {
-      console.warn('Camera start error:', err);
-      setCameraError('No se pudo acceder a la cámara. Por favor autoriza el permiso de la cámara.');
+      console.error('Camera start error:', err);
+      setIsStartingCamera(false);
       setScannerActive(false);
       scannerRef.current = null;
+
+      const errString = String(err || '').toLowerCase();
+      if (
+        errString.includes('permission') ||
+        errString.includes('notallowed') ||
+        errString.includes('denied')
+      ) {
+        setCameraError('Permiso de cámara denegado. Por favor toca el candado o permisos en tu navegador y autoriza la cámara.');
+      } else if (
+        errString.includes('notfound') ||
+        errString.includes('devicesnotfound') ||
+        errString.includes('nodriver')
+      ) {
+        setCameraError('No se detectó cámara en este dispositivo móvil.');
+      } else if (
+        errString.includes('notreadable') ||
+        errString.includes('trackstartexception') ||
+        errString.includes('concurrent')
+      ) {
+        setCameraError('La cámara está en uso por otra app. Ciérrala e inténtalo de nuevo.');
+      } else {
+        setCameraError('No se pudo acceder a la cámara. Revisa los permisos o usa "⚡ Simular Escaneo".');
+      }
     }
   };
 
@@ -211,7 +298,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
       onTouchMove={(e) => e.stopPropagation()}
       className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 select-none animate-fadeIn overflow-y-auto overscroll-contain"
     >
-      {/* Animated flapping bats around modal matching PDF Page 1 & 7 */}
+      {/* Animated flapping bats around modal */}
       {bats.map((bat, idx) => (
         <AnimatedBat
           key={idx}
@@ -280,14 +367,14 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
         ) : (
           /* Main Scanning Layout: Clean, uncluttered, large camera viewfinder */
           <div className="flex flex-col items-center">
-            {/* Store Name - ONLY name, no description, no clutter */}
+            {/* Store Name */}
             <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-amber-300 font-['Lilita_One'] tracking-wide leading-tight mb-3">
               {store.name}
             </h2>
 
             {/* Error banner */}
             {cameraError && (
-              <div className="w-full mb-3 p-2 rounded-xl bg-red-950/80 border border-red-500/50 text-red-200 text-xs sm:text-sm flex items-center gap-2 justify-center font-['Fredoka']">
+              <div className="w-full mb-3 p-2.5 rounded-xl bg-red-950/80 border border-red-500/50 text-red-200 text-xs sm:text-sm flex items-center gap-2 justify-center font-['Fredoka']">
                 <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
                 <span>{cameraError}</span>
               </div>
@@ -298,20 +385,50 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
               {/* Camera reader div is ALWAYS firmly in the DOM, never unmounted prematurely */}
               <div id={readerElementId} className="w-full h-full" />
 
+              {/* Viewfinder Target Reticle when camera is active */}
+              {scannerActive && (
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+                  <div className="w-48 h-48 sm:w-56 sm:h-56 border-2 border-emerald-400/80 rounded-2xl relative shadow-[0_0_15px_rgba(52,211,153,0.4)]">
+                    <span className="absolute top-0 left-0 w-4 h-4 border-t-3 border-l-3 border-amber-400 rounded-tl-md" />
+                    <span className="absolute top-0 right-0 w-4 h-4 border-t-3 border-r-3 border-amber-400 rounded-tr-md" />
+                    <span className="absolute bottom-0 left-0 w-4 h-4 border-b-3 border-l-3 border-amber-400 rounded-bl-md" />
+                    <span className="absolute bottom-0 right-0 w-4 h-4 border-b-3 border-r-3 border-amber-400 rounded-br-md" />
+                    <div className="absolute left-3 right-3 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-pulse top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+              )}
+
+              {/* Overlay button when camera is NOT active */}
               {!scannerActive && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-slate-950/95 z-20">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-emerald-950/80 border-2 border-emerald-400/60 flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(52,211,153,0.4)]">
-                    <Camera className="w-9 h-9 sm:w-11 sm:h-11 text-emerald-400" />
+                    {isStartingCamera ? (
+                      <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-400 animate-spin" />
+                    ) : (
+                      <Camera className="w-9 h-9 sm:w-11 sm:h-11 text-emerald-400" />
+                    )}
                   </div>
                   <button
                     onClick={startCameraScanner}
-                    className="px-6 py-2.5 sm:px-7 sm:py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-400 text-slate-950 font-black text-sm sm:text-base font-['Lilita_One'] tracking-wide shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                    disabled={isStartingCamera}
+                    className="px-6 py-2.5 sm:px-7 sm:py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-400 text-slate-950 font-black text-sm sm:text-base font-['Lilita_One'] tracking-wide shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:pointer-events-none"
                   >
-                    <Camera className="w-5 h-5" />
-                    <span>Abrir Cámara</span>
+                    {isStartingCamera ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Iniciando Cámara...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="w-5 h-5" />
+                        <span>Abrir Cámara</span>
+                      </>
+                    )}
                   </button>
                   <p className="text-xs text-slate-400 mt-2.5 font-['Fredoka'] max-w-[200px] leading-tight">
-                    Toca para enfocar y escanear el QR en el mostrador
+                    {isStartingCamera
+                      ? 'Solicitando acceso a la cámara...'
+                      : 'Toca para enfocar y escanear el QR en el mostrador'}
                   </p>
                 </div>
               )}
@@ -340,10 +457,10 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
           </div>
         )}
 
-        {/* Hidden persistent placeholder for html5-qr-reader if in success/unlocked state, ensuring DOM node is never missing */}
+        {/* Hidden persistent container if in success state so DOM element is never unmounted unexpectedly */}
         {scanStatus === 'SUCCESS' && (
-          <div className="hidden pointer-events-none" aria-hidden="true">
-            <div id={`${readerElementId}-backup`} />
+          <div className="hidden" aria-hidden="true">
+            <div id={`${readerElementId}-safe`} />
           </div>
         )}
       </div>

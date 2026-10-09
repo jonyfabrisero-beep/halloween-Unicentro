@@ -387,5 +387,44 @@
   display: none !important;
 }
 
+/* Print Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Hide app backdrop, map, hud, and other modals during print */
+  body > *:not(#printable-qr-sheet):not(.fixed),
+  #root > *:not(.fixed) {
+    display: none !important;
+  }
+
+  /* Make printable sheet fill the page with pure white background */
+  #printable-qr-sheet {
+    background: #ffffff !important;
+    color: #000000 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  #printable-qr-sheet > div {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    border: 2px dashed #334155 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+  }
+}
+
 
 
