@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { GameScreen, PlayerData, StoreInfo } from './types/game';
-import { STORES_DATA } from './data/stores';
+import { STORES_DATA, getStoresForPlayer } from './data/stores';
 import { storageService } from './services/storage';
 import { soundEffects } from './services/soundEffects';
 import { ambientSound } from './services/ambientAudio';
@@ -144,37 +144,41 @@ export default function App() {
         />
       )}
 
-      {currentScreen === 'MAP' && currentPlayer && (
-        <>
-          {/* Top HUD with 10 Padlocks, Player Avatar, and Controls */}
-          <TopHud
-            player={currentPlayer}
-            stores={STORES_DATA}
-            isMuted={isMuted}
-            volume={volume}
-            onVolumeChange={handleVolumeChange}
-            onToggleMute={handleToggleMute}
-            onSelectStore={(store) => setSelectedStoreFromHud(store)}
-            onOpenVault={() => {
-              setAdminInitialTab('qr_vault');
-              setShowAdminModal(true);
-            }}
-            onOpenAdmin={() => {
-              setAdminInitialTab('participants');
-              setShowAdminModal(true);
-            }}
-          />
+      {currentScreen === 'MAP' && currentPlayer && (() => {
+        const currentStores = getStoresForPlayer(currentPlayer);
+        return (
+          <>
+            {/* Top HUD with 10 Padlocks, Player Avatar, and Controls */}
+            <TopHud
+              player={currentPlayer}
+              stores={currentStores}
+              isMuted={isMuted}
+              volume={volume}
+              onVolumeChange={handleVolumeChange}
+              onToggleMute={handleToggleMute}
+              onSelectStore={(store) => setSelectedStoreFromHud(store)}
+              onOpenVault={() => {
+                setAdminInitialTab('qr_vault');
+                setShowAdminModal(true);
+              }}
+              onOpenAdmin={() => {
+                setAdminInitialTab('participants');
+                setShowAdminModal(true);
+              }}
+            />
 
-          {/* 16:9 Interactive Landscape Map */}
-          <InteractiveMap
-            player={currentPlayer}
-            onUpdatePlayer={(p) => setCurrentPlayer(p)}
-            onRestartGame={handleRestartGame}
-            selectedStoreFromHud={selectedStoreFromHud}
-            onClearSelectedStore={() => setSelectedStoreFromHud(null)}
-          />
-        </>
-      )}
+            {/* 16:9 Interactive Landscape Map */}
+            <InteractiveMap
+              player={currentPlayer}
+              stores={currentStores}
+              onUpdatePlayer={(p) => setCurrentPlayer(p)}
+              onRestartGame={handleRestartGame}
+              selectedStoreFromHud={selectedStoreFromHud}
+              onClearSelectedStore={() => setSelectedStoreFromHud(null)}
+            />
+          </>
+        );
+      })()}
 
       {/* Supervisor & Luma CSV Sync Admin Modal */}
       {showAdminModal && (

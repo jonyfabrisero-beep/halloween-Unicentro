@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import { StoreInfo } from '../types/game';
-import { Printer, Download, X, QrCode, Scissors, Check, FileDown, Loader2 } from 'lucide-react';
+import { Printer, Download, X, QrCode, Check, FileDown, Loader2, Sparkles } from 'lucide-react';
+import { getQrCardTheme, QrCardTheme } from '../data/qrCardThemes';
 
 interface PrintableQrModalProps {
   stores: StoreInfo[];
@@ -11,6 +12,7 @@ interface PrintableQrModalProps {
 interface QrItem {
   store: StoreInfo;
   qrDataUrl: string;
+  theme: QrCardTheme;
 }
 
 export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onClose }) => {
@@ -28,10 +30,12 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
       setLoading(true);
       const items: QrItem[] = [];
 
-      for (const store of stores) {
+      for (let i = 0; i < stores.length; i++) {
+        const store = stores[i];
+        const theme = getQrCardTheme(store.slotNumber ? store.slotNumber - 1 : i);
         try {
           const url = await QRCode.toDataURL(store.code, {
-            width: 320,
+            width: 340,
             margin: 1,
             color: {
               dark: '#000000',
@@ -39,7 +43,7 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
             },
             errorCorrectionLevel: 'H',
           });
-          items.push({ store, qrDataUrl: url });
+          items.push({ store, qrDataUrl: url, theme });
         } catch (err) {
           console.error(`Error generating QR for ${store.name}:`, err);
         }
@@ -84,43 +88,58 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
       document.body.appendChild(printFrame);
 
       const cardsHtml = qrItems
-        .map(
-          (item, idx) => `
-        <div style="border: 2px dashed #333; border-radius: 12px; padding: 14px; text-align: center; page-break-inside: avoid; break-inside: avoid; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: space-between;">
-          <div style="font-size: 10px; font-weight: bold; background: #eee; padding: 2px 8px; border-radius: 999px; margin-bottom: 4px; text-transform: uppercase;">
-            Tienda #${item.store.slotNumber ?? idx + 1} · ${item.store.category}
+        .map((item) => {
+          const theme = item.theme;
+          return `
+        <div style="box-sizing: border-box; border: 3px solid ${theme.borderColor}; border-radius: 18px; padding: 18px 14px; text-align: center; page-break-inside: avoid; break-inside: avoid; background: ${theme.cardBg}; display: flex; flex-direction: column; align-items: center; justify-content: space-between; position: relative; box-shadow: 0 4px 12px rgba(${theme.borderRgb}, 0.15);">
+          <!-- Top game name banner -->
+          <div style="font-size: 11px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; color: ${theme.primaryColor}; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+            <span>${theme.titleEmoji}</span>
+            <span>Tiendas embrujadas en unicentro maracay</span>
+            <span>${theme.titleEmoji}</span>
           </div>
-          <div style="font-size: 16px; font-weight: 900; color: #111; margin-bottom: 2px; font-family: sans-serif;">
+
+          <!-- Store Name -->
+          <div style="font-size: 20px; font-weight: 900; color: ${theme.darkColor}; margin-bottom: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">
             ${item.store.name}
           </div>
-          <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
-            ${item.store.location}
+
+          <!-- Themed Framed QR container with corner ornaments -->
+          <div style="position: relative; background: #ffffff; padding: 10px; border: 3.5px solid ${theme.borderColor}; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(${theme.borderRgb}, 0.2);">
+            <!-- Corner Emojis -->
+            <span style="position: absolute; top: -12px; left: -12px; font-size: 20px; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));">${theme.cornerEmojis[0]}</span>
+            <span style="position: absolute; top: -12px; right: -12px; font-size: 20px; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));">${theme.cornerEmojis[1]}</span>
+            <span style="position: absolute; bottom: -12px; left: -12px; font-size: 20px; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));">${theme.cornerEmojis[2]}</span>
+            <span style="position: absolute; bottom: -12px; right: -12px; font-size: 20px; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));">${theme.cornerEmojis[3]}</span>
+
+            <img src="${item.qrDataUrl}" style="width: 155px; height: 155px; display: block;" />
           </div>
-          <div style="background: #fff; padding: 6px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px;">
-            <img src="${item.qrDataUrl}" style="width: 140px; height: 140px; display: block;" />
+
+          <!-- Manual Code Pill -->
+          <div style="font-family: monospace; font-size: 13px; font-weight: 900; background: ${theme.badgeBg}; color: ${theme.badgeText}; border: 1.5px solid ${theme.badgeBorder}; padding: 6px 14px; border-radius: 999px; letter-spacing: 1px; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+            CÓDIGO: <strong>${item.store.code}</strong>
           </div>
-          <div style="font-family: monospace; font-size: 11px; font-weight: bold; background: #f0f0f0; padding: 4px 8px; border-radius: 4px; word-break: break-all;">
-            Código Manual: <strong>${item.store.code}</strong>
-          </div>
-          <div style="font-size: 9px; color: #888; margin-top: 6px;">
-            ✂️ Recortar y colocar en mostrador
+
+          <!-- Themed ornament footnote -->
+          <div style="font-size: 10px; font-weight: bold; color: ${theme.primaryColor}; margin-top: 8px; letter-spacing: 0.3px;">
+            ${theme.ornament}
           </div>
         </div>
-      `
-        )
+      `;
+        })
         .join('');
 
       const fullHtml = `
         <!DOCTYPE html>
         <html>
         <head>
-          <title>QRs Oficiales Unicentro Maracay</title>
+          <title>Tiendas Embrujadas en Unicentro Maracay - QRs Oficiales</title>
           <style>
-            @page { size: A4; margin: 12mm; }
+            @page { size: A4; margin: 10mm; }
             body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #111; margin: 0; padding: 0; background: #fff; }
-            .header { text-align: center; border-bottom: 2px solid #222; padding-bottom: 12px; margin-bottom: 16px; }
+            .header { text-align: center; border-bottom: 2px solid #222; padding-bottom: 10px; margin-bottom: 14px; }
             .header h1 { margin: 0 0 4px 0; font-size: 22px; color: #d97706; }
-            .header p { margin: 0; font-size: 12px; color: #444; }
+            .header p { margin: 0; font-size: 13px; color: #333; }
             .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
             @media print {
               .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -129,9 +148,8 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
         </head>
         <body>
           <div class="header">
-            <h1>🎃 DULCE O TRUCO 2024 · UNICENTRO MARACAY</h1>
-            <p><strong>CÓDIGOS QR OFICIALES DE LAS TIENDAS EMBRUJADAS</strong></p>
-            <p style="font-size: 11px; color: #666; margin-top: 4px;">Instrucciones: Recorta cada tarjeta por la línea punteada y ubícala visiblemente en el mostrador para el escaneo de los niños.</p>
+            <h1>🎃 TIENDAS EMBRUJADAS EN UNICENTRO MARACAY</h1>
+            <p><strong>CÓDIGOS QR OFICIALES DE LAS TIENDAS</strong></p>
           </div>
           <div class="grid">
             ${cardsHtml}
@@ -162,6 +180,39 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
     }
   };
 
+  // Helper to load image for canvas
+  const loadImage = (src: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  };
+
+  // Helper to draw rounded rectangle on canvas
+  const drawRoundedRect = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number
+  ) => {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  };
+
   // Download entire printable sheet as a high-resolution PNG image
   const handleDownloadSheetImage = async () => {
     if (isExportingImage || qrItems.length === 0) return;
@@ -172,11 +223,11 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
       const cols = 3;
       const rows = Math.ceil(qrItems.length / cols);
 
-      const cardWidth = 360;
-      const cardHeight = 440;
+      const cardWidth = 380;
+      const cardHeight = 460;
       const padding = 40;
       const gap = 24;
-      const headerHeight = 160;
+      const headerHeight = 150;
 
       canvas.width = padding * 2 + cols * cardWidth + (cols - 1) * gap;
       canvas.height = padding * 2 + headerHeight + rows * cardHeight + (rows - 1) * gap;
@@ -190,113 +241,122 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
 
       // Header Banner
       ctx.fillStyle = '#110426';
-      ctx.fillRect(padding, padding, canvas.width - padding * 2, headerHeight - 20);
+      drawRoundedRect(ctx, padding, padding, canvas.width - padding * 2, headerHeight - 20, 16);
+      ctx.fill();
 
       ctx.fillStyle = '#F59E0B';
-      ctx.font = 'bold 32px sans-serif';
+      ctx.font = 'bold 30px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('🎃 DULCE O TRUCO · UNICENTRO MARACAY', canvas.width / 2, padding + 50);
+      ctx.fillText('🎃 TIENDAS EMBRUJADAS EN UNICENTRO MARACAY 🎃', canvas.width / 2, padding + 52);
 
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'bold 20px sans-serif';
-      ctx.fillText('CÓDIGOS QR OFICIALES DE LAS TIENDAS EMBRUJADAS', canvas.width / 2, padding + 85);
-
-      ctx.fillStyle = '#D8B4FE';
-      ctx.font = '14px sans-serif';
-      ctx.fillText(
-        'Instrucciones: Recorta cada tarjeta y ubícala en el mostrador para el escaneo de los participantes.',
-        canvas.width / 2,
-        padding + 115
-      );
-
-      // Helper to load image
-      const loadImage = (src: string): Promise<HTMLImageElement> => {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = src;
-        });
-      };
+      ctx.fillText('CÓDIGOS QR OFICIALES DE CADA TIENDA', canvas.width / 2, padding + 90);
 
       // Draw each store card
       for (let i = 0; i < qrItems.length; i++) {
         const item = qrItems[i];
+        const theme = item.theme;
         const col = i % cols;
         const row = Math.floor(i / cols);
 
         const cardX = padding + col * (cardWidth + gap);
         const cardY = padding + headerHeight + row * (cardHeight + gap);
 
-        // Dashed border card container
-        ctx.strokeStyle = '#64748B';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([8, 6]);
-        ctx.strokeRect(cardX, cardY, cardWidth, cardHeight);
-        ctx.setLineDash([]); // Reset line dash
+        // 1. Card background with subtle theme tint
+        ctx.fillStyle = theme.cardBg;
+        drawRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, 18);
+        ctx.fill();
 
-        // Card header background
-        ctx.fillStyle = '#F8FAFC';
-        ctx.fillRect(cardX + 2, cardY + 2, cardWidth - 4, 75);
+        // 2. Card themed outer border
+        ctx.strokeStyle = theme.borderColor;
+        ctx.lineWidth = 3.5;
+        drawRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, 18);
+        ctx.stroke();
 
-        // Slot badge
-        ctx.fillStyle = '#E2E8F0';
-        ctx.fillRect(cardX + 16, cardY + 12, 110, 24);
-        ctx.fillStyle = '#0F172A';
-        ctx.font = 'bold 12px monospace';
-        ctx.textAlign = 'left';
-        ctx.fillText(`TIENDA #${item.store.slotNumber ?? i + 1}`, cardX + 24, cardY + 28);
-
-        // Category
-        ctx.fillStyle = '#64748B';
-        ctx.font = 'bold 11px sans-serif';
-        ctx.textAlign = 'right';
-        ctx.fillText(item.store.category.slice(0, 22), cardX + cardWidth - 16, cardY + 28);
-
-        // Store Name
-        ctx.fillStyle = '#0F172A';
-        ctx.font = 'bold 20px sans-serif';
+        // 3. Top Game Name Title
+        ctx.fillStyle = theme.primaryColor;
+        ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(item.store.name, cardX + cardWidth / 2, cardY + 62);
+        ctx.fillText(
+          `${theme.titleEmoji} Tiendas embrujadas en unicentro maracay ${theme.titleEmoji}`,
+          cardX + cardWidth / 2,
+          cardY + 32
+        );
 
-        // Location
-        ctx.fillStyle = '#64748B';
-        ctx.font = '12px sans-serif';
-        ctx.fillText(item.store.location, cardX + cardWidth / 2, cardY + 100);
+        // 4. Store Name
+        ctx.fillStyle = theme.darkColor;
+        ctx.font = 'bold 22px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(item.store.name.toUpperCase(), cardX + cardWidth / 2, cardY + 66);
+
+        // 5. Framed QR Code Container
+        const qrSize = 195;
+        const qrX = cardX + (cardWidth - qrSize) / 2;
+        const qrY = cardY + 88;
+
+        // QR frame white background
+        ctx.fillStyle = '#FFFFFF';
+        drawRoundedRect(ctx, qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 14);
+        ctx.fill();
+
+        // QR frame border
+        ctx.strokeStyle = theme.borderColor;
+        ctx.lineWidth = 3.5;
+        drawRoundedRect(ctx, qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 14);
+        ctx.stroke();
 
         // Draw QR Image
         try {
           const qrImg = await loadImage(item.qrDataUrl);
-          const qrSize = 190;
-          const qrX = cardX + (cardWidth - qrSize) / 2;
-          const qrY = cardY + 115;
-
-          // Border around QR
-          ctx.strokeStyle = '#10B981';
-          ctx.lineWidth = 3;
-          ctx.strokeRect(qrX - 4, qrY - 4, qrSize + 8, qrSize + 8);
           ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
         } catch {}
 
-        // Code string pill
-        ctx.fillStyle = '#0F172A';
-        ctx.fillRect(cardX + 20, cardY + 335, cardWidth - 40, 32);
-        ctx.fillStyle = '#FCD34D';
-        ctx.font = 'bold 13px monospace';
+        // 6. Draw Corner Emojis on QR frame
+        ctx.font = '22px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`Código: ${item.store.code}`, cardX + cardWidth / 2, cardY + 356);
+        ctx.textBaseline = 'middle';
+        // Top-left
+        ctx.fillText(theme.cornerEmojis[0], qrX - 8, qrY - 8);
+        // Top-right
+        ctx.fillText(theme.cornerEmojis[1], qrX + qrSize + 8, qrY - 8);
+        // Bottom-left
+        ctx.fillText(theme.cornerEmojis[2], qrX - 8, qrY + qrSize + 8);
+        // Bottom-right
+        ctx.fillText(theme.cornerEmojis[3], qrX + qrSize + 8, qrY + qrSize + 8);
+        ctx.textBaseline = 'alphabetic'; // reset
 
-        // Scissors footnote
-        ctx.fillStyle = '#94A3B8';
-        ctx.font = '11px sans-serif';
-        ctx.fillText('✂️ Recortar por la línea punteada', cardX + cardWidth / 2, cardY + 400);
+        // 7. Manual Code Pill
+        const pillWidth = cardWidth - 50;
+        const pillHeight = 36;
+        const pillX = cardX + 25;
+        const pillY = cardY + 340;
+
+        ctx.fillStyle = theme.badgeBg;
+        drawRoundedRect(ctx, pillX, pillY, pillWidth, pillHeight, 18);
+        ctx.fill();
+
+        ctx.strokeStyle = theme.badgeBorder;
+        ctx.lineWidth = 1.5;
+        drawRoundedRect(ctx, pillX, pillY, pillWidth, pillHeight, 18);
+        ctx.stroke();
+
+        ctx.fillStyle = theme.badgeText;
+        ctx.font = 'bold 15px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`CÓDIGO: ${item.store.code}`, cardX + cardWidth / 2, pillY + 23);
+
+        // 8. Theme Bottom Ornament
+        ctx.fillStyle = theme.primaryColor;
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(theme.ornament, cardX + cardWidth / 2, cardY + 418);
       }
 
       // Convert canvas to downloadable link
       const dataUrl = canvas.toDataURL('image/png');
       const downloadLink = document.createElement('a');
-      downloadLink.download = 'QRs_Oficiales_Unicentro_Maracay.png';
+      downloadLink.download = 'Tiendas_Embrujadas_Unicentro_Maracay_QRs.png';
       downloadLink.href = dataUrl;
       document.body.appendChild(downloadLink);
       downloadLink.click();
@@ -308,14 +368,111 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
     }
   };
 
-  // Download individual QR image
-  const handleDownloadSingleQr = (item: QrItem) => {
-    const link = document.createElement('a');
-    link.download = `QR_${item.store.name.replace(/\s+/g, '_')}.png`;
-    link.href = item.qrDataUrl;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+  // Download individual store card as a high-resolution PNG image
+  const handleDownloadSingleCard = async (item: QrItem) => {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 600;
+      canvas.height = 740;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const theme = item.theme;
+
+      // Card Background
+      ctx.fillStyle = theme.cardBg;
+      drawRoundedRect(ctx, 20, 20, canvas.width - 40, canvas.height - 40, 26);
+      ctx.fill();
+
+      // Card Border
+      ctx.strokeStyle = theme.borderColor;
+      ctx.lineWidth = 5;
+      drawRoundedRect(ctx, 20, 20, canvas.width - 40, canvas.height - 40, 26);
+      ctx.stroke();
+
+      // Top Game Name Title
+      ctx.fillStyle = theme.primaryColor;
+      ctx.font = 'bold 19px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        `${theme.titleEmoji} Tiendas embrujadas en unicentro maracay ${theme.titleEmoji}`,
+        canvas.width / 2,
+        75
+      );
+
+      // Store Name
+      ctx.fillStyle = theme.darkColor;
+      ctx.font = 'bold 36px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(item.store.name.toUpperCase(), canvas.width / 2, 130);
+
+      // Framed QR Code Container
+      const qrSize = 340;
+      const qrX = (canvas.width - qrSize) / 2;
+      const qrY = 170;
+
+      // QR Frame White Background
+      ctx.fillStyle = '#FFFFFF';
+      drawRoundedRect(ctx, qrX - 14, qrY - 14, qrSize + 28, qrSize + 28, 20);
+      ctx.fill();
+
+      // QR Frame Border
+      ctx.strokeStyle = theme.borderColor;
+      ctx.lineWidth = 5;
+      drawRoundedRect(ctx, qrX - 14, qrY - 14, qrSize + 28, qrSize + 28, 20);
+      ctx.stroke();
+
+      // Draw QR Image
+      const qrImg = await loadImage(item.qrDataUrl);
+      ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+
+      // Draw Corner Emojis on QR frame
+      ctx.font = '34px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(theme.cornerEmojis[0], qrX - 14, qrY - 14);
+      ctx.fillText(theme.cornerEmojis[1], qrX + qrSize + 14, qrY - 14);
+      ctx.fillText(theme.cornerEmojis[2], qrX - 14, qrY + qrSize + 14);
+      ctx.fillText(theme.cornerEmojis[3], qrX + qrSize + 14, qrY + qrSize + 14);
+      ctx.textBaseline = 'alphabetic';
+
+      // Manual Code Pill
+      const pillWidth = canvas.width - 120;
+      const pillHeight = 56;
+      const pillX = 60;
+      const pillY = 565;
+
+      ctx.fillStyle = theme.badgeBg;
+      drawRoundedRect(ctx, pillX, pillY, pillWidth, pillHeight, 28);
+      ctx.fill();
+
+      ctx.strokeStyle = theme.badgeBorder;
+      ctx.lineWidth = 2.5;
+      drawRoundedRect(ctx, pillX, pillY, pillWidth, pillHeight, 28);
+      ctx.stroke();
+
+      ctx.fillStyle = theme.badgeText;
+      ctx.font = 'bold 24px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`CÓDIGO: ${item.store.code}`, canvas.width / 2, pillY + 36);
+
+      // Bottom Ornament
+      ctx.fillStyle = theme.primaryColor;
+      ctx.font = 'bold 18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(theme.ornament, canvas.width / 2, 670);
+
+      // Download link
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `QR_${item.store.name.replace(/\s+/g, '_')}_Unicentro.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (e) {
+      console.error('Error exporting single card:', e);
+    }
   };
 
   const handleCopyCode = (code: string) => {
@@ -341,10 +498,10 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
               <span>Impresión y Descarga de QRs</span>
             </div>
             <h2 className="text-lg sm:text-2xl font-black text-white font-['Lilita_One']">
-              Tarjetas Oficiales de Escaneo · Unicentro Maracay
+              Tiendas Embrujadas en Unicentro Maracay
             </h2>
             <p className="text-xs text-purple-200/80 font-['Fredoka']">
-              Imprime en papel para los mostradores de cada tienda o descarga la hoja de respaldo.
+              Diseño temático exclusivo para cada tienda. Imprime la hoja completa o descarga cada tarjeta individualmente.
             </p>
           </div>
 
@@ -366,7 +523,7 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
               onClick={handleDownloadSheetImage}
               disabled={loading || isExportingImage}
               className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm font-['Lilita_One'] tracking-wide flex items-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer disabled:opacity-50"
-              title="Descargar imagen PNG completa lista para imprimir o enviar por WhatsApp"
+              title="Descargar imagen PNG completa con todas las tarjetas"
             >
               {isExportingImage ? (
                 <>
@@ -391,12 +548,12 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
           </div>
         </div>
 
-        {/* Instructions banner */}
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 mb-3 flex items-center justify-between text-xs text-amber-200 font-['Fredoka']">
+        {/* Tip banner */}
+        <div className="bg-purple-950/50 border border-purple-800/40 rounded-xl p-2.5 mb-3 flex items-center justify-between text-xs text-purple-200 font-['Fredoka']">
           <div className="flex items-center gap-2">
-            <Scissors className="w-4 h-4 text-amber-400 shrink-0" />
+            <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
             <span>
-              <strong>Tip:</strong> Si estás en el celular y no tienes impresora conectada, pulsa <strong>"Descargar Hoja PNG"</strong> para guardar la imagen completa y enviarla a imprimir.
+              Cada tienda cuenta con su propio marco decorativo y el título oficial <strong>"Tiendas embrujadas en unicentro maracay"</strong>.
             </span>
           </div>
         </div>
@@ -405,78 +562,116 @@ export const PrintableQrModal: React.FC<PrintableQrModalProps> = ({ stores, onCl
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center py-16 gap-3">
             <Loader2 className="w-10 h-10 text-amber-400 animate-spin" />
-            <p className="text-sm font-['Fredoka'] text-purple-200">Generando códigos QR en alta resolución...</p>
+            <p className="text-sm font-['Fredoka'] text-purple-200">Generando tarjetas con marcos embrujados...</p>
           </div>
         ) : (
-          /* Printable Cards Grid */
+          /* Printable Themed Cards Grid */
           <div
             ref={sheetRef}
             id="printable-qr-sheet"
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 overflow-y-auto pr-1 flex-1 pb-4"
           >
-            {qrItems.map((item, idx) => (
-              <div
-                key={item.store.id}
-                className="p-3.5 rounded-2xl bg-white text-slate-900 border-2 border-dashed border-slate-400 shadow-md flex flex-col items-center text-center relative group hover:border-amber-500 transition-colors"
-              >
-                {/* Store Index Badge */}
-                <span className="absolute top-2.5 left-2.5 text-[10px] font-mono font-bold text-slate-700 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-300">
-                  #{item.store.slotNumber ?? idx + 1}
-                </span>
+            {qrItems.map((item) => {
+              const theme = item.theme;
 
-                {/* Category Pill */}
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 mt-0.5">
-                  {item.store.category}
-                </span>
-
-                {/* Store Name */}
-                <h4 className="font-black text-slate-900 font-['Lilita_One'] text-lg tracking-wide leading-tight">
-                  {item.store.name}
-                </h4>
-
-                {/* Location */}
-                <div className="text-[11px] text-slate-500 font-['Fredoka'] mb-2">
-                  {item.store.location}
-                </div>
-
-                {/* QR Code Container */}
-                <div className="w-36 h-36 p-2 bg-white rounded-xl shadow-inner border-2 border-emerald-500 flex items-center justify-center my-1 relative">
-                  <img
-                    src={item.qrDataUrl}
-                    alt={`QR ${item.store.name}`}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-
-                {/* Code Pill with copy action */}
+              return (
                 <div
-                  onClick={() => handleCopyCode(item.store.code)}
-                  className="mt-2 text-[11px] font-mono font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded border border-slate-300 cursor-pointer transition-colors flex items-center gap-1.5"
-                  title="Toca para copiar código"
+                  key={item.store.id}
+                  style={{
+                    backgroundColor: theme.cardBg,
+                    borderColor: theme.borderColor,
+                    boxShadow: `0 4px 18px rgba(${theme.borderRgb}, 0.18)`,
+                  }}
+                  className="p-4 rounded-2xl border-3 flex flex-col items-center text-center relative group transition-all"
                 >
-                  <span className="text-slate-500 font-sans font-normal text-[10px]">Cód:</span>
-                  <span>{item.store.code}</span>
-                  {copiedCode === item.store.code ? (
-                    <Check className="w-3 h-3 text-emerald-600" />
-                  ) : null}
-                </div>
-
-                {/* Download individual card button */}
-                <div className="mt-2.5 pt-2 border-t border-slate-200 w-full flex items-center justify-between text-[10px] text-slate-400">
-                  <span className="flex items-center gap-1">
-                    <Scissors className="w-3 h-3" />
-                    <span>Línea de corte</span>
-                  </span>
-                  <button
-                    onClick={() => handleDownloadSingleQr(item)}
-                    className="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 hover:underline cursor-pointer"
+                  {/* Game Name Title */}
+                  <div
+                    style={{ color: theme.primaryColor }}
+                    className="text-[11px] font-black uppercase tracking-wider mb-1 flex items-center justify-center gap-1.5 font-sans"
                   >
-                    <Download className="w-3 h-3" />
-                    <span>Guardar QR</span>
-                  </button>
+                    <span>{theme.titleEmoji}</span>
+                    <span>Tiendas embrujadas en unicentro maracay</span>
+                    <span>{theme.titleEmoji}</span>
+                  </div>
+
+                  {/* Store Name */}
+                  <h4
+                    style={{ color: theme.darkColor }}
+                    className="font-black font-['Lilita_One'] text-xl tracking-wide leading-tight uppercase my-1"
+                  >
+                    {item.store.name}
+                  </h4>
+
+                  {/* Themed Framed QR Container with Corner Decorations */}
+                  <div
+                    style={{
+                      borderColor: theme.borderColor,
+                      boxShadow: `0 4px 14px rgba(${theme.borderRgb}, 0.25)`,
+                    }}
+                    className="w-40 h-40 p-2.5 bg-white rounded-2xl border-3 flex items-center justify-center my-2 relative"
+                  >
+                    {/* 4 Themed Corner Emojis */}
+                    <span className="absolute -top-3 -left-3 text-xl drop-shadow-md select-none">
+                      {theme.cornerEmojis[0]}
+                    </span>
+                    <span className="absolute -top-3 -right-3 text-xl drop-shadow-md select-none">
+                      {theme.cornerEmojis[1]}
+                    </span>
+                    <span className="absolute -bottom-3 -left-3 text-xl drop-shadow-md select-none">
+                      {theme.cornerEmojis[2]}
+                    </span>
+                    <span className="absolute -bottom-3 -right-3 text-xl drop-shadow-md select-none">
+                      {theme.cornerEmojis[3]}
+                    </span>
+
+                    <img
+                      src={item.qrDataUrl}
+                      alt={`QR ${item.store.name}`}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+
+                  {/* Code Pill with copy action */}
+                  <div
+                    onClick={() => handleCopyCode(item.store.code)}
+                    style={{
+                      backgroundColor: theme.badgeBg,
+                      color: theme.badgeText,
+                      borderColor: theme.badgeBorder,
+                    }}
+                    className="mt-2 text-xs font-mono font-bold px-3 py-1 rounded-full border shadow-xs cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5"
+                    title="Toca para copiar código"
+                  >
+                    <span>CÓDIGO:</span>
+                    <span className="tracking-wider">{item.store.code}</span>
+                    {copiedCode === item.store.code ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    ) : null}
+                  </div>
+
+                  {/* Themed Ornament Footnote */}
+                  <div
+                    style={{ color: theme.primaryColor }}
+                    className="text-[10px] font-bold mt-2"
+                  >
+                    {theme.ornament}
+                  </div>
+
+                  {/* Download individual card button */}
+                  <div className="mt-2.5 pt-2 border-t border-black/10 w-full flex items-center justify-center">
+                    <button
+                      onClick={() => handleDownloadSingleCard(item)}
+                      style={{ color: theme.primaryColor }}
+                      className="text-[11px] font-bold flex items-center gap-1.5 hover:underline cursor-pointer py-0.5"
+                      title="Descargar esta tarjeta con su marco decorativo en alta resolución"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Descargar Tarjeta</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

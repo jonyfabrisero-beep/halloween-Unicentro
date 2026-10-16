@@ -228,14 +228,6 @@ export const InteractiveGhostsAndPumpkins: React.FC<InteractiveGhostsAndPumpkins
       widthPercent: '2.7%',
     }, // southeast road next to lamppost
     {
-      id: 'p9',
-      x: 49.0,
-      y: 83.5,
-      wobbling: false,
-      imageSrc: '/pumpkins/trio_calabazas_enterradas.png',
-      widthPercent: '4.2%',
-    }, // left grass bank near waterfall (moved further left towards house)
-    {
       id: 'p10',
       x: 64.2,
       y: 81.0,

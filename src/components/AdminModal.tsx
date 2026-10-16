@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { PlayerData } from '../types/game';
-import { STORES_DATA } from '../data/stores';
+import { STORES_DATA, MAP_VARIANTS, getVariantById } from '../data/stores';
 import { storageService } from '../services/storage';
 import { soundEffects } from '../services/soundEffects';
 import { PrintableQrModal } from './PrintableQrModal';
+import { getQrCardTheme } from '../data/qrCardThemes';
 import { 
   X, 
   Download, 
@@ -60,6 +61,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [selectedVaultVariant, setSelectedVaultVariant] = useState<'variante-1' | 'variante-2' | 'variante-3' | 'all'>('variante-1');
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -742,6 +744,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <th className="p-2.5">Código de Canje</th>
                       <th className="p-2.5">Niño / Avatar</th>
                       <th className="p-2.5">Representante</th>
+                      <th className="p-2.5">Ruta</th>
                       <th className="p-2.5">Progreso</th>
                       <th className="p-2.5">Estado</th>
                       <th className="p-2.5 text-center">Premio Entregado</th>
@@ -752,7 +755,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   <tbody className="divide-y divide-purple-950/60">
                     {filteredPlayers.length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="p-6 text-center text-purple-300/60 font-['Fredoka']">
+                        <td colSpan={9} className="p-6 text-center text-purple-300/60 font-['Fredoka']">
                           {searchQuery ? 'No se encontraron participantes que coincidan con la búsqueda.' : 'No hay participantes registrados todavía.'}
                         </td>
                       </tr>
@@ -761,6 +764,10 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         const storesDone = p.unlockedStores?.length || 0;
                         const isComplete = storesDone >= 10;
                         const ticketCode = `DULCE-${p.id.slice(-6).toUpperCase()}`;
+                        const routeBadge = 
+                          p.variantId === 'variante-2' ? { label: 'Ruta B', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40' } :
+                          p.variantId === 'variante-3' ? { label: 'Ruta C', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' } :
+                          { label: 'Ruta A', color: 'bg-purple-500/20 text-purple-300 border-purple-500/40' };
                         return (
                           <tr key={p.id} className="hover:bg-purple-900/20 transition-colors">
                             <td className="p-2.5">
@@ -773,6 +780,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               <span className="truncate max-w-[120px]">{p.playerName}</span>
                             </td>
                             <td className="p-2.5 text-slate-300 truncate max-w-[130px]">{p.parentName}</td>
+                            <td className="p-2.5">
+                              <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${routeBadge.color}`}>
+                                {routeBadge.label}
+                              </span>
+                            </td>
                             <td className="p-2.5 font-mono">
                               <span className="text-amber-400 font-bold">{storesDone}/10</span>
                               <span className="text-slate-400 text-[10px] ml-1">tiendas</span>
@@ -832,67 +844,159 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </table>
               </div>
             </>
-          ) : (
-            /* QR Vault Grid */
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex items-center justify-between pb-2 mb-2">
-                <p className="text-xs text-purple-200/80 font-['Fredoka']">
-                  QRs oficiales para imprimir o respaldar en caso de contingencia.
-                </p>
-                <button
-                  onClick={handlePrintQRs}
-                  className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Imprimir QRs</span>
-                </button>
-              </div>
+          ) : (() => {
+            const currentVaultStores = 
+              selectedVaultVariant === 'all' 
+                ? MAP_VARIANTS.flatMap((v) => v.stores) 
+                : getVariantById(selectedVaultVariant).stores;
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto pr-1 flex-1">
-                {STORES_DATA.map((store, idx) => {
-                  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
-                    store.code
-                  )}&color=000000&bgcolor=FFFFFF`;
-
-                  return (
-                    <div
-                      key={store.id}
-                      className="p-3 rounded-2xl bg-purple-950/40 border border-purple-800/60 flex flex-col items-center text-center relative"
+            return (
+              /* QR Vault Grid */
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 mb-2 border-b border-purple-900/40">
+                  {/* Variant Selector Tabs */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                    <button
+                      onClick={() => setSelectedVaultVariant('variante-1')}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                        selectedVaultVariant === 'variante-1'
+                          ? 'bg-purple-600 text-white shadow-md'
+                          : 'bg-purple-950/60 text-purple-300 hover:bg-purple-900/60'
+                      }`}
                     >
-                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-900 border border-purple-600/40 text-[10px] font-mono font-bold text-amber-400">
-                        Tienda #{store.slotNumber ?? (idx + 1)}
-                      </div>
+                      <span>🎃</span>
+                      <span>Ruta A (10)</span>
+                    </button>
+                    <button
+                      onClick={() => setSelectedVaultVariant('variante-2')}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                        selectedVaultVariant === 'variante-2'
+                          ? 'bg-amber-600 text-white shadow-md'
+                          : 'bg-purple-950/60 text-purple-300 hover:bg-purple-900/60'
+                      }`}
+                    >
+                      <span>🦇</span>
+                      <span>Ruta B (10)</span>
+                    </button>
+                    <button
+                      onClick={() => setSelectedVaultVariant('variante-3')}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                        selectedVaultVariant === 'variante-3'
+                          ? 'bg-cyan-600 text-white shadow-md'
+                          : 'bg-purple-950/60 text-purple-300 hover:bg-purple-900/60'
+                      }`}
+                    >
+                      <span>👻</span>
+                      <span>Ruta C (10)</span>
+                    </button>
+                    <button
+                      onClick={() => setSelectedVaultVariant('all')}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                        selectedVaultVariant === 'all'
+                          ? 'bg-emerald-600 text-white shadow-md'
+                          : 'bg-purple-950/60 text-purple-300 hover:bg-purple-900/60'
+                      }`}
+                    >
+                      <span>🌟</span>
+                      <span>Todas ({MAP_VARIANTS.flatMap((v) => v.stores).length})</span>
+                    </button>
+                  </div>
 
-                      <div className="w-10 h-10 mb-1 flex items-center justify-center">
-                        <img src={store.imagePath} alt="" className="w-full h-full object-contain" />
-                      </div>
+                  <button
+                    onClick={handlePrintQRs}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer shrink-0"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Imprimir QRs ({currentVaultStores.length})</span>
+                  </button>
+                </div>
 
-                      <div className="text-xs font-bold text-white font-['Fredoka'] truncate max-w-full">
-                        {store.name}
-                      </div>
-                      <div className="text-[10px] text-purple-300/80 mb-2">
-                        {store.location}
-                      </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto pr-1 flex-1">
+                  {currentVaultStores.map((store, idx) => {
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                      store.code
+                    )}&color=000000&bgcolor=FFFFFF`;
 
-                      <div className="p-2 bg-white rounded-xl shadow-md mb-2">
-                        <img src={qrUrl} alt={`QR ${store.name}`} className="w-24 h-24 object-contain" />
-                      </div>
+                    const theme = getQrCardTheme(store.slotNumber ? store.slotNumber - 1 : idx);
 
-                      <div className="text-[10px] font-mono text-amber-300 font-bold bg-black/40 px-2 py-0.5 rounded-md">
-                        {store.code}
+                    return (
+                      <div
+                        key={`${store.id}-${idx}`}
+                        style={{
+                          backgroundColor: theme.cardBg,
+                          borderColor: theme.borderColor,
+                        }}
+                        className="p-3 rounded-2xl border-2 flex flex-col items-center text-center relative"
+                      >
+                        {/* Game Title */}
+                        <div
+                          style={{ color: theme.primaryColor }}
+                          className="text-[9px] font-black uppercase tracking-wider mb-1 flex items-center justify-center gap-1 font-sans"
+                        >
+                          <span>{theme.titleEmoji}</span>
+                          <span>Tiendas embrujadas en unicentro maracay</span>
+                          <span>{theme.titleEmoji}</span>
+                        </div>
+
+                        <div className="w-9 h-9 mb-1 flex items-center justify-center">
+                          <img src={store.imagePath} alt="" className="w-full h-full object-contain" />
+                        </div>
+
+                        <div
+                          style={{ color: theme.darkColor }}
+                          className="text-xs font-black font-['Lilita_One'] uppercase truncate max-w-full mb-1"
+                        >
+                          {store.name}
+                        </div>
+
+                        {/* Framed QR with Corner Emojis */}
+                        <div
+                          style={{ borderColor: theme.borderColor }}
+                          className="p-2 bg-white rounded-xl shadow-md border-2 mb-2 relative"
+                        >
+                          <span className="absolute -top-2 -left-2 text-xs select-none">
+                            {theme.cornerEmojis[0]}
+                          </span>
+                          <span className="absolute -top-2 -right-2 text-xs select-none">
+                            {theme.cornerEmojis[1]}
+                          </span>
+                          <span className="absolute -bottom-2 -left-2 text-xs select-none">
+                            {theme.cornerEmojis[2]}
+                          </span>
+                          <span className="absolute -bottom-2 -right-2 text-xs select-none">
+                            {theme.cornerEmojis[3]}
+                          </span>
+
+                          <img src={qrUrl} alt={`QR ${store.name}`} className="w-24 h-24 object-contain" />
+                        </div>
+
+                        <div
+                          style={{
+                            backgroundColor: theme.badgeBg,
+                            color: theme.badgeText,
+                            borderColor: theme.badgeBorder,
+                          }}
+                          className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border truncate max-w-full"
+                        >
+                          CÓDIGO: {store.code}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       )}
 
       {showPrintModal && (
         <PrintableQrModal
-          stores={STORES_DATA}
+          stores={
+            selectedVaultVariant === 'all'
+              ? MAP_VARIANTS.flatMap((v) => v.stores)
+              : getVariantById(selectedVaultVariant).stores
+          }
           onClose={() => setShowPrintModal(false)}
         />
       )}

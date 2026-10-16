@@ -3,6 +3,7 @@ import { Gender, PlayerData } from '../types/game';
 import { GirlAvatar, BoyAvatar } from './GameIcons';
 import { soundEffects } from '../services/soundEffects';
 import { storageService } from '../services/storage';
+import { getRandomVariantId } from '../data/stores';
 import { ShieldCheck, HelpCircle, Ghost, User, Sparkles } from 'lucide-react';
 
 interface RegistrationScreenProps {
@@ -47,6 +48,7 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
       playerName: playerName.trim(),
       parentName: parentName.trim(),
       gender: selectedGender,
+      variantId: getRandomVariantId(),
       createdAt: new Date().toISOString(),
       unlockedStores: [],
       storeStars: {},

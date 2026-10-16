@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { PlayerData, StoreInfo } from '../types/game';
-import { STORES_DATA } from '../data/stores';
+import { STORES_DATA, getStoresForPlayer } from '../data/stores';
 import { HauntedHouse } from './HauntedHouse';
 import { CentralCastle } from './CentralCastle';
 import { InteractiveGhostsAndPumpkins } from './InteractiveGhostsAndPumpkins';
@@ -16,6 +16,7 @@ import { ZoomIn, ZoomOut, RotateCcw, Move } from 'lucide-react';
 
 interface InteractiveMapProps {
   player: PlayerData;
+  stores?: StoreInfo[];
   onUpdatePlayer: (updated: PlayerData) => void;
   onRestartGame: () => void;
   selectedStoreFromHud: StoreInfo | null;
@@ -27,11 +28,13 @@ const MAX_SCALE = 3.0;
 
 export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   player,
+  stores,
   onUpdatePlayer,
   onRestartGame,
   selectedStoreFromHud,
   onClearSelectedStore,
 }) => {
+  const currentStores = stores || getStoresForPlayer(player);
   const [activeStoreModal, setActiveStoreModal] = useState<StoreInfo | null>(null);
   const [animatingStoreId, setAnimatingStoreId] = useState<string | null>(null);
   const [showVictoryModal, setShowVictoryModal] = useState(false);
@@ -623,7 +626,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           />
 
           {/* 10 Realistic Isometric Haunted Houses matching Mall Stores */}
-          {STORES_DATA.map((store) => {
+          {currentStores.map((store) => {
             const isUnlocked = (player.unlockedStores || []).includes(store.id);
             const stars = player.storeStars?.[store.id] || (isUnlocked ? 3 : 0);
 

@@ -36,6 +36,7 @@ export const storageService = {
         playerName: player.playerName || '',
         parentName: player.parentName || '',
         gender: player.gender || 'boy',
+        variantId: player.variantId || 'variante-1',
         unlockedStores: player.unlockedStores || [],
         storeStars: player.storeStars || {},
         scanHistory: player.scanHistory || [],
@@ -249,6 +250,7 @@ export const storageService = {
       'Nombre del Niño',
       'Nombre del Representante',
       'Género / Avatar',
+      'Ruta / Mapa Asignado',
       'Tiendas Completadas (Total)',
       'Total Estrellas Obtenidas',
       'Mapa Completado (Castillo)',
@@ -265,6 +267,9 @@ export const storageService = {
       const prizeStatus = p.prizeDelivered ? 'SÍ' : 'NO';
       const prizeTime = p.prizeDeliveredAt ? p.prizeDeliveredAt : 'Pendiente';
       const ticketCode = `DULCE-${p.id.slice(-6).toUpperCase()}`;
+      const routeLabel = 
+        p.variantId === 'variante-2' ? 'Ruta B' : 
+        p.variantId === 'variante-3' ? 'Ruta C' : 'Ruta A';
       const historyStr = (p.scanHistory || [])
         .map((h) => `${h.storeName} (${h.timestamp.slice(11, 19)})`)
         .join(' | ');
@@ -276,6 +281,7 @@ export const storageService = {
         `"${p.playerName.replace(/"/g, '""')}"`,
         `"${p.parentName.replace(/"/g, '""')}"`,
         `"${p.gender === 'girl' ? 'Niña' : 'Niño'}"`,
+        `"${routeLabel}"`,
         storesDone,
         totalStars,
         `"${isCompleted}"`,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StoreInfo } from '../types/game';
 import { X, Printer, QrCode, Sparkles } from 'lucide-react';
 import { PrintableQrModal } from './PrintableQrModal';
+import { getQrCardTheme } from '../data/qrCardThemes';
 
 interface QrVaultModalProps {
   stores: StoreInfo[];
@@ -31,66 +32,86 @@ export const QrVaultModal: React.FC<QrVaultModalProps> = ({
               <span>Carpeta de Respaldo de QRs</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-white font-['Lilita_One']">
-              QRs Oficiales de Tiendas · Unicentro Maracay
+              Tiendas Embrujadas en Unicentro Maracay
             </h2>
             <p className="text-xs text-purple-200/80 font-['Fredoka'] mt-0.5">
-              Tarjetas de respaldo en caso de baja señal de datos o wifi. Puedes imprimirlas o escanearlas directamente desde otra pantalla.
+              Tarjetas oficiales temáticas de respaldo. Puedes probar el canje o abrir la hoja para imprimir.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="p-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-400 text-slate-300 hover:text-amber-300 transition-colors flex items-center gap-1.5 text-xs font-['Fredoka']"
+              className="p-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-400 text-slate-300 hover:text-amber-300 transition-colors flex items-center gap-1.5 text-xs font-['Fredoka'] cursor-pointer"
               title="Imprimir tarjetas QR"
             >
               <Printer className="w-4 h-4" />
-              <span className="hidden sm:inline">Imprimir QRs</span>
+              <span className="hidden sm:inline">Imprimir / Descargar</span>
             </button>
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* 10 Store QR Cards Grid */}
+        {/* Store QR Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 overflow-y-auto pr-1">
           {stores.map((store, idx) => {
-            // Generating standard QR API image for clean scannable QR
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+            const theme = getQrCardTheme(store.slotNumber ? store.slotNumber - 1 : idx);
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
               store.code
             )}&color=000000&bgcolor=FFFFFF`;
 
             return (
               <div
                 key={store.id}
-                className="p-3.5 rounded-2xl bg-purple-950/40 border border-purple-800/60 hover:border-amber-400/80 transition-all flex flex-col items-center text-center relative group"
+                style={{
+                  backgroundColor: theme.cardBg,
+                  borderColor: theme.borderColor,
+                  boxShadow: `0 4px 16px rgba(${theme.borderRgb}, 0.15)`,
+                }}
+                className="p-3.5 rounded-2xl border-2 flex flex-col items-center text-center relative group"
               >
-                {/* Store Index Badge */}
-                <span className="absolute top-2 left-2 text-[10px] font-mono text-purple-300 px-1.5 py-0.5 rounded bg-black/40 border border-purple-500/30">
-                  #{idx + 1}
-                </span>
-
-                {/* Store Header */}
+                {/* Game Title */}
                 <div
-                  className="px-2.5 py-0.5 rounded-md text-[11px] font-bold text-white mb-1 shadow-xs"
-                  style={{ backgroundColor: store.color }}
+                  style={{ color: theme.primaryColor }}
+                  className="text-[10px] font-black uppercase tracking-wider mb-1 flex items-center justify-center gap-1 font-sans"
                 >
-                  {store.category}
+                  <span>{theme.titleEmoji}</span>
+                  <span>Tiendas embrujadas en unicentro maracay</span>
+                  <span>{theme.titleEmoji}</span>
                 </div>
-                <h4 className="font-black text-amber-300 font-['Lilita_One'] text-base tracking-wide">
+
+                {/* Store Name */}
+                <h4
+                  style={{ color: theme.darkColor }}
+                  className="font-black font-['Lilita_One'] text-base tracking-wide uppercase mb-1"
+                >
                   {store.name}
                 </h4>
-                <div className="text-[11px] text-purple-200/70 font-['Fredoka'] mb-2">
-                  {store.location}
-                </div>
 
-                {/* QR Code Container */}
-                <div className="w-32 h-32 p-2 bg-white rounded-xl shadow-md border-2 border-emerald-400 flex items-center justify-center my-1">
+                {/* Framed QR Code Container with 4 Corner Emojis */}
+                <div
+                  style={{ borderColor: theme.borderColor }}
+                  className="w-32 h-32 p-2 bg-white rounded-xl shadow-md border-2 flex items-center justify-center my-1 relative"
+                >
+                  <span className="absolute -top-2.5 -left-2.5 text-base select-none">
+                    {theme.cornerEmojis[0]}
+                  </span>
+                  <span className="absolute -top-2.5 -right-2.5 text-base select-none">
+                    {theme.cornerEmojis[1]}
+                  </span>
+                  <span className="absolute -bottom-2.5 -left-2.5 text-base select-none">
+                    {theme.cornerEmojis[2]}
+                  </span>
+                  <span className="absolute -bottom-2.5 -right-2.5 text-base select-none">
+                    {theme.cornerEmojis[3]}
+                  </span>
+
                   <img
                     src={qrUrl}
                     alt={`QR de ${store.name}`}
@@ -99,9 +120,16 @@ export const QrVaultModal: React.FC<QrVaultModalProps> = ({
                   />
                 </div>
 
-                {/* QR Code String */}
-                <div className="mt-2 text-[10px] font-mono text-slate-300 bg-black/50 px-2 py-0.5 rounded border border-slate-800 truncate max-w-full">
-                  {store.code}
+                {/* Manual Code Pill */}
+                <div
+                  style={{
+                    backgroundColor: theme.badgeBg,
+                    color: theme.badgeText,
+                    borderColor: theme.badgeBorder,
+                  }}
+                  className="mt-2 text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border truncate max-w-full"
+                >
+                  CÓDIGO: {store.code}
                 </div>
 
                 {/* Test button */}
@@ -110,7 +138,7 @@ export const QrVaultModal: React.FC<QrVaultModalProps> = ({
                     onSimulateScan(store);
                     onClose();
                   }}
-                  className="mt-2.5 w-full py-1.5 px-3 rounded-lg bg-emerald-600/80 hover:bg-emerald-500 text-white font-bold text-xs font-['Fredoka'] transition-colors flex items-center justify-center gap-1 shadow-sm"
+                  className="mt-2.5 w-full py-1.5 px-3 rounded-lg bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold text-xs font-['Fredoka'] transition-colors flex items-center justify-center gap-1 shadow-sm cursor-pointer"
                 >
                   <Sparkles className="w-3 h-3 text-amber-300" />
                   <span>Probar / Canjear QR</span>

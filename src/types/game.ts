@@ -6,6 +6,7 @@ export interface PlayerData {
   parentName: string;
   gender: Gender;
   createdAt: string;
+  variantId?: string; // 'variante-1' | 'variante-2' | 'variante-3'
   completedAt?: string;
   prizeDelivered?: boolean;
   prizeDeliveredAt?: string;
