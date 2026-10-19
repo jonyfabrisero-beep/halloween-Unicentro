@@ -61,7 +61,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
-  const [selectedVaultVariant, setSelectedVaultVariant] = useState<'variante-1' | 'variante-2' | 'variante-3' | 'all'>('variante-1');
+  const [selectedVaultVariant, setSelectedVaultVariant] = useState<
+    'variante-1' | 'variante-2' | 'variante-3' | 'variante-4' | 'variante-5' | 'all'
+  >('variante-1');
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -888,6 +890,28 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     >
                       <span>👻</span>
                       <span>Ruta C (10)</span>
+                    </button>
+                    <button
+                      onClick={() => setSelectedVaultVariant('variante-4')}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                        selectedVaultVariant === 'variante-4'
+                          ? 'bg-rose-600 text-white shadow-md'
+                          : 'bg-purple-950/60 text-purple-300 hover:bg-purple-900/60'
+                      }`}
+                    >
+                      <span>🕷️</span>
+                      <span>Ruta D (10)</span>
+                    </button>
+                    <button
+                      onClick={() => setSelectedVaultVariant('variante-5')}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                        selectedVaultVariant === 'variante-5'
+                          ? 'bg-indigo-600 text-white shadow-md'
+                          : 'bg-purple-950/60 text-purple-300 hover:bg-purple-900/60'
+                      }`}
+                    >
+                      <span>🔮</span>
+                      <span>Ruta E (10)</span>
                     </button>
                     <button
                       onClick={() => setSelectedVaultVariant('all')}
