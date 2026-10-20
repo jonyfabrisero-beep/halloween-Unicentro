@@ -12,6 +12,7 @@ interface VictoryModalProps {
   onClose: () => void;
   onRestart: () => void;
   onPlayerUpdate?: (updated: PlayerData) => void;
+  onReplayCinematic?: () => void;
 }
 
 export const VictoryModal: React.FC<VictoryModalProps> = ({
@@ -19,6 +20,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   onClose,
   onRestart,
   onPlayerUpdate,
+  onReplayCinematic,
 }) => {
   const [showStaffPinInput, setShowStaffPinInput] = useState(false);
   const [staffPin, setStaffPin] = useState('');
@@ -116,17 +118,15 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
           <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
 
-        {/* Golden Trophy / Pumpkin Emblem matching Page 8 */}
-        <div className="relative mx-auto w-24 h-24 sm:w-36 sm:h-36 flex items-center justify-center mb-2 sm:mb-3">
+        {/* Bruja Derrotada Emblem */}
+        <div className="relative mx-auto w-32 sm:w-40 max-w-[80%] flex items-center justify-center mb-1 sm:mb-2">
           <img
-            src="/src/assets/images/halloween_victory_badge_1790615248271.jpg"
-            alt="Trofeo Mapa Completado"
-            className="w-full h-full object-contain filter drop-shadow-[0_0_25px_rgba(251,191,36,0.9)] animate-bounce"
-            style={{ animationDuration: '3s' }}
-            referrerPolicy="no-referrer"
+            src="/bruja_derrotada.png"
+            alt="Bruja Derrotada - ¡Tú ganas!"
+            className="w-full h-auto object-contain filter drop-shadow-[0_0_18px_rgba(251,191,36,0.7)]"
           />
-          <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-amber-300 absolute -top-1 sm:-top-2 -left-1 sm:-left-2 animate-ping" style={{ animationDuration: '2s' }} />
-          <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-200 absolute -bottom-1 -right-1 animate-pulse" />
+          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 absolute -top-1 -left-1 animate-pulse" />
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-200 absolute -bottom-1 -right-1 animate-pulse" />
         </div>
 
         {/* Purple Banner Ribbon "mapa completado" matching Page 8 */}
@@ -280,6 +280,20 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
             <span>Nuevo Jugador</span>
           </button>
         </div>
+
+        {onReplayCinematic && (
+          <div className="mt-3.5 flex justify-center">
+            <button
+              onClick={() => {
+                onClose();
+                onReplayCinematic();
+              }}
+              className="text-xs text-purple-300 hover:text-amber-300 underline underline-offset-4 cursor-pointer flex items-center gap-1.5 transition-colors font-medium"
+            >
+              <span>🎬 Volver a ver la huida de la bruja</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

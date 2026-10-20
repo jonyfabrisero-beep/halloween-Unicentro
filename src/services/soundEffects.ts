@@ -264,6 +264,33 @@ class SoundEffectsService {
     } catch {}
   }
 
+  // Comical witch escape sound on broom (whoosh + warble + slide)
+  public playWitchEscape() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx || !this.sfxGain) return;
+    try {
+      const now = this.ctx.currentTime;
+      // High whoosh & cackle slide
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(400, now);
+      osc.frequency.exponentialRampToValueAtTime(1400, now + 0.4);
+      osc.frequency.exponentialRampToValueAtTime(800, now + 0.8);
+      osc.frequency.exponentialRampToValueAtTime(2200, now + 1.4);
+
+      gain.gain.setValueAtTime(0.01, now);
+      gain.gain.linearRampToValueAtTime(0.25, now + 0.3);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+
+      osc.connect(gain);
+      gain.connect(this.sfxGain);
+      osc.start(now);
+      osc.stop(now + 1.6);
+    } catch {}
+  }
+
   // Delegate background music to the high-quality musica_fondo.mp3 soundtrack
   public startMusic() {
     ambientSound.start();

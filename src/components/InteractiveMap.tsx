@@ -9,6 +9,7 @@ import { ParticleCanvas, ParticleTrigger } from './ParticleCanvas';
 import { DriftingMist } from './DriftingMist';
 import { QrScannerModal } from './QrScannerModal';
 import { VictoryModal } from './VictoryModal';
+import { WitchEscapeCinematic } from './WitchEscapeCinematic';
 import { soundEffects } from '../services/soundEffects';
 import { storageService } from '../services/storage';
 import confetti from 'canvas-confetti';
@@ -38,6 +39,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const [activeStoreModal, setActiveStoreModal] = useState<StoreInfo | null>(null);
   const [animatingStoreId, setAnimatingStoreId] = useState<string | null>(null);
   const [showVictoryModal, setShowVictoryModal] = useState(false);
+  const [isCinematicActive, setIsCinematicActive] = useState(false);
   
   // Touch Gestures: Zoom & Pan state
   const [scale, setScale] = useState<number>(1.0);
@@ -198,6 +200,13 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     handleZoom(scale - 0.35);
   };
 
+  const triggerCastleUnlockSequence = () => {
+    setIsCinematicActive(true);
+    // Smoothly pan & zoom to center directly on the Central Castle
+    setScale(1.45);
+    setPan(clampPan(0, isPortrait ? 25 : 0, 1.45));
+  };
+
   // Touch Gesture Listeners: Pinch-to-zoom & 1-finger pan with native preventDefault and momentum
   useEffect(() => {
     // Listen on the full-screen container so touches anywhere on screen scroll the map
@@ -205,11 +214,12 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     if (!container) return;
 
     const onTouchStart = (e: TouchEvent) => {
-      // If a modal is open, completely bypass map touch gestures to allow smooth native modal scrolling
+      // If a modal or cinematic is open, completely bypass map touch gestures to allow smooth native modal scrolling
       const target = e.target as HTMLElement | null;
       if (
         activeStoreModal ||
         showVictoryModal ||
+        isCinematicActive ||
         target?.closest('.modal-container') ||
         target?.closest('[role="dialog"]')
       ) {
@@ -387,6 +397,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
 
   // Mouse wheel / trackpad zoom & mouse drag on desktop
   const handleWheel = (e: React.WheelEvent) => {
+    if (isCinematicActive) return;
     if (e.ctrlKey || Math.abs(e.deltaY) > 0) {
       e.preventDefault();
       const zoomFactor = e.deltaY < 0 ? 0.15 : -0.15;
@@ -395,7 +406,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0) return; // Only left click
+    if (isCinematicActive || e.button !== 0) return; // Only left click when cinematic is not playing
     const ts = touchStateRef.current;
     ts.isDragging = true;
     ts.startX = e.clientX;
@@ -505,14 +516,11 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
         storageService.saveCurrentPlayer(updatedPlayer);
         onUpdatePlayer(updatedPlayer);
 
-        // If all 10 stores are unlocked, open the central castle lock with fanfare!
+        // If all 10 stores are unlocked, trigger the dramatic cinematic sequence before showing victory!
         if (allNowComplete) {
           setTimeout(() => {
-            try {
-              soundEffects.playUnlock();
-            } catch {}
-            setShowVictoryModal(true);
-          }, 1600);
+            triggerCastleUnlockSequence();
+          }, 1400);
         }
       } catch (err) {
         console.error('Error updating player scan state:', err);
@@ -598,10 +606,6 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
             alt="Fondo Animado del Juego Unicentro Maracay"
             className="absolute inset-0 w-full h-full object-fill object-center pointer-events-none select-none"
             loading="eager"
-            onError={(e) => {
-              // Fallback to static png if needed
-              (e.target as HTMLImageElement).src = '/mapa_de_fondo.png';
-            }}
           />
 
           {/* Ambient Spooky Overlay & Mist */}
@@ -649,9 +653,18 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
             totalStores={10}
             isUnlocked={isAllComplete}
             onOpenVictory={() => {
-              if (touchStateRef.current.dragDistance <= 8) {
+              if (touchStateRef.current.dragDistance <= 8 && !isCinematicActive) {
                 setShowVictoryModal(true);
               }
+            }}
+          />
+
+          {/* Central Castle Unlock & Witch Escape Cinematic Cutscene */}
+          <WitchEscapeCinematic
+            isActive={isCinematicActive}
+            onComplete={() => {
+              setIsCinematicActive(false);
+              setShowVictoryModal(true);
             }}
           />
         </div>
@@ -741,6 +754,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           onClose={() => setShowVictoryModal(false)}
           onRestart={onRestartGame}
           onPlayerUpdate={onUpdatePlayer}
+          onReplayCinematic={triggerCastleUnlockSequence}
         />
       )}
     </div>

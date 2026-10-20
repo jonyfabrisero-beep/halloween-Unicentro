@@ -13,6 +13,7 @@ import OrientationWarning from './components/OrientationWarning';
 import { OrientationSetupScreen } from './components/OrientationSetupScreen';
 import { IntroScreen } from './components/IntroScreen';
 import { RegistrationScreen } from './components/RegistrationScreen';
+import { LoadingScreen } from './components/LoadingScreen';
 import { InteractiveMap } from './components/InteractiveMap';
 import { TopHud } from './components/TopHud';
 import { AdminModal } from './components/AdminModal';
@@ -23,7 +24,7 @@ export default function App() {
   );
 
   const [currentScreen, setCurrentScreen] = useState<GameScreen>(() =>
-    storageService.getCurrentPlayer() ? 'MAP' : 'REGISTRATION'
+    storageService.getCurrentPlayer() ? 'LOADING' : 'REGISTRATION'
   );
 
   const [isMuted, setIsMuted] = useState<boolean>(() => soundEffects.getIsMuted());
@@ -95,7 +96,7 @@ export default function App() {
       ambientSound.start();
     }
     if (currentPlayer) {
-      setCurrentScreen('MAP');
+      setCurrentScreen('LOADING');
     } else {
       setCurrentScreen('REGISTRATION');
     }
@@ -125,7 +126,7 @@ export default function App() {
         <OrientationSetupScreen
           onContinue={() => {
             if (currentPlayer) {
-              setCurrentScreen('MAP');
+              setCurrentScreen('LOADING');
             } else {
               setCurrentScreen('INTRO');
             }
@@ -141,6 +142,15 @@ export default function App() {
         <RegistrationScreen
           onRegistered={handleRegistered}
           onOpenAdmin={() => setShowAdminModal(true)}
+        />
+      )}
+
+      {currentScreen === 'LOADING' && (
+        <LoadingScreen
+          player={currentPlayer}
+          onLoaded={() => {
+            setCurrentScreen('MAP');
+          }}
         />
       )}
 

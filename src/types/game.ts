@@ -83,5 +83,6 @@ export type GameScreen =
   | 'ORIENTATION_SETUP'
   | 'INTRO'
   | 'REGISTRATION'
+  | 'LOADING'
   | 'MAP'
   | 'VICTORY';
