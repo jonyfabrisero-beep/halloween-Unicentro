@@ -67,17 +67,17 @@
 
 @keyframes fall {
   0% {
-    transform: translateY(-60px) rotate(0deg);
+    transform: translateY(0) rotate(0deg);
     opacity: 0;
   }
-  10% {
-    opacity: 1;
+  6% {
+    opacity: 0.95;
   }
-  90% {
-    opacity: 1;
+  92% {
+    opacity: 0.95;
   }
   100% {
-    transform: translateY(105vh) rotate(360deg);
+    transform: translateY(calc(100vh + 180px)) rotate(360deg);
     opacity: 0;
   }
 }

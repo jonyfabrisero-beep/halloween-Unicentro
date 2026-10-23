@@ -36,10 +36,6 @@ export const HauntedHouse: React.FC<HauntedHouseProps> = ({
     `/tiendas/salvadas/${store.slotNumber}_salvada.webp`,
     `/tiendas/salvadas/tienda_${String(store.slotNumber).padStart(2, '0')}_salvada.webp`,
     `/tiendas/salvadas/tienda_${store.slotNumber}_salvada.webp`,
-    `/tiendas/salvadas/${store.slotNumber}_salvada.png`,
-    `/tiendas/salvadas/${cleanName}_salvada.png`,
-    `/tiendas/salvadas/${cleanBrand}_salvada.png`,
-    `/tiendas/salvadas/${store.slotNumber}.png`,
   ].filter(Boolean);
 
   const isAnimating = animatingStoreId === store.id;

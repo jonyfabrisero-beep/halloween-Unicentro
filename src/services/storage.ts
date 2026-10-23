@@ -269,7 +269,10 @@ export const storageService = {
       const ticketCode = `DULCE-${p.id.slice(-6).toUpperCase()}`;
       const routeLabel = 
         p.variantId === 'variante-2' ? 'Ruta B' : 
-        p.variantId === 'variante-3' ? 'Ruta C' : 'Ruta A';
+        p.variantId === 'variante-3' ? 'Ruta C' :
+        p.variantId === 'variante-4' ? 'Ruta D' :
+        p.variantId === 'variante-5' ? 'Ruta E' :
+        p.variantId === 'variante-6' ? 'Ruta F' : 'Ruta A';
       const historyStr = (p.scanHistory || [])
         .map((h) => `${h.storeName} (${h.timestamp.slice(11, 19)})`)
         .join(' | ');

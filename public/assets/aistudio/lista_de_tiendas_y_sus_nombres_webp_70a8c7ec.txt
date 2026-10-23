@@ -1,0 +1,247 @@
+VARIANTE 1 "Ruta A":
+1: bambu tea
+embrujada: bambu_tea_embrujada.webp
+salvada: bambu_tea_salvada.webp
+
+2: biella
+embrujada: biella_embrujada.webp
+salvada: biella_salvada.webp
+
+3: depekes
+embrujada: depekes_embrujada.webp
+salvada: depekes_salvada.webp
+
+4: farmatodo
+embrujada: farmatodo_embrujada.webp
+salvada: farmatodo_salvada.webp
+
+5: Jadu
+embrujada: jadu_embrujada.webp
+salvada: jadu_salvada.webp
+
+6: Jump
+embrujada: jump_embrujada.webp
+salvada: jump_salvada.webp
+
+7: Mobalu store
+embrujada: mobalu_embrujada.webp
+salvada: mobalu_salvada.webp
+
+8: Probiovida
+embrujada: probiovida_embrujada.webp
+salvada: probiovida_salvada.webp
+
+9: Quiero galleta
+embrujada: quiero_galleta_embrujada.webp
+salvada: quiero_galleta_salvada.webp
+
+10: Siddhi
+embrujada: siddhi_embrujada.webp
+salvada: siddhi_salvada.webp
+
+VARIANTE 2 "Ruta B":
+1: Sushi y cebiches
+embrujada: sushi_&cebiches_embrujada.webp
+salvada: sushi&_cebiches_salvada.webp
+
+2: Yalorde tentaciones
+embrujada: yalorde_embrujada.webp
+salvada: yalorde_salvada.webp
+
+3: Maison rose
+embrujada: maison_rose_embrujada.webp
+salvada: maison_rose_salvada.webp
+
+4: My platinum
+embrujada: my_platinum_embrujada.webp
+salvada: my_platinum_salvada.webp 
+
+5: Planet Park
+embrujada: planet_park_embrujada.webp
+salvada: planet_park_salvada.webp
+
+6: Coco Bongo
+embrujada: coco_bongo_embrujada.webp
+salvada: coco_bongo_salvada.webp
+
+7: Cherry Beauty
+embrujada: cherry_beauty_embrujada.webp
+salvada: cherry_beauty_salvada.webp
+ 
+8: Gatitas fashion
+embrujada: gatitas_fashion_embrujada.webp
+salvada: gatitas_fashion_salvada.webp
+
+9: Baby fun
+embrujada: baby_fun_embrujada.webp
+salvada: baby_fun_salvada.webp
+
+10: Vijones
+embrujada: vijones_embrujada.webp
+salvada: vijones_salvada.webp
+
+
+VARIANTE 3 "Ruta c":
+1: maiso
+embrujada: maiso_embrujada.webp
+salvada: maiso_salvada.webp
+
+2: Incanto bloom
+embrujada: incanto_bloom_embrujada.webp
+salvada: incanto_bloom_salvada.webp
+
+3: Remington center
+embrujada: remington_center_embrujada.webp
+salvada: remington_center_salvada.webp
+
+4: Doggie
+embrujada: doggie_embrujada.webp
+salvada: doggie_salvada.webp
+
+5: Xtasis Store
+embrujada: xtasis_store_embrujada.webp
+salvada: xtasis_stores_salvada.webp
+
+6: Hallyu
+embrujada: hallyu_embrujada.webp
+salvada: Hallyu_salvada.webp
+
+7:Arrow
+embrujada: arrow_embrujada.webp
+salvada: arrow_salvada.webp
+
+8: Atlanta
+embrujada: atlanta_embrujada.webp
+salvada: atlanta_salvada.webp
+
+9:Beato napoletano
+embrujada: beato_napoletano_embrujada.webp
+salvada: beato_napoletano_salvada.webp
+
+10:Beaunique
+embrujada: beaunique_embrujada.webp
+salvada: beaunique_salvada.webp
+
+VARIANTE 4 "Ruta d":
+1:Cerrajería Gran Colombia
+embrujada: cerrajeria_gran_colombia_embrujada.webp
+salvada: cerrajeria_gran_colombia_salvada.webp
+
+2:Chako Lab
+embrujada: chako_lab_embrujada.webp
+salvada: chako_lab_salvada.webp
+
+3:Demaciao Pizza
+embrujada: demaciao_pizza_embrujada.webp
+salvada: demaciao_pizza_salvada.webp
+
+4: Fit Shop
+embrujada: fit_shop_embrujada.webp
+salvada: fit_shop_salvada.webp
+
+5: Focus fitness
+embrujada: focus_fitness_embrujada.webp
+salvada: focus_fitness_salvada.webp
+
+6: Goals moda
+embrujada: goals_moda_embrujada.webp
+salvada: Goals_moda.webp
+
+7:Hubble
+embrujada: hubble_embrujada.webp
+salvada: hubble_salvada.webp
+
+8: Infinite fix
+embrujada: infinite_fix_embrujada.webp
+salvada: infinite_fix_salvada.webp
+
+9: Lily eyes
+embrujada: lily_eyes_studio_embrujada.webp
+salvada: lily_eyes__studio_salvada.webp
+
+10:Limoncello
+embrujada: limoncello_embrujada.webp
+salvada: limoncello_salvada.webp
+
+VARIANTE 5 "Ruta e":
+1: Lulie store
+embrujada: lulie_store_embrujada.webp
+salvada: lulie_store_salvada.webp
+
+2: Opticolor
+embrujada: opticolor_embrujada.webp
+salvada: opticolor_salvada.webp
+
+3: Pollos Gran Combo
+embrujada: pollos_gran_combo_embrujada.webp
+salvada: pollos_gran_combo_salvada.webp
+
+4: Tajma joyas
+embrujada: tajma_joyas_embrujada.webp
+salvada: tajma_joyas_salvada.webp
+
+5: Tanooki
+embrujada: tanooki_embrujada.webp
+salvada: tanooki_salvada.webp
+
+6: Tu punto shop
+embrujada: tu_punto_shop_embrujada.webp
+salvada: tu_punto_shop_salvada.webp
+
+7: Vanitum
+embrujada: vanitum_embrujada.webp
+salvada: vanitum_salvada.webp
+
+8:Vida Pet
+embrujada: vida_pets_embrujada.webp
+salvada: vida_pet_salvada.webp
+
+9: Ziba
+embrujada: ziba_embrujada.webp
+salvada: ziba_salvada.webp
+
+10: Pawer
+embrujada:pawe_embrujada.webp
+salvada: pawer_salvada.webp
+
+VARIANTE 6 "Ruta f":
+
+1: Isafit
+embrujada: _embrujada.webp
+salvada: _salvada.webp
+
+2: Santa papa
+embrujada: santa_papa_embrujada.webp
+salvada: santa_papa_salvada.webp
+
+3: The children place
+embrujada: The_children_place_embrujada.webp
+salvada: The_children_place_salvada.webp
+
+4: Forum
+embrujada: forum_embrujada.webp
+salvada: forum_salvada.webp
+
+5: Sportland
+embrujada: Sportland_embrujada.webp
+salvada: Sportland_salvada.webp
+
+6: Clarks
+embrujada: Clarks_embrujada.webp
+salvada: Clarks_salvada.webp
+
+7: baking amor
+embrujada: baking_embrujada.webp
+salvada: baking_salvada.webp
+
+8: Ilahui
+embrujada: ilahui_embrujada.webp
+salvada: ilahui_salvada.webp
+
+9: Shoebox
+embrujada: shoebox_embrujada.webp
+salvada: shoebox_salvada.webp
+
+10: La nota	
+embrujada: la_nota_embrujada.webp
+salvada: la_nota_salvada.webp

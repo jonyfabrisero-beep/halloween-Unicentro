@@ -62,7 +62,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [selectedVaultVariant, setSelectedVaultVariant] = useState<
-    'variante-1' | 'variante-2' | 'variante-3' | 'variante-4' | 'variante-5' | 'all'
+    'variante-1' | 'variante-2' | 'variante-3' | 'variante-4' | 'variante-5' | 'variante-6' | 'all'
   >('variante-1');
 
   useEffect(() => {
@@ -769,6 +769,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         const routeBadge = 
                           p.variantId === 'variante-2' ? { label: 'Ruta B', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40' } :
                           p.variantId === 'variante-3' ? { label: 'Ruta C', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' } :
+                          p.variantId === 'variante-4' ? { label: 'Ruta D', color: 'bg-rose-500/20 text-rose-300 border-rose-500/40' } :
+                          p.variantId === 'variante-5' ? { label: 'Ruta E', color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' } :
+                          p.variantId === 'variante-6' ? { label: 'Ruta F', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' } :
                           { label: 'Ruta A', color: 'bg-purple-500/20 text-purple-300 border-purple-500/40' };
                         return (
                           <tr key={p.id} className="hover:bg-purple-900/20 transition-colors">
@@ -912,6 +915,17 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     >
                       <span>🔮</span>
                       <span>Ruta E (10)</span>
+                    </button>
+                    <button
+                      onClick={() => setSelectedVaultVariant('variante-6')}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                        selectedVaultVariant === 'variante-6'
+                          ? 'bg-teal-600 text-white shadow-md'
+                          : 'bg-purple-950/60 text-purple-300 hover:bg-purple-900/60'
+                      }`}
+                    >
+                      <span>🍭</span>
+                      <span>Ruta F (10)</span>
                     </button>
                     <button
                       onClick={() => setSelectedVaultVariant('all')}

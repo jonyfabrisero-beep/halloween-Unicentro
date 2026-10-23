@@ -10,10 +10,8 @@ import { storageService } from './services/storage';
 import { soundEffects } from './services/soundEffects';
 import { ambientSound } from './services/ambientAudio';
 import OrientationWarning from './components/OrientationWarning';
-import { OrientationSetupScreen } from './components/OrientationSetupScreen';
 import { IntroScreen } from './components/IntroScreen';
 import { RegistrationScreen } from './components/RegistrationScreen';
-import { LoadingScreen } from './components/LoadingScreen';
 import { InteractiveMap } from './components/InteractiveMap';
 import { TopHud } from './components/TopHud';
 import { AdminModal } from './components/AdminModal';
@@ -23,9 +21,7 @@ export default function App() {
     storageService.getCurrentPlayer()
   );
 
-  const [currentScreen, setCurrentScreen] = useState<GameScreen>(() =>
-    storageService.getCurrentPlayer() ? 'LOADING' : 'REGISTRATION'
-  );
+  const [currentScreen, setCurrentScreen] = useState<GameScreen>('INTRO');
 
   const [isMuted, setIsMuted] = useState<boolean>(() => soundEffects.getIsMuted());
   const [volume, setVolume] = useState<number>(() => soundEffects.getMusicVolume());
@@ -96,7 +92,7 @@ export default function App() {
       ambientSound.start();
     }
     if (currentPlayer) {
-      setCurrentScreen('LOADING');
+      setCurrentScreen('MAP');
     } else {
       setCurrentScreen('REGISTRATION');
     }
@@ -107,13 +103,13 @@ export default function App() {
       ambientSound.start();
     }
     setCurrentPlayer(newPlayer);
-    setCurrentScreen('ORIENTATION_SETUP');
+    setCurrentScreen('MAP');
   };
 
   const handleRestartGame = () => {
     storageService.clearCurrentPlayer();
     setCurrentPlayer(null);
-    setCurrentScreen('REGISTRATION');
+    setCurrentScreen('INTRO');
   };
 
   return (
@@ -122,35 +118,14 @@ export default function App() {
       {currentScreen === 'MAP' && <OrientationWarning />}
 
       {/* Screen Router */}
-      {currentScreen === 'ORIENTATION_SETUP' && (
-        <OrientationSetupScreen
-          onContinue={() => {
-            if (currentPlayer) {
-              setCurrentScreen('LOADING');
-            } else {
-              setCurrentScreen('INTRO');
-            }
-          }}
-        />
-      )}
-
       {currentScreen === 'INTRO' && (
-        <IntroScreen onStart={handleStartFromIntro} />
+        <IntroScreen player={currentPlayer} onStart={handleStartFromIntro} />
       )}
 
       {currentScreen === 'REGISTRATION' && (
         <RegistrationScreen
           onRegistered={handleRegistered}
           onOpenAdmin={() => setShowAdminModal(true)}
-        />
-      )}
-
-      {currentScreen === 'LOADING' && (
-        <LoadingScreen
-          player={currentPlayer}
-          onLoaded={() => {
-            setCurrentScreen('MAP');
-          }}
         />
       )}
 

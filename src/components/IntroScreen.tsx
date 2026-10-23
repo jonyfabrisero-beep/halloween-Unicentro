@@ -1,5 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { PlayerData } from '../types/game';
+import { getStoresForPlayer, MAP_VARIANTS } from '../data/stores';
 import { soundEffects } from '../services/soundEffects';
+import { Sparkles, Ghost } from 'lucide-react';
 
 interface FallingItem {
   id: number;
@@ -8,163 +11,303 @@ interface FallingItem {
   delay: number;
   size: number;
   rotationSpeed: number;
-  type: 'pumpkin' | 'potion' | 'book' | 'flame' | 'candy';
+  type: 'pumpkin' | 'potion' | 'book' | 'ghost';
 }
 
-export const IntroScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
-  const [items, setItems] = useState<FallingItem[]>([]);
+interface IntroScreenProps {
+  player?: PlayerData | null;
+  onStart: () => void;
+}
 
+const CRITICAL_ASSETS = [
+  // Fondo e ilustraciones del Intro
+  '/intro/fondo_morado.webp',
+  '/intro/calabaza.webp',
+  '/intro/fantasma.webp',
+  '/intro/libro.webp',
+  '/intro/pocion.webp',
+  '/LOGO03B.png',
+
+  // Fondos del Juego
+  '/fondo_animado_juego.gif',
+
+  // Castillo Central, Bruja y Candados
+  '/houses/castillo_central.png',
+  '/castle/parte_superior_candado.png',
+  '/castle/parte_inferior_candado.png',
+  '/bruja_huyendo.png',
+  '/bruja_derrotada.png',
+
+  // Calabazas Interactivas
+  '/pumpkins/calabaza_rostro.png',
+  '/pumpkins/calabaza_sin_rostro.png',
+  '/pumpkins/calabazas_duo.png',
+  '/pumpkins/trio_calabazas.png',
+
+  // Árboles
+  '/trees/arbol_01.png',
+  '/trees/arbol_02.png',
+  '/trees/arbol_03.png',
+  '/trees/arbol_04.png',
+  '/trees/arbol_05.png',
+
+  // HUD Candados
+  '/hud/qr_acertado.png',
+  '/hud/qr_por_acertar.png',
+];
+
+const SPOOKY_TIPS = [
+  'Invocando la niebla en Unicentro Maracay...',
+  'Despertando a los fantasmas traviesos...',
+  'Encendiendo las calabazas encantadas...',
+  'Hechizando las tiendas de tu ruta...',
+  'Asegurando los 10 candados del Castillo Central...',
+  '¡Todo listo para entrar a las tiendas!',
+];
+
+export const IntroScreen: React.FC<IntroScreenProps> = ({ player, onStart }) => {
+  const [items, setItems] = useState<FallingItem[]>([]);
+  const [progress, setProgress] = useState(0);
+  const [isPreloadComplete, setIsPreloadComplete] = useState(false);
+  const [tipIndex, setTipIndex] = useState(0);
+  const [canSkip, setCanSkip] = useState(false);
+  const hasTriggeredRef = useRef(false);
+
+  // Generar lluvia de elementos auténticos (calabaza, fantasma, libro, poción)
   useEffect(() => {
-    // Generate 16 fun falling spooky items matching Page 6
-    const generated: FallingItem[] = Array.from({ length: 18 }).map((_, i) => ({
-      id: i,
-      x: 5 + Math.random() * 90,
-      speed: 4 + Math.random() * 5,
-      delay: Math.random() * 4,
-      size: 32 + Math.random() * 28,
-      rotationSpeed: (Math.random() - 0.5) * 80,
-      type: (['pumpkin', 'potion', 'book', 'flame', 'candy'] as const)[i % 5],
-    }));
+    const generated: FallingItem[] = Array.from({ length: 16 }).map((_, i) => {
+      const speed = 5.5 + Math.random() * 4.5; // 5.5s a 10s
+      return {
+        id: i,
+        x: 4 + (i * 6.2 + Math.random() * 3) % 91, // Distribución horizontal equilibrada
+        speed,
+        delay: -Math.random() * speed, // Delay negativo: ya están cayendo a distintas alturas desde el segundo 0
+        size: 32 + Math.random() * 18, // Tamaño balanceado (32px a 50px)
+        rotationSpeed: (Math.random() - 0.5) * 50,
+        type: (['pumpkin', 'ghost', 'book', 'potion'] as const)[i % 4],
+      };
+    });
     setItems(generated);
   }, []);
 
+  // Rotar frases mágicas cada 1.8s
+  useEffect(() => {
+    const tipInterval = setInterval(() => {
+      setTipIndex((prev) => (prev + 1) % SPOOKY_TIPS.length);
+    }, 1800);
+    return () => clearInterval(tipInterval);
+  }, []);
+
+  // Red de seguridad: permitir avanzar tras 3.5s si la red es lenta
+  useEffect(() => {
+    const skipTimer = setTimeout(() => {
+      setCanSkip(true);
+      setIsPreloadComplete(true);
+      setProgress(100);
+    }, 3500);
+    return () => clearTimeout(skipTimer);
+  }, []);
+
+  // Pre-carga invisible en segundo plano de imágenes y assets
+  useEffect(() => {
+    const storeAssets: string[] = [];
+
+    if (player) {
+      const stores = getStoresForPlayer(player);
+      stores.forEach((s) => {
+        if (s.imagePath) storeAssets.push(s.imagePath);
+        if (s.savedImagePath) storeAssets.push(s.savedImagePath);
+      });
+    } else {
+      // Si aún no está registrado, pre-cargamos tiendas de las variantes
+      MAP_VARIANTS.forEach((variant) => {
+        variant.stores.forEach((s) => {
+          if (s.imagePath) storeAssets.push(s.imagePath);
+        });
+      });
+    }
+
+    const allUrls = Array.from(new Set([...CRITICAL_ASSETS, ...storeAssets]));
+    const total = allUrls.length;
+    let loaded = 0;
+
+    const handleOneAsset = () => {
+      loaded += 1;
+      const pct = Math.min(100, Math.round((loaded / total) * 100));
+      setProgress(pct);
+
+      if (loaded >= total && !hasTriggeredRef.current) {
+        hasTriggeredRef.current = true;
+        setIsPreloadComplete(true);
+        soundEffects.playStarChime(3);
+      }
+    };
+
+    allUrls.forEach((url) => {
+      const img = new Image();
+      img.onload = handleOneAsset;
+      img.onerror = handleOneAsset;
+      img.src = url;
+    });
+  }, [player]);
+
   const handleStart = () => {
+    if (!isPreloadComplete && !canSkip && progress < 30) return;
+
     soundEffects.playBounce();
     soundEffects.startMusic();
     onStart();
   };
 
+  const isReady = isPreloadComplete || canSkip || progress >= 95;
+
   return (
     <div
-      onClick={handleStart}
+      onClick={isReady ? handleStart : undefined}
       style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-      className="relative w-full min-h-[100dvh] flex flex-col items-center justify-between p-4 sm:p-6 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-[#2e0854] via-[#1a0536] to-[#0d021f] text-white cursor-pointer select-none touch-pan-y"
+      className={`relative w-full min-h-[100dvh] flex flex-col items-center justify-between p-4 sm:p-6 overflow-y-auto overflow-x-hidden bg-[#18032b] text-white select-none touch-pan-y transition-colors duration-500 ${
+        isReady ? 'cursor-pointer' : 'cursor-default'
+      }`}
     >
-      {/* Background illustration overlay */}
+      {/* Fondo morado oficial */}
       <img
-        src="/src/assets/images/halloween_intro_splash_1790615262295.jpg"
-        alt="Halloween Unicentro"
-        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none mix-blend-screen"
-        referrerPolicy="no-referrer"
+        src="/intro/fondo_morado.webp"
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none opacity-85"
+        draggable={false}
       />
 
-      {/* Radiant glow rays in the center */}
+      {/* Degradado para óptimo contraste */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#18032b]/40 via-transparent to-[#0a0118]/70 pointer-events-none" />
+
+      {/* Resplandor radial de fondo */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[600px] h-[600px] rounded-full bg-gradient-radial from-amber-500/20 via-purple-600/10 to-transparent blur-3xl animate-pulse" />
+        <div className="w-[600px] h-[600px] rounded-full bg-gradient-radial from-amber-500/15 via-purple-600/10 to-transparent blur-3xl animate-pulse" />
       </div>
 
-      {/* Falling objects (calabazas, pociones, libros, fuegos fatuos) */}
+      {/* Lluvia de elementos temáticos con las imágenes oficiales proporcionadas */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {items.map((item) => (
           <div
             key={item.id}
             className="absolute animate-fall"
             style={{
+              top: '-90px',
               left: `${item.x}%`,
               animationDuration: `${item.speed}s`,
               animationDelay: `${item.delay}s`,
               width: `${item.size}px`,
               height: `${item.size}px`,
+              willChange: 'transform',
             }}
           >
-            {item.type === 'pumpkin' && (
-              <svg viewBox="0 0 100 90" className="w-full h-full filter drop-shadow-[0_0_8px_#f97316]">
-                <ellipse cx="50" cy="50" rx="42" ry="34" fill="#EA580C" stroke="#9A3412" strokeWidth="2.5" />
-                <ellipse cx="50" cy="50" rx="22" ry="34" fill="#F97316" stroke="#9A3412" strokeWidth="2" />
-                <rect x="47" y="10" width="7" height="10" rx="2" fill="#15803D" />
-                <polygon points="36,40 43,48 30,48" fill="#451A03" />
-                <polygon points="64,40 70,48 57,48" fill="#451A03" />
-                <path d="M32 60 L38 68 L44 60 L50 68 L56 60 L62 68 L68 60 Z" fill="#451A03" />
-              </svg>
-            )}
-            {item.type === 'potion' && (
-              <svg viewBox="0 0 100 100" className="w-full h-full filter drop-shadow-[0_0_8px_#c084fc]">
-                <rect x="43" y="12" width="14" height="16" fill="#64748B" rx="2" />
-                <path d="M43 28 L24 75 Q20 85 32 88 L68 88 Q80 85 76 75 L57 28 Z" fill="#9333EA" stroke="#C084FC" strokeWidth="2.5" />
-                <ellipse cx="50" cy="72" rx="16" ry="6" fill="#C084FC" opacity="0.6" />
-                <circle cx="44" cy="55" r="3" fill="#E9D5FF" />
-                <circle cx="56" cy="62" r="2" fill="#E9D5FF" />
-              </svg>
-            )}
-            {item.type === 'book' && (
-              <svg viewBox="0 0 100 100" className="w-full h-full filter drop-shadow-[0_0_8px_#ef4444]">
-                <rect x="22" y="18" width="56" height="66" rx="5" fill="#991B1B" stroke="#F59E0B" strokeWidth="2.5" />
-                <circle cx="50" cy="50" r="14" stroke="#FBBF24" strokeWidth="2" fill="none" />
-                <polygon points="50,38 53,47 62,47 55,52 58,61 50,56 42,61 45,52 38,47 47,47" fill="#FBBF24" />
-              </svg>
-            )}
-            {item.type === 'flame' && (
-              <svg viewBox="0 0 100 100" className="w-full h-full filter drop-shadow-[0_0_8px_#38bdf8]">
-                <path d="M50 8 C30 24, 24 50, 28 72 C36 86, 64 86, 72 72 C76 50, 70 24, 50 8 Z" fill="#38BDF8" stroke="#0284C7" strokeWidth="2" />
-                <ellipse cx="44" cy="48" rx="3.5" ry="5" fill="#0C4A6E" />
-                <ellipse cx="56" cy="48" rx="3.5" ry="5" fill="#0C4A6E" />
-                <path d="M46 60 Q50 66 54 60" stroke="#0C4A6E" strokeWidth="2" fill="none" />
-              </svg>
-            )}
-            {item.type === 'candy' && (
-              <svg viewBox="0 0 100 100" className="w-full h-full filter drop-shadow-[0_0_8px_#fbbf24]">
-                <rect x="30" y="38" width="40" height="24" rx="4" fill="#F59E0B" stroke="#D97706" strokeWidth="2" />
-                <line x1="38" y1="38" x2="44" y2="62" stroke="#FFFFFF" strokeWidth="2.5" />
-                <line x1="56" y1="38" x2="62" y2="62" stroke="#FFFFFF" strokeWidth="2.5" />
-                <polygon points="30,50 16,36 16,64" fill="#D97706" />
-                <polygon points="70,50 84,36 84,64" fill="#D97706" />
-              </svg>
-            )}
+            <img
+              src={
+                item.type === 'pumpkin'
+                  ? '/intro/calabaza.webp'
+                  : item.type === 'potion'
+                  ? '/intro/pocion.webp'
+                  : item.type === 'book'
+                  ? '/intro/libro.webp'
+                  : '/intro/fantasma.webp'
+              }
+              alt=""
+              className="w-full h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.55)] pointer-events-none select-none"
+              draggable={false}
+            />
           </div>
         ))}
       </div>
 
-      {/* Top subtitle */}
-      <div className="z-10 pt-2 text-center">
-        <span className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-amber-300 bg-purple-950/70 px-4 py-1.5 rounded-full border border-amber-400/30 shadow-md">
-          Especial de Halloween 2026
-        </span>
-      </div>
+      {/* Espaciador superior (badge removido según instrucción) */}
+      <div className="z-10 pt-2" />
 
-      {/* Center Brand Lockup matching PDF Page 6 */}
-      <div className="z-10 flex flex-col items-center justify-center text-center my-auto px-2 sm:px-4 max-w-2xl max-h-[85vh] overflow-y-auto">
-        {/* Official Mall Logo matching LOGO03B.png - Static */}
+      {/* Bloque central: Logo + Título 'Tiendas Encantadas' + Preload + Botón */}
+      <div className="z-10 flex flex-col items-center justify-center text-center my-auto px-2 sm:px-4 max-w-xl w-full">
+        {/* Logo Oficial de Unicentro Maracay */}
         <div className="flex items-center justify-center mb-1">
           <img
             src="/LOGO03B.png"
             alt="Unicentro Maracay"
-            className="w-36 h-36 xs:w-48 xs:h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 max-h-[30vh] object-contain filter drop-shadow-[0_6px_24px_rgba(245,158,11,0.5)] select-none pointer-events-none"
+            className="w-36 h-36 xs:w-44 xs:h-44 sm:w-56 sm:h-56 md:w-64 md:h-64 max-h-[28vh] object-contain filter drop-shadow-[0_8px_28px_rgba(245,158,11,0.55)] select-none pointer-events-none"
             loading="eager"
           />
         </div>
 
-        {/* Game Title with Playful Bounce Animation */}
-        <div className="relative mt-1 sm:mt-2 mb-2 sm:mb-3 animate-bounce" style={{ animationDuration: '3s' }}>
-          <h2 className="text-3xl xs:text-4xl sm:text-6xl md:text-7xl font-black tracking-normal text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-amber-200 font-['Lilita_One'] drop-shadow-[0_4px_12px_rgba(249,115,22,0.6)]">
-            Dulce o Truco
-          </h2>
-          <p className="text-xs sm:text-base text-purple-200 font-['Fredoka'] font-medium mt-0.5 sm:mt-1">
+        {/* Título Oficial del Juego: Tiendas Encantadas */}
+        <div className="relative mt-1 mb-2">
+          <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-black tracking-normal text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-amber-200 font-['Lilita_One'] drop-shadow-[0_4px_14px_rgba(249,115,22,0.65)]">
+            Tiendas Encantadas
+          </h1>
+          <p className="text-xs sm:text-base text-purple-200 font-['Fredoka'] font-medium mt-0.5">
             ¡El Gran Recorrido de Halloween por las Tiendas!
           </p>
         </div>
 
-        {/* Big Play CTA Button */}
-        <div className="mt-3 sm:mt-6">
+        {/* Barra de Pre-carga Integrada */}
+        <div className="w-full max-w-sm mt-3 px-2">
+          {!isReady ? (
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-full bg-purple-950/70 border border-purple-800/80 rounded-full h-3.5 p-0.5 shadow-inner overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400 rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(245,158,11,0.8)]"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-amber-200/90 font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" style={{ animationDuration: '4s' }} />
+                <span>{SPOOKY_TIPS[tipIndex]}</span>
+                <span className="font-mono font-bold text-amber-300">({progress}%)</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-emerald-300 font-semibold bg-emerald-950/50 border border-emerald-500/40 px-3 py-1 rounded-full shadow-md animate-fade-in">
+              <Ghost className="w-4 h-4 text-emerald-400 animate-bounce" />
+              <span>
+                {player ? `¡Bienvenido de nuevo, ${player.playerName}! Todo listo.` : '¡Todo el mapa encantado está cargado!'}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Botón de Acción Principal */}
+        <div className="mt-4 sm:mt-6 w-full flex justify-center">
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleStart();
             }}
-            className="group relative px-8 sm:px-10 py-2.5 sm:py-3.5 rounded-full bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-600 text-slate-950 font-black text-lg sm:text-2xl font-['Lilita_One'] tracking-wide shadow-[0_0_25px_rgba(52,211,153,0.7)] hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-emerald-200 cursor-pointer"
+            disabled={!isReady}
+            className={`group relative px-8 sm:px-12 py-3 sm:py-4 rounded-full font-black text-lg sm:text-2xl font-['Lilita_One'] tracking-wide transition-all duration-300 cursor-pointer ${
+              isReady
+                ? 'bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-600 text-slate-950 shadow-[0_0_30px_rgba(52,211,153,0.8)] hover:scale-105 active:scale-95 border-2 border-emerald-200 animate-pulse'
+                : 'bg-purple-950/80 text-purple-300/70 border border-purple-800/60 shadow-inner opacity-80 cursor-wait'
+            }`}
           >
-            <span className="flex items-center gap-2">
-              <span>¡TOCAR PARA JUGAR!</span>
-              <span className="text-xl sm:text-2xl group-hover:translate-x-1 transition-transform">🎃</span>
+            <span className="flex items-center gap-2.5">
+              {isReady ? (
+                <>
+                  <span>¡TOCAR PARA JUGAR!</span>
+                  <span className="text-xl sm:text-2xl group-hover:scale-125 transition-transform">🎃</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 text-amber-400 animate-spin" />
+                  <span>PREPARANDO MAGIA...</span>
+                </>
+              )}
             </span>
           </button>
         </div>
 
-        <p className="text-[11px] sm:text-xs text-purple-300/80 mt-2.5 sm:mt-4 font-['Fredoka']">
-          Toca en cualquier parte de la pantalla para comenzar
-        </p>
+        {isReady && (
+          <p className="text-[11px] sm:text-xs text-purple-300/80 mt-3 font-['Fredoka'] animate-pulse">
+            Toca el botón o cualquier parte de la pantalla para comenzar
+          </p>
+        )}
       </div>
 
-      {/* Footer details */}
+      {/* Pie de pantalla */}
       <div className="z-10 pb-2 text-center text-xs text-slate-400 font-['Fredoka']">
         Centro Comercial Unicentro Maracay · Actividad Infantil de Halloween
       </div>
